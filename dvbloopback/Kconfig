@@ -1,0 +1,4 @@
+config DVB_LOOPBACK_ADAPTER
+	tristate "A loopback interface to a real DVB adapter"
+	depends on MEDIA_SUPPORT && DVB_CORE
+	default m
