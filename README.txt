@@ -12,7 +12,8 @@ Add
 obj-$(CONFIG_DVB_LOOPBACK_ADAPTER) += dvbloopback/
 to drivers/media/pci/Makefile
 
-Patch drivers/media/dvb-core/dvbdev.c the usual way
+Patch drivers/media/dvb-core/dvbdev.c the usual way,
+example patches are in the ffdecsawrapper repo.
 
 For v4l tree or linux-4.1 or higher,
 in drivers/media/Kconfig comment out:
