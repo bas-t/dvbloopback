@@ -86,6 +86,8 @@ show_help(){
   echo " --stock=<opt>          [yes] When running a Debian/Ubuntu"
   echo "                        stock kernel, recompile it with"
   echo "                        dvbloopback driver and dvb-core patch"
+  echo "                        Only for Debian stable or"
+  echo "                        latest Ubuntu LTS"
   echo "                        "
   echo " --vanilla=<bool>       specify a the vanilla kernel version you"
   echo "                        want to compile. Like --vanilla=3.18.12"
@@ -95,11 +97,18 @@ show_help(){
   echo "                        against your running kernel"
   echo "                        Disables --stock= and --vanilla="
   echo "                        "
+  echo " --adapters=<opt>       [16] Set max number of adapters that are allowed,"
+  echo "                        twice the number of physical adapters is needed."
+  echo "                        "
+  echo " --update=<opt>         [yes] no: don't auto-update or clean this repo"
+  echo "                        "
 }
 
 stock_opt="yes"
 vanilla_opt=""
 v4l_opt="no"
+adapters_opt="16"
+update_opt="yes"
 
 for opt do
   optval="${opt#*=}"
@@ -108,9 +117,13 @@ for opt do
   ;;
   --stock=*) stock_opt="$optval"
   ;;
-  --vanilla=*) stock_opt="no"; vanilla_opt="$optval"
+  --vanilla=*) stock_opt="no"; v4l_opt="no"; vanilla_opt="$optval"
   ;;
   --v4l=*) stock_opt="no"; vanilla_opt=""; v4l_opt="$optval"
+  ;;
+  --adapters=*) adapters_opt="$optval"
+  ;;
+  --update=*) update_opt="$optval"
   ;;
   *)
   die_unknown $opt
@@ -120,6 +133,12 @@ done
 
 # Check git status
 if [ "x$update_opt" = "xyes" ]; then
+  if [ -d linux* ]; then
+    rm -rf linux*
+  fi
+  if [ -d media* ]; then
+    rm -rf media*
+  fi
   git clean -xfd > /dev/null
   git reset --hard HEAD > /dev/null
   git remote update > /dev/null 2>&1
@@ -217,19 +236,200 @@ Aborting...
   fi    
 fi
 
+# Get build-deps, Debian/Ubuntu only.
 if [ -f /usr/bin/lsb_release ]; then
   OS=$( lsb_release -si )
   RELEASE=$( lsb_release -sc )
 fi
 
-if ! [ "$OS" = Debian -o "$OS" = Ubuntu ] ; then
+if ! [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ] ; then
   stock_opt=no
+else
+  if ! dpkg-query -l build-essential | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency build-essential, marking for installation.
+
+"
+    apt-get install build-essential -y || die "Error installing dependency build-essential"
+  fi
+  apt-get build-dep --no-install-recommends linux -y
+  if ! [ "$?" -eq "0" ]; then
+    echo "
+Error(s) while installing build dependencies
+
+Aborting...
+"
+    exit 1
+  fi
+  apt-get install kernel-package bin86 devscripts makedumpfile libelf-dev binutils-dev fakeroot crash kernel-wedge libncurses5 libncurses5-dev asciidoc flex bison initramfs-tools patch patchutils libfile-fcntllock-perl libproc-processtable-perl libdigest-sha-perl --no-install-recommends -y
+  if ! [ "$?" -eq "0" ]; then
+    echo "
+Error(s) while installing build dependencies
+
+Aborting...
+"
+    exit 1
+  fi
+  if ! [ "$RELEASE" = "jessie" -o "$RELEASE" = "trusty" ];then
+    if [ "x$stock_opt" = "xyes" ]; then
+      echo "
+Recompiling a stock kernel is only supported in
+
+Debian Jessie (latest stable) or Ubuntu Trusty (latest LTS).
+
+You can choose to compile a vanilla kernel or the v4l tree.
+
+Aborting...
+"
+      exit 1
+    fi
+  fi
+  if [ "x$stock_opt" = "xno" ]; then
+    if [ "x$vanilla_opt" = "x" ] && [ "x$v4l_opt" = "xno" ]; then
+      echo "
+You should use either the --vanilla= or the --v4l= flag.
+
+Aborting...
+"
+      exit 1
+    fi
+  fi
 fi
 
-# Common section
+#
+# Get the source
+#
 
-# Stock section
+# Debian
+if [ "x$stock_opt" = "xyes" ]; then
+  if [ "$OS" = "Debian" ]; then
+    apt-get -t jessie source linux -y || die "Error(s) while fetching Debian Linux source"
+    cd linux-*
+  elif [ "$OS" = "Ubuntu" ]; then
+    apt-get source linux -y || die "Error(s) while fetching Ubuntu Linux source"
+    cd linux-*
+  fi
+fi
 
-# Vanilla section
+# v4l
+if [ "x$v4l_opt" = "xyes" ];then
+  git clone git://linuxtv.org/media_build.git || die "Error(s) while fetching v4l build system"
+  git clone git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
+fi
 
-# v4l section
+# Other
+if [ "x$vanilla_opt" != "x" ];then
+  MAJOR=$(echo "$vanilla_opt" | cut -d'.' -f1)
+  VERSION=$( echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1 )
+  if [ "$MAJOR" -lt "3" ]; then
+    echo "
+Minimum supported kernel version is linux-3.10.x
+You requested linux-$vanilla_opt
+Aborting...
+"
+    exit 1
+  fi
+  if [ "$MAJOR" -eq "3" ] && [ "$VERSION" -lt "10" ]; then
+    echo "
+Minimum supported kernel version is linux-3.10.x
+You requested linux-$vanilla_opt
+Aborting...
+"
+    exit 1
+  fi
+  if ! echo "$vanilla_opt" | grep "rc" > /dev/null 2>&1; then
+    wget https://www.kernel.org/pub/linux/kernel/v$MAJOR.x/linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
+  else
+    wget https://www.kernel.org/pub/linux/kernel/v4.x/testing/linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
+  fi
+  tar -xJf linux-$vanilla_opt.tar.xz
+  cd linux-$vanilla_opt
+  make clean && make mrproper
+fi
+
+#
+# Patch the source
+#
+
+# Common
+if [ "x$v4l_opt" = "xno" ]; then
+  mkdir drivers/media/pci/dvbloopback
+  cp -f ../drivers/media/pci/dvbloopback/* drivers/media/pci/dvbloopback/
+  patch -p0 < ../dvbloopback.patch
+  FIRST_DIGIT=$( echo `pwd` | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2' )
+  SECOND_DIGIT=$( echo `pwd` | grep -o '[[:digit:]]\+' | head -n3 | awk 'NR==3' )
+  if [ "$FIRST_DIGIT" -lt "4" ] && [ "$SECOND_DIGIT" -lt "13" ]; then
+    patch -p0 < ../3.7-dvb-core.patch
+  else
+    patch -p0 < ../3.13-dvb-core.patch
+  fi
+fi
+
+# v4l
+if [ "x$v4l_opt" = "xyes" ]; then
+  cd media_tree
+  mkdir drivers/media/pci/dvbloopback
+  cp -f ../drivers/media/pci/dvbloopback/* drivers/media/pci/dvbloopback/
+  patch -p0 < ../dvbloopback.patch
+  patch -p0 < ../3.13-dvb-core.patch
+  git add -A
+  git commit -a -m 'Add dvbloopback driver, patch dvb-core.'
+  cd ../media_build
+  patch -p0 < ../v4l-make-install.patch
+  git commit -a -m 'Install drivers in /lib/modules/`uname -r`/updates/media'
+  make dir DIR=../media_tree
+fi
+
+#
+# Configure the source
+#
+
+# Debian
+
+# v4l
+if [ "x$v4l_opt" = "xyes" ]; then
+  make distclean
+  make allyesconfig
+  sed -i 's/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/' v4l/.config
+  sed -i 's/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/' v4l/.config
+fi
+
+# Other
+
+
+#
+# Compile the source
+#
+
+# Debian
+
+# v4l
+if [ "x$v4l_opt" = "xyes" ]; then
+  make
+  if ! [ "$?" -eq "0" ]; then
+    echo "
+Error(s) while compiling the v4l source.
+Try again in a couple of days, the error(s)
+will probably be fixed upstream by then.
+Aborting...
+"
+    exit 1
+  fi
+fi
+
+# Other
+
+
+#
+# Install the result
+#
+
+# Debian
+
+# v4l
+if [ "x$v4l_opt" = "xyes" ]; then
+  make install
+fi
+
+# Other
+
