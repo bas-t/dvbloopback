@@ -184,17 +184,15 @@ Aborting...
     else
       echo -en "
 
-######################################################
+############################################################
 
 Synced with remote repo successfully! Please rerun
 
-./configure to complete installation of FFdecsawrapper
-
-and dvbloopback drivers.
+./configure to complete installation of dvbloopback drivers.
 
 Arrow up and enter will get you there.
 
-######################################################
+############################################################
 
 
 "

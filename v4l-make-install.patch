@@ -1,0 +1,32 @@
+--- a/v4l/Makefile	2013-11-27 16:15:21.528260850 +0100
++++ b/v4l/Makefile	2013-11-27 16:24:37.171815316 +0100
+@@ -154,6 +154,7 @@
+ PWD		:= $(shell pwd)
+ DEST		:= /lib/modules/$(KERNELRELEASE)/v4l2
+ KDIR26		:= /lib/modules/$(KERNELRELEASE)/kernel/drivers/media
++INSTDIR 	:= $(DESTDIR)/lib/modules/$(KERNELRELEASE)/updates/media
+ 
+ #################################################
+ # Compiler fixup rules
+@@ -202,9 +203,18 @@
+ #################################################
+ # installation invocation rules
+ 
+-modules_install install:: media-install firmware_install
+-
+-remove rminstall:: media-rminstall
++modules_install install:: rminstall firmware_install
++	install -d -v $(INSTDIR)
++	@for i in *.ko; do				\
++		echo "install $$i -> $(INSTDIR)/";	\
++		install -p -m 644 $$i $(INSTDIR);	\
++	done;
++	strip --strip-debug $(INSTDIR)/*.ko
++	/sbin/depmod -a $(KERNELRELEASE) $(if $(DESTDIR),-b $(DESTDIR))
++
++remove rminstall::
++	@rm -Rfv $(INSTDIR)
++	/sbin/depmod -a $(KERNELRELEASE) $(if $(DESTDIR),-b $(DESTDIR))
+ 
+ firmware_install::
+ 	make -C firmware install
