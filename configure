@@ -733,3 +733,13 @@ if [ "x$v4l_opt" = "xno" ] && [ "x$stock_opt" = "xno" ]; then
   ln -s $HEADERSDIR $SOURCELINK
   ln -s $HEADERSDIR $BUILDLINK
 fi
+
+# Install the firmware
+if [ ! -d /lib/firmware ]; then
+  mkdir /lib/firmware
+fi
+cp -f firmware/* /lib/firmware/
+
+# Set msi mode for saa716x budget driver
+echo "options saa716x_budget int_type=1" > /etc/modprobe.d/tbs_opensource.conf
+
