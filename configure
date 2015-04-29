@@ -102,6 +102,8 @@ show_help(){
   echo "                        "
   echo " --update=<opt>         [yes] no: don't auto-update or clean this repo"
   echo "                        "
+  echo " --abi=<opt>            [900] Debian only kernel version tweak"
+  echo "                        "
 }
 
 stock_opt="yes"
@@ -109,6 +111,7 @@ vanilla_opt=""
 v4l_opt="no"
 adapters_opt="16"
 update_opt="yes"
+abi_opt="900"
 
 for opt do
   optval="${opt#*=}"
@@ -125,6 +128,8 @@ for opt do
   ;;
   --update=*) update_opt="$optval"
   ;;
+  --abi=*) abi_opt="$optval"
+  ;;
   *)
   die_unknown $opt
   ;;
@@ -133,16 +138,12 @@ done
 
 # Check git status
 if [ "x$update_opt" = "xyes" ]; then
-  if [ -d linux* ]; then
-    rm -rf linux*
-  fi
-  if [ -d media* ]; then
-    rm -rf media*
-  fi
+  rm -rf linux* > /dev/null 2>&1
+  rm -rf media* > /dev/null 2>&1
   git clean -xfd > /dev/null
   git reset --hard HEAD > /dev/null
   git remote update > /dev/null 2>&1
-  if ! [ "$?" -eq 0 ]; then
+  if ! [ "$?" -eq "0" ]; then
     echo -en "
 \E[1;33;44m
 ###################################
@@ -236,10 +237,40 @@ Aborting...
   fi    
 fi
 
+# Make sure that we are running as root
+if ! echo "$(whoami)" | grep "root" > /dev/null 2>&1; then
+  echo -en "
+\E[1;33;44m
+You should run as root.
+
+Aborting...
+\E[0m
+
+"
+  exit 0
+fi
+
 # Get build-deps, Debian/Ubuntu only.
 if [ -f /usr/bin/lsb_release ]; then
   OS=$( lsb_release -si )
   RELEASE=$( lsb_release -sc )
+  RELEASENUMBER=$(lsb_release -sr | cut -d'.' -f1)
+fi
+
+if [ "$OS" = "Ubuntu" ]; then
+  if ! lsb_release -d | grep LTS > /dev/null 2>&1; then
+    echo "
+Only Ubuntu LTS releases are supported, starting with 14.04 (trusty)
+"
+    exit 1
+  elif [ "$RELEASENUMBER" -lt "14" ]; then
+    echo "
+Only Ubuntu LTS releases are supported, starting with 14.04 (trusty)
+"
+    exit 1
+  else
+    UBUNTURELEASE="LTS"
+  fi
 fi
 
 if ! [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ] ; then
@@ -270,12 +301,25 @@ Aborting...
 "
     exit 1
   fi
-  if ! [ "$RELEASE" = "jessie" -o "$RELEASE" = "trusty" ];then
+  if [ "$OS" = "Debian" ]; then
+    apt-get install linux-headers-amd64
+  elif [ "$OS" = "Ubuntu" ]; then
+    apt-get install linux-headers-generic
+  fi
+  if ! [ "$?" -eq "0" ]; then
+    echo "
+Error(s) while installing build dependencies
+
+Aborting...
+"
+    exit 1
+  fi
+  if ! [ "$RELEASE" = "jessie" -o "$UBUNTURELEASE" = "LTS" ];then
     if [ "x$stock_opt" = "xyes" ]; then
       echo "
 Recompiling a stock kernel is only supported in
 
-Debian Jessie (latest stable) or Ubuntu Trusty (latest LTS).
+Debian Stable (Jessie) or Ubuntu LTS, starting with trusty.
 
 You can choose to compile a vanilla kernel or the v4l tree.
 
@@ -314,7 +358,7 @@ fi
 # v4l
 if [ "x$v4l_opt" = "xyes" ];then
   git clone git://linuxtv.org/media_build.git || die "Error(s) while fetching v4l build system"
-  git clone git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
+  git clone --depth=1 git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
 fi
 
 # Other
@@ -385,23 +429,172 @@ fi
 #
 
 # Debian
+if [ "x$stock_opt" = "xyes" ]; then
+  if [ "$OS" = "Debian" ]; then
+    if [ "$abi_opt" = "900" ]; then
+      DEBIANKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
+      RUNNING=$(uname -r | grep "90[0-9]-amd64")
+      if [ -d /lib/modules/$DEBIANKERNEL.0-900-amd64 ]; then
+        if ! [ -d /lib/modules/$DEBIANKERNEL.0-901-amd64 ]; then
+          abi_opt=901
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-902-amd64 ]; then
+          abi_opt=902
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-903-amd64 ]; then
+          abi_opt=903
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-904-amd64 ]; then
+          abi_opt=904
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-905-amd64 ]; then
+          abi_opt=905
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-906-amd64 ]; then
+          abi_opt=906
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-907-amd64 ]; then
+          abi_opt=907
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-908-amd64 ]; then
+          abi_opt=908
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-909-amd64 ]; then
+          abi_opt=909
+        else
+          if [ "$RUNNING" = "" ]; then
+            echo "
+
+You have a total of 10 \"$DEBIANKERNEL.0-90x-amd64\" kernels installed.
+Not going to install any more of those, aborting...
+"
+            exit 0
+          else
+            echo  "
+
+You have a total of 10 \"$DEBIANKERNEL.0-90x-amd64\" kernels installed.
+You are currently running the $RUNNING version of those.
+Not going to install any more of those, aborting...
+"
+            exit 0
+          fi 
+        fi
+      fi
+    fi
+    _ABINAME=$(cat debian/config/defines | grep 'abiname:' | awk -F"[ ]" '{ print $NF }')
+    export _ABINAME
+    sed -i "s/abiname: $_ABINAME/abiname: $abi_opt/" debian/config/defines
+    sed -i "s/-$_ABINAME/-$abi_opt/g" debian/rules.gen
+    fakeroot debian/rules debian/control-real
+    sed -i "s/DEBUG='True'/DEBUG='FALSE'/g" debian/rules.gen
+    fakeroot make -f debian/rules.gen setup_amd64_none_amd64
+    sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian/build/build_amd64_none_amd64/.config
+  elif [ "$OS" = "Ubuntu" ]; then
+    chmod a+x debian/scripts/*
+    chmod a+x debian/scripts/misc/*
+    sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian.master/config/config.common.ubuntu
+    sed -i "/CONFIG_DVB_LNBP22=m/a CONFIG_DVB_LOOPBACK_ADAPTER=m/" debian.master/config/config.common.ubuntu
+    fakeroot debian/rules updateconfigs amd64
+    UBUNTUKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
+    _ABIDIR=$(ls debian.master/abi/)    
+    _ABINAME=$(ls debian.master/abi/ | grep -o '[[:digit:]]\+' | head -n4 | awk 'NR==4')
+    if [ "$abi_opt" = "900" ]; then
+      RUNNING=$(uname -r | grep "90[0-9]-generic")
+      if [ -d /lib/modules/$UBUNTUKERNEL.0-900-generic ]; then
+        if ! [ -d /lib/modules/$UBUNTUKERNEL.0-901-generic ]; then
+          abi_opt=901
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-902-generic ]; then
+          abi_opt=902
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-903-generic ]; then
+          abi_opt=903
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-904-generic ]; then
+          abi_opt=904
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-905-generic ]; then
+          abi_opt=905
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-906-generic ]; then
+          abi_opt=906
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-907-generic ]; then
+          abi_opt=907
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-908-generic ]; then
+          abi_opt=908
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-909-generic ]; then
+          abi_opt=909
+        else
+          if [ "$RUNNING" = "" ]; then
+            echo "
+
+You have a total of 10 \"$UBUNTUKERNEL.0-90x-generic\" kernels installed.
+Not going to install any more of those, aborting...
+"
+            exit 0
+          else
+            echo  "
+
+You have a total of 10 \"$UBUNTUKERNEL.0-90x-generic\" kernels installed.
+You are currently running the $RUNNING version of those.
+Not going to install any more of those, aborting...
+"
+            exit 0
+          fi 
+        fi
+      fi
+    fi
+    _NEWABIDIR=$(echo $_ABIDIR | sed "s/$_ABINAME/$abi_opt/")
+    sed -i "s/$UBUNTUKERNEL.0-$_ABINAME/$UBUNTUKERNEL.0-$abi_opt/g" debian/control
+    sed -i "s/$UBUNTUKERNEL.0-$_ABINAME/$UBUNTUKERNEL.0-$abi_opt/g" debian/control.stub
+    sed -i "s/$UBUNTUKERNEL.0-$_ABINAME/$UBUNTUKERNEL.0-$abi_opt/g" debian/changelog
+    sed -i "s/$UBUNTUKERNEL.0-$_ABINAME/$UBUNTUKERNEL.0-$abi_opt/g" debian.master/changelog
+    mv debian.master/abi/$_ABIDIR debian.master/abi/$_NEWABIDIR
+    fakeroot debian/rules clean
+  fi
+fi
 
 # v4l
 if [ "x$v4l_opt" = "xyes" ]; then
   make distclean
   make allyesconfig
-  sed -i 's/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/' v4l/.config
-  sed -i 's/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/' v4l/.config
+  sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" v4l/.config
+  sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" v4l/.config
 fi
 
 # Other
-
+if [ "x$stock_opt" = "xno" ]; then
+  make oldconfig
+  ADAPTERS=$( cat .config | grep "CONFIG_DVB_MAX_ADAPTERS" | grep -o '[[:digit:]]\+' )
+  if ! [ "$ADAPTERS" = "$adapters_opt" ]; then
+    sed -i "s/CONFIG_DVB_MAX_ADAPTERS=$ADAPTERS/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" .config
+  fi
+  if cat .config | grep "CONFIG_MEDIA_CONTROLLER_DVB=y" > /dev/null 2>&1; then
+    sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" .config
+  fi
+fi
 
 #
 # Compile the source
 #
 
 # Debian
+if [ "x$stock_opt" = "xyes" ]; then
+  if [ "$OS" = "Debian" ]; then
+    fakeroot make -f debian/rules.gen binary-arch_amd64_none_real
+    fakeroot make -f debian/rules.gen binary-arch_amd64_none_amd64
+    if ! [ "$?" -eq "0" ]; then
+      echo "
+Error(s) while compiling the kernel
+
+Aborting...
+"
+      exit 1
+    fi
+    cd ..
+    rm -f xen*
+  elif [ "$OS" = "Ubuntu" ]; then
+    AUTOBUILD=1 NOEXTRAS=1 skipabi=true fakeroot debian/rules binary-headers binary-generic
+    if ! [ "$?" -eq "0" ]; then
+      echo "
+Error(s) while compiling the kernel
+
+Aborting...
+"
+      exit 1
+    fi
+    cd ..
+    rm -f linux-tools*
+    rm -f linux-cloud*
+  fi
+fi
 
 # v4l
 if [ "x$v4l_opt" = "xyes" ]; then
@@ -409,8 +602,11 @@ if [ "x$v4l_opt" = "xyes" ]; then
   if ! [ "$?" -eq "0" ]; then
     echo "
 Error(s) while compiling the v4l source.
-Try again in a couple of days, the error(s)
-will probably be fixed upstream by then.
+This is not uncommon.
+
+Try again tomorrow, or in a couple of days,
+the error(s) will probably be fixed upstream by then.
+
 Aborting...
 "
     exit 1
@@ -425,9 +621,43 @@ fi
 #
 
 # Debian
+if [ "x$stock_opt" = "xyes" ]; then
+  if [ "$OS" = "Debian" ]; then
+    dpkg -i *.deb
+    apt-get -f install
+    echo "
+Installed:
+
+linux-image-$DEBIANKERNEL.0-$abi_opt-amd64
+linux-headers-$DEBIANKERNEL.0-$abi_opt-amd64
+linux-headers-$DEBIANKERNEL.0-$abi_opt-common
+
+All done, you should reboot NOW!
+
+"
+  elif [ "$OS" = "Ubuntu" ]; then
+    dpkg -i *.deb
+    apt-get -f install
+    echo "
+Installed:
+
+linux-image-$UBUNTUKERNEL.0-$abi_opt-generic
+linux-image-extra-$UBUNTUKERNEL.0-$abi_opt-generic
+linux-headers-$UBUNTUKERNEL.0-$abi_opt-generic
+linux-headers-$UBUNTUKERNEL.0-$abi_opt
+
+All done, you should reboot NOW!
+
+"
+  fi
+fi
 
 # v4l
 if [ "x$v4l_opt" = "xyes" ]; then
+  if [ -d /lib/modules/`uname -r`/updates/media ]; then
+    rm -rf /lib/modules/`uname -r`/updates/media
+    depmod -a
+  fi
   make install
 fi
 
