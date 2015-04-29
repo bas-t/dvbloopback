@@ -543,7 +543,7 @@ if [ "x$v4l_opt" = "xyes" ]; then
 fi
 
 # Vanilla
-if [ "x$stock_opt" = "xno" ]; then
+if [ "x$stock_opt" = "xno" ] && [ "x$v4l_opt" = "xno" ]; then
   echo -en "
 Going to configure your vanilla kernel.
 
