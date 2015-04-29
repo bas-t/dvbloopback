@@ -42,9 +42,6 @@ struct si2168_config {
 
 	/* TS clock inverted */
 	bool ts_clock_inv;
-
-	/* TS clock gapped */
-	bool ts_clock_gapped;
 };
 
 #endif
