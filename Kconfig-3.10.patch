@@ -1,0 +1,60 @@
+--- drivers/media/dvb-frontends/Kconfig	2015-03-18 13:22:50.000000000 +0100
++++ drivers/media/dvb-frontends/Kconfig	2015-03-19 11:31:30.291875904 +0100
+@@ -270,6 +270,13 @@
+ 	help
+ 	  A DVB-T tuner module. Say Y when you want to support this frontend.
+ 
++config DVB_SI2168
++	tristate "Silicon Labs Si2168"
++	depends on DVB_CORE && I2C && I2C_MUX
++	default m if !MEDIA_SUBDRV_AUTOSELECT
++	help
++	  Say Y when you want to support this frontend.
++
+ config DVB_CX22702
+ 	tristate "Conexant cx22702 demodulator (OFDM)"
+ 	depends on DVB_CORE && I2C
+--- drivers/media/pci/cx23885/Kconfig	2015-03-18 13:22:50.000000000 +0100
++++ drivers/media/pci/cx23885/Kconfig	2015-03-19 11:33:47.633242476 +0100
+@@ -20,6 +20,7 @@
+ 	select DVB_TDA10048 if MEDIA_SUBDRV_AUTOSELECT
+ 	select DVB_LNBP21 if MEDIA_SUBDRV_AUTOSELECT
+ 	select DVB_STV090x if MEDIA_SUBDRV_AUTOSELECT
++	select DVB_SI2168 if MEDIA_SUBDRV_AUTOSELECT
+ 	select DVB_STB6100 if MEDIA_SUBDRV_AUTOSELECT
+ 	select DVB_STV6110 if MEDIA_SUBDRV_AUTOSELECT
+ 	select DVB_CX24116 if MEDIA_SUBDRV_AUTOSELECT
+@@ -31,6 +32,7 @@
+ 	select DVB_A8293 if MEDIA_SUBDRV_AUTOSELECT
+ 	select MEDIA_TUNER_MT2063 if MEDIA_SUBDRV_AUTOSELECT
+ 	select MEDIA_TUNER_MT2131 if MEDIA_SUBDRV_AUTOSELECT
++	select MEDIA_TUNER_SI2157 if MEDIA_SUBDRV_AUTOSELECT
+ 	select MEDIA_TUNER_XC2028 if MEDIA_SUBDRV_AUTOSELECT
+ 	select MEDIA_TUNER_TDA8290 if MEDIA_SUBDRV_AUTOSELECT
+ 	select MEDIA_TUNER_TDA18271 if MEDIA_SUBDRV_AUTOSELECT
+--- drivers/media/pci/Kconfig	2015-03-18 13:22:50.000000000 +0100
++++ drivers/media/pci/Kconfig	2015-03-19 11:31:30.291875904 +0100
+@@ -28,6 +28,7 @@
+ source "drivers/media/pci/cx25821/Kconfig"
+ source "drivers/media/pci/cx88/Kconfig"
+ source "drivers/media/pci/bt8xx/Kconfig"
++source "drivers/media/pci/saa716x/Kconfig"
+ source "drivers/media/pci/saa7134/Kconfig"
+ source "drivers/media/pci/saa7164/Kconfig"
+ 
+--- drivers/media/tuners/Kconfig	2015-03-18 13:22:50.000000000 +0100
++++ drivers/media/tuners/Kconfig	2015-03-19 11:31:30.291875904 +0100
+@@ -35,6 +35,13 @@
+ 	help
+ 	  Say Y here to include support for Philips TDA8290+8275(a) tuner.
+ 
++config MEDIA_TUNER_SI2157
++	tristate "Silicon Labs Si2157 silicon tuner"
++	depends on MEDIA_SUPPORT && I2C
++	default m if !MEDIA_SUBDRV_AUTOSELECT
++	help
++	  Silicon Labs Si2157 silicon tuner driver.
++
+ config MEDIA_TUNER_TDA827X
+ 	tristate "Philips TDA827X silicon tuner"
+ 	depends on MEDIA_SUPPORT && I2C

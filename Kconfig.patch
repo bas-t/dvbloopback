@@ -1,0 +1,11 @@
+--- drivers/media/pci/Kconfig	2014-12-07 23:21:05.000000000 +0100
++++ drivers/media/pci/Kconfig	2014-12-12 10:25:02.325177377 +0100
+@@ -30,6 +30,7 @@
+ source "drivers/media/pci/cx25821/Kconfig"
+ source "drivers/media/pci/cx88/Kconfig"
+ source "drivers/media/pci/bt8xx/Kconfig"
++source "drivers/media/pci/saa716x/Kconfig"
+ source "drivers/media/pci/saa7134/Kconfig"
+ source "drivers/media/pci/saa7164/Kconfig"
+ 
+
