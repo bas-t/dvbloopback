@@ -32,7 +32,7 @@ confirmno(){
 
 confirmyes(){
     # call with a prompt string or use a default
-    read -r -p "${1:-Are you sure? [Y/n]} " response
+    read -r -p "${1:-Continue? [Y/n]} " response
     case $response in
         [yY][eE][sS]|[yY]) 
             true
@@ -104,6 +104,8 @@ show_help(){
   echo "                        "
   echo " --abi=<opt>            [900] Debian only kernel version tweak"
   echo "                        "
+  echo " --test=<opt>           [no] yes: review each and every step"
+  echo "                        "
 }
 
 stock_opt="yes"
@@ -112,6 +114,9 @@ v4l_opt="no"
 adapters_opt="16"
 update_opt="yes"
 abi_opt="900"
+test_opt="no"
+ubuntu_opt="no"
+personal_opt="yes"
 
 for opt do
   optval="${opt#*=}"
@@ -129,6 +134,12 @@ for opt do
   --update=*) update_opt="$optval"
   ;;
   --abi=*) abi_opt="$optval"
+  ;;
+  --test=*) test_opt="$optval"
+  ;;
+  --ubuntu=*) ubuntu_opt="$optval"
+  ;;
+  --personal=*) personal_opt="$optval"
   ;;
   *)
   die_unknown $opt
@@ -256,8 +267,11 @@ if [ -f /usr/bin/lsb_release ]; then
   RELEASE=$( lsb_release -sc )
 fi
 
-if ! [ "$OS" = "Debian" ] ; then
-  stock_opt=no
+if ! [ "$OS" = "Debian" -o "x$ubuntu_opt" = "xyes" ]; then
+  echo "
+Your distro is not supported. Should be Debian
+"
+  exit 0
 else
   if ! dpkg-query -l build-essential | grep "ii" > /dev/null 2>&1; then
     echo "
@@ -284,7 +298,11 @@ Aborting...
 "
     exit 1
   fi
-  apt-get install linux-headers-amd64
+  if [ "x$ubuntu_opt" = "xno" ]; then
+    apt-get install linux-headers-amd64
+  elif [ "x$ubuntu_opt" = "xyes" ]; then
+    apt-get install linux-headers-generic
+  fi
   if ! [ "$?" -eq "0" ]; then
     echo "
 Error(s) while installing build dependencies
@@ -292,30 +310,6 @@ Error(s) while installing build dependencies
 Aborting...
 "
     exit 1
-  fi
-  if ! [ "$RELEASE" = "jessie" ];then
-    if [ "x$stock_opt" = "xyes" ]; then
-      echo "
-Recompiling a stock kernel is only supported in
-
-Debian Stable (Jessie)
-
-You can choose to compile a vanilla kernel or the v4l tree.
-
-Aborting...
-"
-      exit 1
-    fi
-  fi
-  if [ "x$stock_opt" = "xno" ]; then
-    if [ "x$vanilla_opt" = "x" ] && [ "x$v4l_opt" = "xno" ]; then
-      echo "
-You should use either the --vanilla= or the --v4l= flag.
-
-Aborting...
-"
-      exit 1
-    fi
   fi
 fi
 
@@ -325,31 +319,42 @@ fi
 
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
-  apt-get -t jessie source linux -y || die "Error(s) while fetching Debian Linux source"
+  apt-get source linux -y || die "Error(s) while fetching Debian Linux source"
   cd linux-*
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmyes
+  fi
 fi
 
 # v4l
 if [ "x$v4l_opt" = "xyes" ];then
   git clone git://linuxtv.org/media_build.git || die "Error(s) while fetching v4l build system"
   git clone --depth=1 git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmyes
+  fi
 fi
 
 # Vanilla
 if [ "x$vanilla_opt" != "x" ];then
   MAJOR=$(echo "$vanilla_opt" | cut -d'.' -f1)
-  VERSION=$( echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1 )
-  MINVERSION="18"
-  # Check for minimum supported kernel version to build with
-  # (should be 3.18 or up)
+  VERSION=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
   if [ "$MAJOR" -lt "4" ]; then
     if ! [ "$VERSION" -eq "10" ]; then
+      if [ "x$personal_opt" = "xyes" ]; then
+        MINVERSION="18"
+      else
+        MINVERSION="10"
+      fi
+      # Check for minimum supported kernel version to build with
       if [ "$VERSION" -lt "$MINVERSION" ]; then
         echo -en "
 \E[1;33;44m
-This TBS6281/6285 driver is supported intree as of 3.18.x kernels.
+Minimum supported kernel version is linux-3.10.x
 
-(With the exeption of 3.10.x kernels)
+The TBS6281/6285 driver is supported as of 3.18.x kernels.
+
+(With the exeption of 3.10.x and a couple of stock kernels)
 
 You requested a build with a $vanilla_opt kernel.
 
@@ -369,6 +374,9 @@ Aborting...
   tar -xJf linux-$vanilla_opt.tar.xz
   cd linux-$vanilla_opt
   make clean && make mrproper
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmyes
+  fi
 fi
 
 #
@@ -389,50 +397,68 @@ if [ "x$v4l_opt" = "xno" ]; then
   else
     patch -p0 < ../3.13-dvb-core.patch
   fi
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmyes
+  fi
 
   # saa716x patch
-  mkdir drivers/media/pci/saa716x
-  cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
-  if ! [ "$VERSION" = "10" ]; then
-    patch -p0 < ../Kconfig.patch
-  else
-    patch -p0 < ../Kconfig-3.10.patch
+  if [ "x$personal_opt" = "xyes" ];then
+    mkdir drivers/media/pci/saa716x
+    cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
+    if ! [ "$VERSION" = "10" ]; then
+      patch -p0 < ../Kconfig.patch
+    else
+      patch -p0 < ../Kconfig-3.10.patch
+    fi
+    if [ "$SECOND_DIGIT" = "16" -o "$SECOND_DIGIT" = "13" ]; then
+      patch -p0 < ../Makefile-3.16.patch
+    elif [ "$SECOND_DIGIT" = "10" ]; then
+      patch -p0 < ../Makefile-3.10.patch
+    else
+      patch -p0 < ../Makefile.patch
+    fi
+    patch -p0 < ../uapi.patch
+    if [ "x$test_opt" = "xyes" ]; then
+      confirmyes
+    fi
   fi
-  if [ "$SECOND_DIGIT" = "16" ]; then
-    patch -p0 < ../Makefile-3.16.patch
-  elif [ "$SECOND_DIGIT" = "10" ]; then
-    patch -p0 < ../Makefile-3.10.patch
-  else
-    patch -p0 < ../Makefile.patch
-  fi
-  patch -p0 < ../uapi.patch
 
   # cx23885 patch
-  if [ "$FIRST_DIGIT" -lt "4" ]; then
-    if [ "$SECOND_DIGIT" = "19" ]; then
-      patch -p0 < ../cx23885-3.19.patch
-    elif [ "$SECOND_DIGIT" = "18" ]; then
-      patch -p0 < ../cx23885-3.18.patch
-    elif [ "$SECOND_DIGIT" = "16" ]; then
-      patch -p0 < ../cx23885-3.16.patch
-    elif [ "$SECOND_DIGIT" = "10" ]; then
-      patch -p0 < ../cx23885-3.10.patch
+  if [ "x$personal_opt" = "xyes" ];then
+    if [ "$FIRST_DIGIT" -lt "4" ]; then
+      if [ "$SECOND_DIGIT" = "19" ]; then
+        patch -p0 < ../cx23885-3.19.patch
+      elif [ "$SECOND_DIGIT" = "18" ]; then
+        patch -p0 < ../cx23885-3.18.patch
+      elif [ "$SECOND_DIGIT" = "16" -o "$SECOND_DIGIT" = "13" ]; then
+        patch -p0 < ../cx23885-3.16.patch
+      elif [ "$SECOND_DIGIT" = "10" ]; then
+        patch -p0 < ../cx23885-3.10.patch
+      fi
+    #else
+    #  patch -p0 < ../cx23885-4.0.patch
+      if [ "x$test_opt" = "xyes" ]; then
+        confirmyes
+      fi
     fi
-  #else
-  #  patch -p0 < ../cx23885-4.0.patch
   fi
 
-  # silabs si2157 si2168 patch
-  cp -f ../drivers/media/tuners/* drivers/media/tuners/
-  cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
+  if [ "x$personal_opt" = "xyes" ];then
+    # silabs si2157 si2168 patch
+    cp -f ../drivers/media/tuners/* drivers/media/tuners/
+    cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
 
-  # silabs si2168 DVB-C patch
-  sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    # silabs si2168 DVB-C patch
+    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    if [ "x$test_opt" = "xyes" ]; then
+      confirmyes
+    fi
 
-  # If linux source >= 4.2 patch saa716x with IF patch
-  #if [ "$FIRST_DIGIT" -eq "4" ] && [ "$SECOND_DIGIT" -gt "1" ]; then
-  #  patch -p0 < ../saa716x_IF.patch
-  #fi
+    # If linux source >= 4.2 patch saa716x with IF patch
+    #if [ "$FIRST_DIGIT" -eq "4" ] && [ "$SECOND_DIGIT" -gt "1" ]; then
+    #  patch -p0 < ../saa716x_IF.patch
+    #fi
+  fi
 fi
 
 # v4l
@@ -444,31 +470,47 @@ if [ "x$v4l_opt" = "xyes" ]; then
   cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
   patch -p0 < ../dvbloopback.patch
   patch -p0 < ../3.13-dvb-core.patch
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmyes
+  fi
 
-  # saa716x patch
-  mkdir drivers/media/pci/saa716x
-  cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
-  patch -p0 < ../Kconfig.patch
-  patch -p0 < ../Makefile.patch
+  if [ "x$personal_opt" = "xyes" ];then
+    # saa716x patch
+    mkdir drivers/media/pci/saa716x
+    cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
+    patch -p0 < ../Kconfig.patch
+    patch -p0 < ../Makefile.patch
+    if [ "x$test_opt" = "xyes" ]; then
+      confirmyes
+    fi
 
-  # silabs si2168 DVC-C patch
-  sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    # silabs si2168 DVC-C patch
+    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
 
-  # cx23885 gapped clock patch
-  #patch -p0 < ../cx23885-4.0.patch
+    # cx23885 gapped clock patch
+    #patch -p0 < ../cx23885-4.0.patch
+  fi
 
   # commit patches
   git add -A
   git commit -a -m 'Add drivers, patch dvb-core and si2168.'
-
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmyes
+  fi
 
   cd ../media_build
 
   # make install patch
   patch -p0 < ../v4l-make-install.patch
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmyes
+  fi
 
   # commit patch
   git commit -a -m 'Install drivers in /lib/modules/`uname -r`/updates/media'
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmyes
+  fi
 fi
 
 #
@@ -478,55 +520,123 @@ fi
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
   if [ "$abi_opt" = "900" ]; then
-    DEBIANKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
-    RUNNING=$(uname -r | grep "90[0-9]-amd64")
-    if [ -d /lib/modules/$DEBIANKERNEL.0-900-amd64 ]; then
-      if ! [ -d /lib/modules/$DEBIANKERNEL.0-901-amd64 ]; then
-        abi_opt=901
-      elif ! [ -d /lib/modules/$DEBIANKERNEL.0-902-amd64 ]; then
-        abi_opt=902
-      elif ! [ -d /lib/modules/$DEBIANKERNEL.0-903-amd64 ]; then
-        abi_opt=903
-      elif ! [ -d /lib/modules/$DEBIANKERNEL.0-904-amd64 ]; then
-        abi_opt=904
-      elif ! [ -d /lib/modules/$DEBIANKERNEL.0-905-amd64 ]; then
-        abi_opt=905
-      elif ! [ -d /lib/modules/$DEBIANKERNEL.0-906-amd64 ]; then
-        abi_opt=906
-      elif ! [ -d /lib/modules/$DEBIANKERNEL.0-907-amd64 ]; then
-        abi_opt=907
-      elif ! [ -d /lib/modules/$DEBIANKERNEL.0-908-amd64 ]; then
-        abi_opt=908
-      elif ! [ -d /lib/modules/$DEBIANKERNEL.0-909-amd64 ]; then
-        abi_opt=909
-      else
-        if [ "$RUNNING" = "" ]; then
-          echo "
+    if [ "x$ubuntu_opt" = "xno" ]; then
+      DEBIANKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
+      RUNNING=$(uname -r | grep "90[0-9]-amd64")
+      if [ -d /lib/modules/$DEBIANKERNEL.0-900-amd64 ]; then
+        if ! [ -d /lib/modules/$DEBIANKERNEL.0-901-amd64 ]; then
+          abi_opt=901
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-902-amd64 ]; then
+          abi_opt=902
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-903-amd64 ]; then
+          abi_opt=903
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-904-amd64 ]; then
+          abi_opt=904
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-905-amd64 ]; then
+          abi_opt=905
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-906-amd64 ]; then
+          abi_opt=906
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-907-amd64 ]; then
+          abi_opt=907
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-908-amd64 ]; then
+          abi_opt=908
+        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-909-amd64 ]; then
+          abi_opt=909
+        else
+          if [ "$RUNNING" = "" ]; then
+            echo "
 
 You have a total of 10 \"$DEBIANKERNEL.0-90x-amd64\" kernels installed.
 Not going to install any more of those, aborting...
 "
-          exit 0
-        else
-          echo  "
+            exit 0
+          else
+            echo  "
 
 You have a total of 10 \"$DEBIANKERNEL.0-90x-amd64\" kernels installed.
 You are currently running the $RUNNING version of those.
 Not going to install any more of those, aborting...
 "
-          exit 0
-        fi 
+            exit 0
+          fi 
+        fi
+      fi
+      _ABINAME=$(cat debian/config/defines | grep 'abiname:' | awk -F"[ ]" '{ print $NF }')
+      export _ABINAME
+      sed -i "s/abiname: $_ABINAME/abiname: $abi_opt/" debian/config/defines
+      sed -i "s/-$_ABINAME/-$abi_opt/g" debian/rules.gen
+      fakeroot debian/rules debian/control-real
+      sed -i "s/DEBUG='True'/DEBUG='FALSE'/g" debian/rules.gen
+      fakeroot make -f debian/rules.gen setup_amd64_none_amd64
+      sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian/build/build_amd64_none_amd64/.config
+      if [ "x$test_opt" = "xyes" ]; then
+        confirmyes
+      fi
+    elif [ "x$ubuntu_opt" = "xyes" ]; then
+      chmod a+x debian/scripts/*
+      chmod a+x debian/scripts/misc/*
+      sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian.master/config/config.common.ubuntu
+      sed -i "/CONFIG_DVB_LNBP22=m/a CONFIG_DVB_LOOPBACK_ADAPTER=m" debian.master/config/config.common.ubuntu
+      if [ "x$personal_opt" = "xyes" ]; then
+        sed -i "/CONFIG_S2IO=m/a CONFIG_SAA716X_SUPPORT=y" debian.master/config/config.common.ubuntu
+        sed -i "/CONFIG_SAA716X_SUPPORT=y/a CONFIG_SAA716X_BUDGET=m" debian.master/config/config.common.ubuntu
+        sed -i "/CONFIG_DVB_S921=m/a CONFIG_DVB_SAA716X_CORE=m" debian.master/config/config.common.ubuntu
+      fi
+      fakeroot debian/rules updateconfigs
+      UBUNTUKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
+      _ABIDIR=$(ls debian.master/abi/)
+      _ABIDIRNUM=$(echo $_ABIDIR | grep -o '[[:digit:]]\+' | head -4 | awk 'NR==4')
+      _ABINAME=$(cat debian/changelog | head -1 | grep -o '[[:digit:]]\+' | head -4 | awk 'NR==4')
+      RUNNING=$(uname -r | grep "90[0-9]-generic")
+      if [ -d /lib/modules/$UBUNTUKERNEL.0-900-generic ]; then
+        if ! [ -d /lib/modules/$UBUNTUKERNEL.0-901-generic ]; then
+          abi_opt="901"
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-902-generic ]; then
+          abi_opt="902"
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-903-generic ]; then
+          abi_opt="903"
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-904-generic ]; then
+          abi_opt="904"
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-905-generic ]; then
+          abi_opt="905"
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-906-generic ]; then
+          abi_opt="906"
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-907-generic ]; then
+          abi_opt="907"
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-908-generic ]; then
+          abi_opt="908"
+        elif ! [ -d /lib/modules/$UBUNTUKERNEL.0-909-generic ]; then
+          abi_opt="909"
+        else
+          if [ "$RUNNING" = "" ]; then
+            echo "
+
+You have a total of 10 \"$UBUNTUKERNEL.0-90x-generic\" kernels installed.
+Not going to install any more of those, aborting...
+"
+            exit 0
+          else
+            echo  "
+
+You have a total of 10 \"$UBUNTUKERNEL.0-90x-generic\" kernels installed.
+You are currently running the $RUNNING version of those.
+Not going to install any more of those, aborting...
+"
+            exit 0
+          fi 
+        fi
+      fi
+      _NEWABIDIR=$(echo $_ABIDIR | sed "s/$_ABIDIRNUM/$abi_opt/")
+      sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/control
+      sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/control.stub
+      sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/changelog
+      sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian.master/changelog
+      fakeroot debian/rules clean
+      if [ "x$test_opt" = "xyes" ]; then
+        confirmyes
       fi
     fi
   fi
-  _ABINAME=$(cat debian/config/defines | grep 'abiname:' | awk -F"[ ]" '{ print $NF }')
-  export _ABINAME
-  sed -i "s/abiname: $_ABINAME/abiname: $abi_opt/" debian/config/defines
-  sed -i "s/-$_ABINAME/-$abi_opt/g" debian/rules.gen
-  fakeroot debian/rules debian/control-real
-  sed -i "s/DEBUG='True'/DEBUG='FALSE'/g" debian/rules.gen
-  fakeroot make -f debian/rules.gen setup_amd64_none_amd64
-  sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian/build/build_amd64_none_amd64/.config
 fi
 
 # v4l
@@ -536,81 +646,88 @@ if [ "x$v4l_opt" = "xyes" ]; then
   make allyesconfig
   sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" v4l/.config
   sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" v4l/.config
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmyes
+  fi
 fi
 
 # Vanilla
 if [ "x$stock_opt" = "xno" ] && [ "x$v4l_opt" = "xno" ]; then
-  echo -en "
+  if [ "x$ubuntu_opt" = "xno" ]; then
+    echo -en "
 Going to configure your vanilla kernel.
 
 "
-  if [ "$MAJOR" -lt "4" ]; then
-    if [ "$VERSION" = "19" ]; then
-      echo -en "
+    if [ "$MAJOR" -lt "4" ]; then
+      if [ "$VERSION" = "19" ]; then
+        echo -en "
 Choise: use supplied config file or
 do 'make oldconfig'. Do you want to
 use supplied kernel config?
 If you hit 'n', 'make oldconfig' starts.
 
 "
-      confirmyes "Yes, use it. [Y/n]"
+        confirmyes "Yes, use it. [Y/n]"
 
-      if [ "$?" -eq 0 ]; then
-        cp -f ../kernelconfig/amd64/3.19/config ./.config
-      else
-        make oldconfig
-      fi
-    elif [ "$VERSION" = "18" ]; then
-      echo -en "
+        if [ "$?" -eq 0 ]; then
+          cp -f ../kernelconfig/amd64/3.19/config ./.config
+        else
+          make oldconfig
+        fi
+      elif [ "$VERSION" = "18" ]; then
+        echo -en "
 Choise: use supplied config file or
 do 'make oldconfig'. Do you want to
 use supplied kernel config?
 If you hit 'n', 'make oldconfig' starts.
 
 "
-      confirmyes "Yes, use it. [Y/n]"
+        confirmyes "Yes, use it. [Y/n]"
 
-      if [ "$?" -eq 0 ]; then
-        cp -f ../kernelconfig/amd64/3.18/config ./.config
-      else
-        make oldconfig
-      fi
-    elif [ "$VERSION" = "10" ]; then
-      echo -en "
+        if [ "$?" -eq 0 ]; then
+          cp -f ../kernelconfig/amd64/3.18/config ./.config
+        else
+          make oldconfig
+        fi
+      elif [ "$VERSION" = "10" ]; then
+        echo -en "
 Choise: use supplied config file or
 do 'make oldconfig'. Do you want to
 use supplied kernel config?
 If you hit 'n', 'make oldconfig' starts.
 
 "
-      confirmyes "Yes, use it. [Y/n]"
+        confirmyes "Yes, use it. [Y/n]"
 
-      if [ "$?" -eq 0 ]; then
-        cp -f ../kernelconfig/amd64/3.10/config ./.config
-      else
+        if [ "$?" -eq 0 ]; then
+          cp -f ../kernelconfig/amd64/3.10/config ./.config
+        else
         make oldconfig
+        fi
       fi
-    fi
-  elif [ "$MAJOR" -lt "5" ]; then
-    if [ "$VERSION" = "0" ]; then
-      echo -en "
+    elif [ "$MAJOR" -lt "5" ]; then
+      if [ "$VERSION" = "0" ]; then
+        echo -en "
 Choise: use supplied config file or
 do 'make oldconfig'. Do you want to
 use supplied kernel config?
 If you hit 'n', 'make oldconfig' starts.
 
 "
-      confirmyes "Yes, use it. [Y/n]"
+        confirmyes "Yes, use it. [Y/n]"
 
-      if [ "$?" -eq 0 ]; then
-        cp -f ../kernelconfig/amd64/4.0/config ./.config
+        if [ "$?" -eq 0 ]; then
+          cp -f ../kernelconfig/amd64/4.0/config ./.config
+        else
+          make oldconfig
+        fi
       else
         make oldconfig
       fi
-    else
+    else    
       make oldconfig
     fi
-  else    
+  elif [ "x$ubuntu_opt" = "xyes" ]; then
     make oldconfig
   fi
   ADAPTERS=$( cat .config | grep "CONFIG_DVB_MAX_ADAPTERS" | grep -o '[[:digit:]]\+' )
@@ -620,6 +737,9 @@ If you hit 'n', 'make oldconfig' starts.
   if cat .config | grep "CONFIG_MEDIA_CONTROLLER_DVB=y" > /dev/null 2>&1; then
     sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" .config
   fi
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmyes
+  fi
 fi
 
 #
@@ -628,18 +748,40 @@ fi
 
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
-  fakeroot make -f debian/rules.gen binary-arch_amd64_none_real
-  fakeroot make -f debian/rules.gen binary-arch_amd64_none_amd64
-  if ! [ "$?" -eq "0" ]; then
-    echo "
+  if [ "x$ubuntu_opt" = "xno" ]; then
+    fakeroot make -f debian/rules.gen binary-arch_amd64_none_real
+    if [ "x$test_opt" = "xyes" ]; then
+      fakeroot make -f debian/rules.gen binary-arch_amd64_none_amd64 > ../build.log
+    else
+      fakeroot make -j2 -f debian/rules.gen binary-arch_amd64_none_amd64
+    fi
+    if ! [ "$?" -eq "0" ]; then
+      echo "
 Error(s) while compiling the kernel
 
 Aborting...
 "
-    exit 1
+      exit 1
+    fi
+    cd ..
+    rm -f xen*
+  elif [ "x$ubuntu_opt" = "xyes" ]; then
+    AUTOBUILD=1 NOEXTRAS=1 skipabi=true fakeroot debian/rules binary-headers binary-generic
+    if ! [ "$?" -eq "0" ]; then
+      echo "
+Error(s) while compiling the kernel
+
+Aborting...
+"
+      exit 1
+    fi
+    cd ..
+    rm -f linux-tools*
+    rm -f linux-cloud*
   fi
-  cd ..
-  rm -f xen*
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmyes
+  fi
 fi
 
 # v4l
@@ -657,10 +799,16 @@ Aborting...
 "
     exit 1
   fi
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmyes
+  fi
 fi
 
 # Vanilla
 if [ "x$v4l_opt" = "xno" ] && [ "x$stock_opt" = "xno" ]; then
+  if [ "x$test_opt" = "xno" ]; then
+    export CONCURRENCY_LEVEL=2
+  fi
   make-kpkg --rootcmd fakeroot clean
   make-kpkg --rootcmd fakeroot --initrd kernel_image kernel_headers
   if ! [ "$?" -eq "0" ]; then
@@ -672,6 +820,9 @@ Aborting...
     exit 1
   fi
   cd ..
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmyes
+  fi
 fi
 
 #
@@ -682,7 +833,8 @@ fi
 if [ "x$stock_opt" = "xyes" ]; then
   dpkg -i *.deb
   apt-get -f install
-  echo "
+  if [ "x$ubuntu_opt" = "xno" ]; then
+    echo "
 Installed:
 
 linux-image-$DEBIANKERNEL.0-$abi_opt-amd64
@@ -692,6 +844,19 @@ linux-headers-$DEBIANKERNEL.0-$abi_opt-common
 All done, you should reboot NOW!
 
 "
+  elif [ "x$ubuntu_opt" = "xyes" ]; then
+   echo "
+Installed:
+
+linux-image-$UBUNTUKERNEL.0-$abi_opt-generic
+linux-image-extra-$UBUNTUKERNEL.0-$abi_opt-generic
+linux-headers-$UBUNTUKERNEL.0-$abi_opt-generic
+linux-headers-$UBUNTUKERNEL.0-$abi_opt
+
+All done, you should reboot NOW!
+
+"
+  fi
 fi
 
 # v4l
@@ -730,12 +895,13 @@ if [ "x$v4l_opt" = "xno" ] && [ "x$stock_opt" = "xno" ]; then
   ln -s $HEADERSDIR $BUILDLINK
 fi
 
-# Install the firmware
-if [ ! -d /lib/firmware ]; then
-  mkdir /lib/firmware
+if [ "x$personal_opt" = "xyes" ]; then
+  # Install the firmware
+  if [ ! -d /lib/firmware ]; then
+    mkdir /lib/firmware
+  fi
+  cp -f firmware/* /lib/firmware/
+
+  # Set msi mode for saa716x budget driver
+  echo "options saa716x_budget int_type=1" > /etc/modprobe.d/tbs_opensource.conf
 fi
-cp -f firmware/* /lib/firmware/
-
-# Set msi mode for saa716x budget driver
-echo "options saa716x_budget int_type=1" > /etc/modprobe.d/tbs_opensource.conf
-
