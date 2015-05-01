@@ -762,6 +762,8 @@ If you hit 'n', 'make oldconfig' starts.
     else
       make oldconfig
     fi
+  else
+    make oldconfig
   fi
 fi  
 ADAPTERS=$( cat .config | grep "CONFIG_DVB_MAX_ADAPTERS" | grep -o '[[:digit:]]\+' )
