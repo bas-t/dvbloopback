@@ -46,36 +46,6 @@ confirmyes(){
     esac
 }
 
-experimental_api(){
-echo -en "
-\E[1;33;44m
-Your kernel or v4l media stack is compiled with
-
-CONFIG_MEDIA_CONTROLLER_DVB=y, or
-CONFIG_MEDIA_CONTROLLER_DVB=m
-
-This is a new and experimental api.
-
-The dvbloopback module will likely
-crash your kernel.
-
-You are heading for DISASTER!!!
-
-Recompile your kernel/v4l media stack with:
-
-# CONFIG_MEDIA_CONTROLLER_DVB is not set
-
-Aborting...
-
-Feel free to patch the dvbloopback module
-so it can coexist with Mauro's new api.
-If you do, please share your patch.
-\E[0m
-
-"
-exit 1
-}
-
 show_help(){
   echo " Usage: ./configure --opt1=<opt> --opt2=<opt>"
   echo "                        "
@@ -298,10 +268,12 @@ Aborting...
 "
     exit 1
   fi
-  if [ "x$ubuntu_opt" = "xno" ]; then
-    apt-get install linux-headers-amd64
-  elif [ "x$ubuntu_opt" = "xyes" ]; then
-    apt-get install linux-headers-generic
+  if [ "x$v4l_opt" = "xyes" ]; then
+    if [ "x$ubuntu_opt" = "xno" ]; then
+      apt-get install linux-headers-amd64
+    elif [ "x$ubuntu_opt" = "xyes" ]; then
+      apt-get install linux-headers-generic
+    fi
   fi
   if ! [ "$?" -eq "0" ]; then
     echo "
@@ -322,6 +294,9 @@ if [ "x$stock_opt" = "xyes" ]; then
   apt-get source linux -y || die "Error(s) while fetching Debian Linux source"
   cd linux-*
   if [ "x$test_opt" = "xyes" ]; then
+    echo "
+Source is downloaded.
+"
     confirmyes
   fi
 fi
@@ -331,6 +306,9 @@ if [ "x$v4l_opt" = "xyes" ];then
   git clone git://linuxtv.org/media_build.git || die "Error(s) while fetching v4l build system"
   git clone --depth=1 git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
   if [ "x$test_opt" = "xyes" ]; then
+    echo "
+Source is downloaded.
+"
     confirmyes
   fi
 fi
@@ -375,6 +353,9 @@ Aborting...
   cd linux-$vanilla_opt
   make clean && make mrproper
   if [ "x$test_opt" = "xyes" ]; then
+    echo "
+Source is downloaded.
+"
     confirmyes
   fi
 fi
@@ -398,6 +379,9 @@ if [ "x$v4l_opt" = "xno" ]; then
     patch -p0 < ../3.13-dvb-core.patch
   fi
   if [ "x$test_opt" = "xyes" ]; then
+    echo "
+dvbdev.c is patched.
+"
     confirmyes
   fi
 
@@ -410,6 +394,12 @@ if [ "x$v4l_opt" = "xno" ]; then
     else
       patch -p0 < ../Kconfig-3.10.patch
     fi
+    if [ "x$test_opt" = "xyes" ]; then
+      echo "
+Kconfig is patched for saa716x.
+"
+      confirmyes
+    fi
     if [ "$SECOND_DIGIT" = "16" -o "$SECOND_DIGIT" = "13" ]; then
       patch -p0 < ../Makefile-3.16.patch
     elif [ "$SECOND_DIGIT" = "10" ]; then
@@ -417,8 +407,17 @@ if [ "x$v4l_opt" = "xno" ]; then
     else
       patch -p0 < ../Makefile.patch
     fi
+    if [ "x$test_opt" = "xyes" ]; then
+      echo "
+Makefile is patched for saa716x.
+"
+      confirmyes
+    fi
     patch -p0 < ../uapi.patch
     if [ "x$test_opt" = "xyes" ]; then
+      echo "
+uapi patch applied for saa716x.
+"
       confirmyes
     fi
   fi
@@ -438,6 +437,9 @@ if [ "x$v4l_opt" = "xno" ]; then
     #else
     #  patch -p0 < ../cx23885-4.0.patch
       if [ "x$test_opt" = "xyes" ]; then
+        echo "
+cx23885 patch applied.
+"
         confirmyes
       fi
     fi
@@ -451,6 +453,9 @@ if [ "x$v4l_opt" = "xno" ]; then
     # silabs si2168 DVB-C patch
     sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
     if [ "x$test_opt" = "xyes" ]; then
+      echo "
+silabs si2168 and si2157 patch applied, si2168 is set to DVB-C.
+"
       confirmyes
     fi
 
@@ -469,8 +474,17 @@ if [ "x$v4l_opt" = "xyes" ]; then
   mkdir drivers/media/pci/dvbloopback
   cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
   patch -p0 < ../dvbloopback.patch
+  if [ "x$test_opt" = "xyes" ]; then
+    echo "
+dvbloopback patch applied.
+"
+    confirmyes
+  fi
   patch -p0 < ../3.13-dvb-core.patch
   if [ "x$test_opt" = "xyes" ]; then
+    echo "
+dvbdev.c patch applied.
+"
     confirmyes
   fi
 
@@ -479,8 +493,17 @@ if [ "x$v4l_opt" = "xyes" ]; then
     mkdir drivers/media/pci/saa716x
     cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
     patch -p0 < ../Kconfig.patch
+    if [ "x$test_opt" = "xyes" ]; then
+    echo "
+Kconfig patch applied.
+"
+      confirmyes
+    fi
     patch -p0 < ../Makefile.patch
     if [ "x$test_opt" = "xyes" ]; then
+    echo "
+Makefile patch applied.
+"
       confirmyes
     fi
 
@@ -495,6 +518,9 @@ if [ "x$v4l_opt" = "xyes" ]; then
   git add -A
   git commit -a -m 'Add drivers, patch dvb-core and si2168.'
   if [ "x$test_opt" = "xyes" ]; then
+    echo "
+Patches are committed to media_tree.
+"
     confirmyes
   fi
 
@@ -503,12 +529,18 @@ if [ "x$v4l_opt" = "xyes" ]; then
   # make install patch
   patch -p0 < ../v4l-make-install.patch
   if [ "x$test_opt" = "xyes" ]; then
+    echo "
+make install patch applied.
+"
     confirmyes
   fi
 
   # commit patch
   git commit -a -m 'Install drivers in /lib/modules/`uname -r`/updates/media'
   if [ "x$test_opt" = "xyes" ]; then
+    echo "
+Patches are committed to media_build.
+"
     confirmyes
   fi
 fi
@@ -570,6 +602,9 @@ Not going to install any more of those, aborting...
       fakeroot make -f debian/rules.gen setup_amd64_none_amd64
       sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian/build/build_amd64_none_amd64/.config
       if [ "x$test_opt" = "xyes" ]; then
+        echo "
+Kernel configured.
+"
         confirmyes
       fi
     elif [ "x$ubuntu_opt" = "xyes" ]; then
@@ -584,8 +619,6 @@ Not going to install any more of those, aborting...
       fi
       fakeroot debian/rules updateconfigs
       UBUNTUKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
-      _ABIDIR=$(ls debian.master/abi/)
-      _ABIDIRNUM=$(echo $_ABIDIR | grep -o '[[:digit:]]\+' | head -4 | awk 'NR==4')
       _ABINAME=$(cat debian/changelog | head -1 | grep -o '[[:digit:]]\+' | head -4 | awk 'NR==4')
       RUNNING=$(uname -r | grep "90[0-9]-generic")
       if [ -d /lib/modules/$UBUNTUKERNEL.0-900-generic ]; then
@@ -633,6 +666,9 @@ Not going to install any more of those, aborting...
       sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian.master/changelog
       fakeroot debian/rules clean
       if [ "x$test_opt" = "xyes" ]; then
+        echo "
+Kernel configured.
+"
         confirmyes
       fi
     fi
@@ -647,6 +683,9 @@ if [ "x$v4l_opt" = "xyes" ]; then
   sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" v4l/.config
   sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" v4l/.config
   if [ "x$test_opt" = "xyes" ]; then
+    echo "
+v4l source configured.
+"
     confirmyes
   fi
 fi
@@ -738,6 +777,9 @@ If you hit 'n', 'make oldconfig' starts.
     sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" .config
   fi
   if [ "x$test_opt" = "xyes" ]; then
+    echo "
+Kernel configured.
+"
     confirmyes
   fi
 fi
@@ -780,6 +822,9 @@ Aborting...
     rm -f linux-cloud*
   fi
   if [ "x$test_opt" = "xyes" ]; then
+    echo "
+Kernel compiled.
+"
     confirmyes
   fi
 fi
@@ -800,6 +845,9 @@ Aborting...
     exit 1
   fi
   if [ "x$test_opt" = "xyes" ]; then
+    echo "
+v4l source compiled.
+"
     confirmyes
   fi
 fi
@@ -821,6 +869,9 @@ Aborting...
   fi
   cd ..
   if [ "x$test_opt" = "xyes" ]; then
+    echo "
+Kernel compiled.
+"
     confirmyes
   fi
 fi
