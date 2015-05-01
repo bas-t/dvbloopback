@@ -293,6 +293,18 @@ fi
 if [ "x$stock_opt" = "xyes" ]; then
   apt-get source linux -y || die "Error(s) while fetching Debian Linux source"
   cd linux-*
+  FIRST_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
+  SECOND_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
+  if [ "$FIRST_DIGIT" -lt "4" ] && [ "$SECOND_DIGIT" -lt "17" ]; then
+    if [ "x$personal_opt" = "xyes" ]; then
+      echo "
+Building saa716x intree is not supported for your kernel version.
+
+Aborting...
+"
+      exit 1
+    fi
+  fi  
   if [ "x$test_opt" = "xyes" ]; then
     echo "
 Source is downloaded.
@@ -400,7 +412,7 @@ Kconfig is patched for saa716x.
 "
       confirmyes
     fi
-    if [ "$SECOND_DIGIT" = "16" -o "$SECOND_DIGIT" = "13" ]; then
+    if [ "$SECOND_DIGIT" = "16" ]; then
       patch -p0 < ../Makefile-3.16.patch
     elif [ "$SECOND_DIGIT" = "10" ]; then
       patch -p0 < ../Makefile-3.10.patch
@@ -429,7 +441,7 @@ uapi patch applied for saa716x.
         patch -p0 < ../cx23885-3.19.patch
       elif [ "$SECOND_DIGIT" = "18" ]; then
         patch -p0 < ../cx23885-3.18.patch
-      elif [ "$SECOND_DIGIT" = "16" -o "$SECOND_DIGIT" = "13" ]; then
+      elif [ "$SECOND_DIGIT" = "16" ]; then
         patch -p0 < ../cx23885-3.16.patch
       elif [ "$SECOND_DIGIT" = "10" ]; then
         patch -p0 < ../cx23885-3.10.patch
