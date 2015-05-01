@@ -762,25 +762,20 @@ If you hit 'n', 'make oldconfig' starts.
     else
       make oldconfig
     fi
-  else    
-    make oldconfig
   fi
-elif [ "x$ubuntu_opt" = "xyes" ]; then
-  make oldconfig
+fi  
+ADAPTERS=$( cat .config | grep "CONFIG_DVB_MAX_ADAPTERS" | grep -o '[[:digit:]]\+' )
+if ! [ "$ADAPTERS" = "$adapters_opt" ]; then
+  sed -i "s/CONFIG_DVB_MAX_ADAPTERS=$ADAPTERS/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" .config
 fi
-  ADAPTERS=$( cat .config | grep "CONFIG_DVB_MAX_ADAPTERS" | grep -o '[[:digit:]]\+' )
-  if ! [ "$ADAPTERS" = "$adapters_opt" ]; then
-    sed -i "s/CONFIG_DVB_MAX_ADAPTERS=$ADAPTERS/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" .config
-  fi
-  if cat .config | grep "CONFIG_MEDIA_CONTROLLER_DVB=y" > /dev/null 2>&1; then
-    sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" .config
-  fi
-  if [ "x$test_opt" = "xyes" ]; then
-    echo "
+if cat .config | grep "CONFIG_MEDIA_CONTROLLER_DVB=y" > /dev/null 2>&1; then
+  sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" .config
+fi
+if [ "x$test_opt" = "xyes" ]; then
+  echo "
 Kernel configured.
 "
-    confirmyes
-  fi
+  confirmyes
 fi
 
 #
