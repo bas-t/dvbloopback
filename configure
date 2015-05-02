@@ -767,7 +767,11 @@ If you hit 'n', 'make oldconfig' starts.
       confirmyes "Yes, use it. [Y/n]"
 
       if [ "$?" -eq 0 ]; then
-        cp -f ../kernelconfig/amd64/4.0/config ./.config
+        if [ "$OS" = "Debian" ]; then
+          cp -f ../kernelconfig/amd64/4.0/config ./.config
+        elif [ "$OS" = "Ubuntu" ]; then
+          cp -f ../kernelconfig/amd64/4.0/config-ubuntu ./.config
+        fi
       else
         make oldconfig
       fi
