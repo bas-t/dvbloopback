@@ -243,6 +243,11 @@ Your distro is not supported. Should be Debian
 "
   exit 0
 else
+  if uname -a | grep "x86_64" > /dev/null 2>&1; then
+    CONFIG="amd64"
+  else
+    CONFIG="i386"
+  fi
   if ! dpkg-query -l build-essential | grep "ii" > /dev/null 2>&1; then
     echo "
 Missing dependency build-essential, marking for installation.
@@ -611,8 +616,13 @@ Not going to install any more of those, aborting...
       sed -i "s/-$_ABINAME/-$abi_opt/g" debian/rules.gen
       fakeroot debian/rules debian/control-real
       sed -i "s/DEBUG='True'/DEBUG='FALSE'/g" debian/rules.gen
-      fakeroot make -f debian/rules.gen setup_amd64_none_amd64
-      sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian/build/build_amd64_none_amd64/.config
+      if [ "$CONFIG" = "amd64" ]; then
+        fakeroot make -f debian/rules.gen setup_amd64_none_amd64
+        sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian/build/build_amd64_none_amd64/.config
+      else
+        fakeroot make -f debian/rules.gen setup_i386_none_686-pae_real
+        sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian/build/build_i386_none_686-pae/.config
+      fi
       if [ "x$test_opt" = "xyes" ]; then
         echo "
 Kernel configured.
@@ -811,11 +821,20 @@ fi
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
   if [ "x$ubuntu_opt" = "xno" ]; then
-    fakeroot make -f debian/rules.gen binary-arch_amd64_none_real
-    if [ "x$test_opt" = "xyes" ]; then
-      fakeroot make -f debian/rules.gen binary-arch_amd64_none_amd64 > ../build.log
+    if [ "$CONFIG" = "amd64" ]; then
+      fakeroot make -f debian/rules.gen binary-arch_amd64_none_real
+      if [ "x$test_opt" = "xyes" ]; then
+        fakeroot make -f debian/rules.gen binary-arch_amd64_none_amd64 > ../build.log
+      else
+        fakeroot make -j2 -f debian/rules.gen binary-arch_amd64_none_amd64
+      fi
     else
-      fakeroot make -j2 -f debian/rules.gen binary-arch_amd64_none_amd64
+      fakeroot make -f debian/rules.gen binary-arch_i386_none_real
+      if [ "x$test_opt" = "xyes" ]; then
+        fakeroot make -f debian/rules.gen binary-arch_i386_none_686-pae > ../build.log
+      else
+        fakeroot make -j2 -f debian/rules.gen binary-arch_i386_none_686-pae
+      fi
     fi
     if ! [ "$?" -eq "0" ]; then
       echo "
