@@ -74,7 +74,7 @@ show_help(){
   echo "                        "
   echo " --abi=<opt>            [900] Debian only kernel version tweak"
   echo "                        "
-  echo " --test=<opt>           [no] yes: review each and every step"
+  echo " --test=<opt>           [no] yes: pause to review each and every step"
   echo "                        "
 }
 
@@ -349,7 +349,7 @@ Minimum supported kernel version is linux-3.10.x
 
 The TBS6281/6285 driver is supported as of 3.18.x kernels.
 
-(With the exeption of 3.10.x and a couple of stock kernels)
+(With the exception of 3.10.x and a couple of stock kernels)
 
 You requested a build with a $vanilla_opt kernel.
 
@@ -547,7 +547,7 @@ Patches are committed to media_tree.
   patch -p0 < ../v4l-make-install.patch
   if [ "x$test_opt" = "xyes" ]; then
     echo "
-make install patch applied.
+make install patch applied to media_build repo.
 "
     confirmyes
   fi
@@ -731,9 +731,9 @@ If you hit 'n', 'make oldconfig' starts.
 
       if [ "$?" -eq 0 ]; then
         if [ "$OS" = "Debian" ]; then
-          cp -f ../kernelconfig/amd64/3.19/config ./.config
+          cp -f ../kernelconfig/$CONFIG/3.19/config ./.config
         elif [ "$OS" = "Ubuntu" ]; then
-          cp -f ../kernelconfig/amd64/3.19/config-ubuntu ./.config
+          cp -f ../kernelconfig/$CONFIG/3.19/config-ubuntu ./.config
         fi
       else
         make oldconfig
@@ -750,9 +750,9 @@ If you hit 'n', 'make oldconfig' starts.
 
       if [ "$?" -eq 0 ]; then
         if [ "$OS" = "Debian" ]; then
-          cp -f ../kernelconfig/amd64/3.18/config ./.config
+          cp -f ../kernelconfig/$CONFIG/3.18/config ./.config
         elif [ "$OS" = "Ubuntu" ]; then
-          cp -f ../kernelconfig/amd64/3.18/config-ubuntu ./.config
+          cp -f ../kernelconfig/$CONFIG/3.18/config-ubuntu ./.config
         fi
       else
         make oldconfig
@@ -768,7 +768,7 @@ If you hit 'n', 'make oldconfig' starts.
       confirmyes "Yes, use it. [Y/n]"
 
       if [ "$?" -eq 0 ]; then
-        cp -f ../kernelconfig/amd64/3.10/config ./.config
+        cp -f ../kernelconfig/$CONFIG/3.10/config ./.config
       else
       make oldconfig
       fi
