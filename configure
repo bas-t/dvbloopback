@@ -308,14 +308,16 @@ if [ "x$stock_opt" = "xyes" ]; then
   cd linux-*
   FIRST_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
   SECOND_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
-  if [ "$FIRST_DIGIT" -lt "4" ] && [ "$SECOND_DIGIT" -lt "16" ]; then
-    if [ "x$personal_opt" = "xyes" ]; then
-      echo "
+  if [ "$FIRST_DIGIT" -lt "4" ]; then
+    if [ "$SECOND_DIGIT" -lt "16" ]; then
+      if [ "x$personal_opt" = "xyes" ]; then
+        echo "
 Building saa716x intree is not supported for your kernel version.
 
 Aborting...
 "
-      exit 1
+        exit 1
+      fi
     fi
   fi  
   if [ "x$test_opt" = "xyes" ]; then
@@ -378,7 +380,7 @@ Aborting...
   if echo "$vanilla_opt" | grep "rc" > /dev/null 2>&1; then
     wget https://www.kernel.org/pub/linux/kernel/v$MAJOR.x/testing/linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
   else
-    wget https://www.kernel.org/pub/linux/kernel/v$MAJOR.x//linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
+    wget https://www.kernel.org/pub/linux/kernel/v$MAJOR.x/linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
   fi
   tar -xJf linux-$vanilla_opt.tar.xz
   cd linux-$vanilla_opt
@@ -407,10 +409,12 @@ if [ "x$v4l_opt" = "xno" ]; then
   mkdir drivers/media/pci/dvbloopback
   cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
   patch -p0 < ../dvbloopback.patch
-  if [ "$FIRST_DIGIT" -lt "4" ] && [ "$SECOND_DIGIT" -lt "13" ]; then
-    patch -p0 < ../3.7-dvb-core.patch
-  else
-    patch -p0 < ../3.13-dvb-core.patch
+  if [ "$FIRST_DIGIT" -lt "4" ]; then
+    if [ "$SECOND_DIGIT" -lt "13" ]; then
+      patch -p0 < ../3.7-dvb-core.patch
+    else
+      patch -p0 < ../3.13-dvb-core.patch
+    fi
   fi
   if [ "x$test_opt" = "xyes" ]; then
     echo "
@@ -426,10 +430,13 @@ dvbdev.c is patched.
   if [ "x$personal_opt" = "xyes" ];then
     mkdir drivers/media/pci/saa716x
     cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
-    if ! [ "$VERSION" = "10" ]; then
-      patch -p0 < ../Kconfig.patch
+    if [ "$FIRST_DIGIT" -lt "4" ];then
+      if [ "$SECOND_DIGIT" -eq "10" ];then
+        patch -p0 < ../Kconfig-3.10.patch
+      else
+        patch -p0 < ../Kconfig.patch
     else
-      patch -p0 < ../Kconfig-3.10.patch
+      patch -p0 < ../Kconfig.patch
     fi
     if [ "x$test_opt" = "xyes" ]; then
       echo "
