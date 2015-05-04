@@ -296,13 +296,7 @@ fi
 
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
-  if [ "x$ubuntu_opt" = "xyes" ] && [ "$RELEASE" = "trusty" ]; then
-    if uname -r | grep "3.16.0-[0-9][0-9]-generic" > /dev/null 2>&1; then
-      apt-get source linux-lts-utopic || die "Error(s) while fetching Debian Linux source"
-    fi
-  elif [ "$OS" = "Debian" -o "x$ubuntu_opt" = "xyes" ]; then
-    apt-get source linux -y || die "Error(s) while fetching Debian Linux source"
-  fi
+  apt-get source linux-image-`uname -r` -y || die "Error(s) while fetching Debian Linux source"
   cd linux-*
   FIRST_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
   SECOND_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
@@ -574,29 +568,29 @@ fi
 
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
-  if [ "x$abi_opt" = "900" ]; then
-    if [ "x$ubuntu_opt" = "xno" ]; then
+  if [ "$OS" = "Debian" ]; then
+    if [ "x$abi_opt" = "900" ]; then
       DEBIANKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
       RUNNING=$(uname -r | grep "90[0-9]-amd64")
       if [ -d /lib/modules/$DEBIANKERNEL.0-900-amd64 ]; then
         if ! [ -d /lib/modules/$DEBIANKERNEL.0-901-amd64 ]; then
-          abi_opt=901
+          abi_opt="901"
         elif ! [ -d /lib/modules/$DEBIANKERNEL.0-902-amd64 ]; then
-          abi_opt=902
+          abi_opt="902"
         elif ! [ -d /lib/modules/$DEBIANKERNEL.0-903-amd64 ]; then
-          abi_opt=903
+          abi_opt="903"
         elif ! [ -d /lib/modules/$DEBIANKERNEL.0-904-amd64 ]; then
-          abi_opt=904
+          abi_opt="904"
         elif ! [ -d /lib/modules/$DEBIANKERNEL.0-905-amd64 ]; then
-          abi_opt=905
+          abi_opt="905"
         elif ! [ -d /lib/modules/$DEBIANKERNEL.0-906-amd64 ]; then
-          abi_opt=906
+          abi_opt="906"
         elif ! [ -d /lib/modules/$DEBIANKERNEL.0-907-amd64 ]; then
-          abi_opt=907
+          abi_opt="907"
         elif ! [ -d /lib/modules/$DEBIANKERNEL.0-908-amd64 ]; then
-          abi_opt=908
+          abi_opt="908"
         elif ! [ -d /lib/modules/$DEBIANKERNEL.0-909-amd64 ]; then
-          abi_opt=909
+          abi_opt="909"
         else
           if [ "$RUNNING" = "" ]; then
             echo "
@@ -616,38 +610,40 @@ Not going to install any more of those, aborting...
           fi 
         fi
       fi
-      _ABINAME=$(cat debian/config/defines | grep 'abiname:' | awk -F"[ ]" '{ print $NF }')
-      export _ABINAME
-      sed -i "s/abiname: $_ABINAME/abiname: $abi_opt/" debian/config/defines
-      sed -i "s/-$_ABINAME/-$abi_opt/g" debian/rules.gen
-      fakeroot debian/rules debian/control-real
-      sed -i "s/DEBUG='True'/DEBUG='FALSE'/g" debian/rules.gen
-      if [ "$CONFIG" = "amd64" ]; then
-        fakeroot make -f debian/rules.gen setup_amd64_none_amd64
-        sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian/build/build_amd64_none_amd64/.config
-      else
-        fakeroot make -f debian/rules.gen setup_i386_none_686-pae_real
-        sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian/build/build_i386_none_686-pae/.config
-      fi
-      if [ "x$test_opt" = "xyes" ]; then
-        echo "
+    fi
+    _ABINAME=$(cat debian/config/defines | grep 'abiname:' | awk -F"[ ]" '{ print $NF }')
+    export _ABINAME
+    sed -i "s/abiname: $_ABINAME/abiname: $abi_opt/" debian/config/defines
+    sed -i "s/-$_ABINAME/-$abi_opt/g" debian/rules.gen
+    fakeroot debian/rules debian/control-real
+    sed -i "s/DEBUG='True'/DEBUG='FALSE'/g" debian/rules.gen
+    if [ "$CONFIG" = "amd64" ]; then
+      fakeroot make -f debian/rules.gen setup_amd64_none_amd64
+      sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian/build/build_amd64_none_amd64/.config
+    else
+      fakeroot make -f debian/rules.gen setup_i386_none_686-pae_real
+      sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian/build/build_i386_none_686-pae/.config
+    fi
+    if [ "x$test_opt" = "xyes" ]; then
+      echo "
 Kernel configured.
 "
-        confirmyes
-      fi
-    elif [ "x$ubuntu_opt" = "xyes" ]; then
-      chmod a+x debian/scripts/*
-      chmod a+x debian/scripts/misc/*
-      sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian.master/config/config.common.ubuntu
-      sed -i "/CONFIG_DVB_LNBP22=m/a CONFIG_DVB_LOOPBACK_ADAPTER=m" debian.master/config/config.common.ubuntu
-      if [ "x$personal_opt" = "xyes" ]; then
-        sed -i "/CONFIG_S2IO=m/a CONFIG_SAA716X_SUPPORT=y" debian.master/config/config.common.ubuntu
-        sed -i "/CONFIG_SAA716X_SUPPORT=y/a CONFIG_SAA716X_BUDGET=m" debian.master/config/config.common.ubuntu
-        sed -i "/CONFIG_DVB_S921=m/a CONFIG_DVB_SAA716X_CORE=m" debian.master/config/config.common.ubuntu
-      fi
-      fakeroot debian/rules updateconfigs
-      UBUNTUKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
-      _ABINAME=$(cat debian/changelog | head -1 | grep -o '[[:digit:]]\+' | head -4 | awk 'NR==4')
+      confirmyes
+    fi
+  elif [ "x$ubuntu_opt" = "xyes" ]; then
+    chmod a+x debian/scripts/*
+    chmod a+x debian/scripts/misc/*
+    sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian.master/config/config.common.ubuntu
+    sed -i "/CONFIG_DVB_LNBP22=m/a CONFIG_DVB_LOOPBACK_ADAPTER=m" debian.master/config/config.common.ubuntu
+    if [ "x$personal_opt" = "xyes" ]; then
+      sed -i "/CONFIG_S2IO=m/a CONFIG_SAA716X_SUPPORT=y" debian.master/config/config.common.ubuntu
+      sed -i "/CONFIG_SAA716X_SUPPORT=y/a CONFIG_SAA716X_BUDGET=m" debian.master/config/config.common.ubuntu
+      sed -i "/CONFIG_DVB_S921=m/a CONFIG_DVB_SAA716X_CORE=m" debian.master/config/config.common.ubuntu
+    fi
+    fakeroot debian/rules updateconfigs
+    UBUNTUKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
+    _ABINAME=$(cat debian/changelog | head -1 | grep -o '[[:digit:]]\+' | head -4 | awk 'NR==4')
+    if [ "x$abi_opt" = "900" ]; then
       RUNNING=$(uname -r | grep "90[0-9]-generic")
       if [ -d /lib/modules/$UBUNTUKERNEL.0-900-generic ]; then
         if ! [ -d /lib/modules/$UBUNTUKERNEL.0-901-generic ]; then
@@ -687,17 +683,17 @@ Not going to install any more of those, aborting...
           fi 
         fi
       fi
-      sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/control
-      sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/control.stub
-      sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/changelog
-      sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian.master/changelog
-      fakeroot debian/rules clean
-      if [ "x$test_opt" = "xyes" ]; then
-        echo "
+    fi
+    sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/control
+    sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/control.stub
+    sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/changelog
+    sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian.master/changelog
+    fakeroot debian/rules clean
+    if [ "x$test_opt" = "xyes" ]; then
+      echo "
 Kernel configured.
 "
-        confirmyes
-      fi
+      confirmyes
     fi
   fi
 fi
