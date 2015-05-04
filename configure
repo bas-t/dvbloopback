@@ -277,7 +277,7 @@ Aborting...
     if [ "x$ubuntu_opt" = "xno" ]; then
       apt-get install linux-headers-amd64
     elif [ "x$ubuntu_opt" = "xyes" ]; then
-      apt-get install linux-headers-generic
+      apt-get install linux-headers-`uname -r`
     fi
   fi
   if ! [ "$?" -eq "0" ]; then
@@ -574,7 +574,7 @@ fi
 
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
-  if [ "$abi_opt" = "900" ]; then
+  if [ "x$abi_opt" = "900" ]; then
     if [ "x$ubuntu_opt" = "xno" ]; then
       DEBIANKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
       RUNNING=$(uname -r | grep "90[0-9]-amd64")
@@ -687,7 +687,6 @@ Not going to install any more of those, aborting...
           fi 
         fi
       fi
-      _NEWABIDIR=$(echo $_ABIDIR | sed "s/$_ABIDIRNUM/$abi_opt/")
       sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/control
       sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/control.stub
       sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/changelog
