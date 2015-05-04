@@ -966,6 +966,7 @@ v4l source compiled.
     if [ "$?" != "0" ]; then
       exit 0
     fi
+    cd ..
   fi
 fi
 
