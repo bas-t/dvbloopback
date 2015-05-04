@@ -308,6 +308,9 @@ Aborting...
 Source is downloaded.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
 fi
 
@@ -320,6 +323,9 @@ if [ "x$v4l_opt" = "xyes" ];then
 Source is downloaded.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
 fi
 
@@ -367,6 +373,9 @@ Aborting...
 Source is downloaded.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
 fi
 
@@ -393,6 +402,9 @@ if [ "x$v4l_opt" = "xno" ]; then
 dvbdev.c is patched.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
 
   # saa716x patch
@@ -409,6 +421,9 @@ dvbdev.c is patched.
 Kconfig is patched for saa716x.
 "
       confirmyes
+      if [ "$?" != "0" ]; then
+        exit 0
+      fi
     fi
     if [ "$SECOND_DIGIT" = "16" ]; then
       patch -p0 < ../Makefile-3.16.patch
@@ -422,6 +437,9 @@ Kconfig is patched for saa716x.
 Makefile is patched for saa716x.
 "
       confirmyes
+      if [ "$?" != "0" ]; then
+        exit 0
+      fi
     fi
     patch -p0 < ../uapi.patch
     if [ "x$test_opt" = "xyes" ]; then
@@ -429,6 +447,9 @@ Makefile is patched for saa716x.
 uapi patch applied for saa716x.
 "
       confirmyes
+      if [ "$?" != "0" ]; then
+        exit 0
+      fi
     fi
   fi
 
@@ -451,6 +472,9 @@ uapi patch applied for saa716x.
 cx23885 patch applied.
 "
         confirmyes
+        if [ "$?" != "0" ]; then
+          exit 0
+        fi
       fi
     fi
   fi
@@ -467,6 +491,9 @@ cx23885 patch applied.
 silabs si2168 and si2157 patch applied, si2168 is set to DVB-C.
 "
       confirmyes
+      if [ "$?" != "0" ]; then
+        exit 0
+      fi
     fi
 
     # If linux source >= 4.2 patch saa716x with IF patch
@@ -489,6 +516,9 @@ if [ "x$v4l_opt" = "xyes" ]; then
 dvbloopback patch applied.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
   patch -p0 < ../3.13-dvb-core.patch
   if [ "x$test_opt" = "xyes" ]; then
@@ -496,6 +526,9 @@ dvbloopback patch applied.
 dvbdev.c patch applied.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
 
   if [ "x$personal_opt" = "xyes" ];then
@@ -508,6 +541,9 @@ dvbdev.c patch applied.
 Kconfig patch applied.
 "
       confirmyes
+      if [ "$?" != "0" ]; then
+        exit 0
+      fi
     fi
     patch -p0 < ../Makefile.patch
     if [ "x$test_opt" = "xyes" ]; then
@@ -515,6 +551,9 @@ Kconfig patch applied.
 Makefile patch applied.
 "
       confirmyes
+      if [ "$?" != "0" ]; then
+        exit 0
+      fi
     fi
 
     # silabs si2168 DVC-C patch
@@ -532,6 +571,9 @@ Makefile patch applied.
 Patches are committed to media_tree.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
 
   cd ../media_build
@@ -543,6 +585,9 @@ Patches are committed to media_tree.
 make install patch applied to media_build repo.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
 
   # commit patch
@@ -552,6 +597,9 @@ make install patch applied to media_build repo.
 Patches are committed to media_build.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
 fi
 
@@ -622,6 +670,9 @@ Not going to install any more of those, aborting...
 Kernel configured.
 "
       confirmyes
+      if [ "$?" != "0" ]; then
+        exit 0
+      fi
     fi
   elif [ "$OS" = "Ubuntu" ]; then
     chmod a+x debian/scripts/*
@@ -690,6 +741,9 @@ Not going to install any more of those, aborting...
 Kernel configured.
 "
       confirmyes
+      if [ "$?" != "0" ]; then
+        exit 0
+      fi
     fi
   fi
 fi
@@ -706,6 +760,9 @@ if [ "x$v4l_opt" = "xyes" ]; then
 v4l source configured.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
 fi
 
@@ -808,6 +865,9 @@ If you hit 'n', 'make oldconfig' starts.
 Kernel configured.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
 fi
 
@@ -862,6 +922,9 @@ Aborting...
 Kernel compiled.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
 fi
 
@@ -885,6 +948,9 @@ Aborting...
 v4l source compiled.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
 fi
 
@@ -909,6 +975,9 @@ Aborting...
 Kernel compiled.
 "
     confirmyes
+    if [ "$?" != "0" ]; then
+      exit 0
+    fi
   fi
 fi
 
