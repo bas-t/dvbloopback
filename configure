@@ -85,7 +85,6 @@ adapters_opt="16"
 update_opt="yes"
 abi_opt="900"
 test_opt="no"
-ubuntu_opt="no"
 personal_opt="yes"
 
 for opt do
@@ -106,8 +105,6 @@ for opt do
   --abi=*) abi_opt="$optval"
   ;;
   --test=*) test_opt="$optval"
-  ;;
-  --ubuntu=*) ubuntu_opt="$optval"
   ;;
   --personal=*) personal_opt="$optval"
   ;;
@@ -239,12 +236,7 @@ if [ -f /usr/bin/lsb_release ]; then
   RELEASE=$( lsb_release -sc )
 fi
 
-if ! [ "$OS" = "Debian" -o "x$ubuntu_opt" = "xyes" ]; then
-  echo "
-Your distro is not supported. Should be Debian
-"
-  exit 0
-else
+if [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
   if uname -a | grep "x86_64" > /dev/null 2>&1; then
     CONFIG="amd64"
   else
@@ -276,9 +268,7 @@ Aborting...
     exit 1
   fi
   if [ "x$v4l_opt" = "xyes" ]; then
-    if [ "x$ubuntu_opt" = "xno" ]; then
-      apt-get install linux-headers-amd64
-    elif [ "x$ubuntu_opt" = "xyes" ]; then
+    if [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
       apt-get install linux-headers-`uname -r`
     fi
   fi
@@ -363,10 +353,10 @@ Aborting...
       fi
     fi
   fi
-  if ! echo "$vanilla_opt" | grep "rc" > /dev/null 2>&1; then
-    wget https://www.kernel.org/pub/linux/kernel/v$MAJOR.x/linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
+  if echo "$vanilla_opt" | grep "rc" > /dev/null 2>&1; then
+    wget https://www.kernel.org/pub/linux/kernel/v$MAJOR.x/testing/linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
   else
-    wget https://www.kernel.org/pub/linux/kernel/v4.x/testing/linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
+    wget https://www.kernel.org/pub/linux/kernel/v$MAJOR.x//linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
   fi
   tar -xJf linux-$vanilla_opt.tar.xz
   cd linux-$vanilla_opt
@@ -632,7 +622,7 @@ Kernel configured.
 "
       confirmyes
     fi
-  elif [ "x$ubuntu_opt" = "xyes" ]; then
+  elif [ "$OS" = "Ubuntu" ]; then
     chmod a+x debian/scripts/*
     chmod a+x debian/scripts/misc/*
     sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian.master/config/config.common.ubuntu
@@ -719,7 +709,7 @@ v4l source configured.
 fi
 
 # Vanilla
-if [ "x$stock_opt" = "xno" ] && [ "x$v4l_opt" = "xno" ]; then
+if [ "x$vanilla_opt" != "x" ]; then
   echo -en "
 Going to configure your vanilla kernel.
 
@@ -792,9 +782,9 @@ If you hit 'n', 'make oldconfig' starts.
 
       if [ "$?" -eq 0 ]; then
         if [ "$OS" = "Debian" ]; then
-          cp -f ../kernelconfig/amd64/4.0/config ./.config
+          cp -f ../kernelconfig/$CONFIG/4.0/config ./.config
         elif [ "$OS" = "Ubuntu" ]; then
-          cp -f ../kernelconfig/amd64/4.0/config-ubuntu ./.config
+          cp -f ../kernelconfig/$CONFIG/4.0/config-ubuntu ./.config
         fi
       else
         make oldconfig
@@ -826,7 +816,7 @@ fi
 
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
-  if [ "x$ubuntu_opt" = "xno" ]; then
+  if [ "$OS" = "Debian" ]; then
     if [ "$CONFIG" = "amd64" ]; then
       fakeroot make -f debian/rules.gen binary-arch_amd64_none_real
       if [ "x$test_opt" = "xyes" ]; then
@@ -852,7 +842,7 @@ Aborting...
     fi
     cd ..
     rm -f xen*
-  elif [ "x$ubuntu_opt" = "xyes" ]; then
+  elif [ "$OS" = "Ubuntu" ]; then
     AUTOBUILD=1 NOEXTRAS=1 skipabi=true fakeroot debian/rules binary-headers binary-generic
     if ! [ "$?" -eq "0" ]; then
       echo "
@@ -898,7 +888,7 @@ v4l source compiled.
 fi
 
 # Vanilla
-if [ "x$v4l_opt" = "xno" ] && [ "x$stock_opt" = "xno" ]; then
+if [ "x$vanilla_opt" != "x" ]; then
   if [ "x$test_opt" = "xno" ]; then
     export CONCURRENCY_LEVEL=2
   fi
@@ -929,7 +919,7 @@ fi
 if [ "x$stock_opt" = "xyes" ]; then
   dpkg -i *.deb
   apt-get -f install
-  if [ "x$ubuntu_opt" = "xno" ]; then
+  if [ "$OS" = "Debian" ]; then
     echo "
 Installed:
 
@@ -940,7 +930,7 @@ linux-headers-$DEBIANKERNEL.0-$abi_opt-common
 All done, you should reboot NOW!
 
 "
-  elif [ "x$ubuntu_opt" = "xyes" ]; then
+  elif [ "$OS" = "Ubuntu" ]; then
    echo "
 Installed:
 
@@ -970,7 +960,7 @@ v4l source is compiled. Install it? [N/y]
 fi
 
 # Vanilla
-if [ "x$v4l_opt" = "xno" ] && [ "x$stock_opt" = "xno" ]; then
+if [ "x$vanilla_opt" != "x" ]; then
   dpkg -i *.deb
   if echo $vanilla_opt | grep "rc" > /dev/null 2>&1; then
     BUILDLINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/-rc/.0-rc/')build"
