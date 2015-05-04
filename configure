@@ -10,10 +10,11 @@ die(){
 
 die_unknown(){
     echo -en "
-\E[1;33;44mUnknown option \"$1\".\E[0m
+\E[1;33;44mUnknown option \"$1\".
+
+run ./configure --help for valid options\E[0m
 
 "
-    ./configure --help
     exit 1
 }
 
