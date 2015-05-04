@@ -296,7 +296,13 @@ fi
 
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
-  apt-get source linux -y || die "Error(s) while fetching Debian Linux source"
+  if [ "x$ubuntu_opt" = "xyes" ] && [ "$RELEASE" = "trusty" ]; then
+    if uname -r | grep "3.16.0-[0-9][0-9]-generic" > /dev/null 2>&1; then
+      apt-get source linux-lts-utopic || die "Error(s) while fetching Debian Linux source"
+    fi
+  elif [ "$OS" = "Debian" -o "x$ubuntu_opt" = "xyes" ]; then
+    apt-get source linux -y || die "Error(s) while fetching Debian Linux source"
+  fi
   cd linux-*
   FIRST_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
   SECOND_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
