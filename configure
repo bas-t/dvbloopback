@@ -117,6 +117,8 @@ for opt do
   esac
 done
 
+export abi_opt
+
 # Check git status
 if [ "x$update_opt" = "xyes" ]; then
   rm -rf linux* > /dev/null 2>&1
@@ -569,7 +571,7 @@ fi
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
   if [ "$OS" = "Debian" ]; then
-    if [ "x$abi_opt" = "900" ]; then
+    if [ "$abi_opt" = "900" ]; then
       DEBIANKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
       RUNNING=$(uname -r | grep "90[0-9]-amd64")
       if [ -d /lib/modules/$DEBIANKERNEL.0-900-amd64 ]; then
@@ -643,7 +645,8 @@ Kernel configured.
     fakeroot debian/rules updateconfigs
     UBUNTUKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
     _ABINAME=$(cat debian/changelog | head -1 | grep -o '[[:digit:]]\+' | head -4 | awk 'NR==4')
-    if [ "x$abi_opt" = "900" ]; then
+    export _ABINAME
+    if [ "$abi_opt" = "900" ]; then
       RUNNING=$(uname -r | grep "90[0-9]-generic")
       if [ -d /lib/modules/$UBUNTUKERNEL.0-900-generic ]; then
         if ! [ -d /lib/modules/$UBUNTUKERNEL.0-901-generic ]; then
