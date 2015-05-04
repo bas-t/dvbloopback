@@ -690,7 +690,9 @@ Not going to install any more of those, aborting...
     sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/control
     sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/control.stub
     sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian/changelog
-    sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian.master/changelog
+    sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian.*/control
+    sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian.*/control.stub
+    sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian.*/changelog
     fakeroot debian/rules clean
     if [ "x$test_opt" = "xyes" ]; then
       echo "
