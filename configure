@@ -231,6 +231,21 @@ Aborting...
   exit 0
 fi
 
+if ! [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
+  if [ "x$stock_opt" = "xyes" ]; then
+    echo "
+
+Compiling a distro's stock kernel is supported
+
+in Debian and Ubuntu only. You can compile the
+
+v4l tree or a vanilla kernel. Aborting....
+
+"
+    exit 0
+  fi
+fi
+
 # Get build-deps, Debian only.
 if [ -f /usr/bin/lsb_release ]; then
   OS=$( lsb_release -si )
