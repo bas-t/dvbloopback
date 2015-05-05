@@ -311,10 +311,10 @@ if [ "x$stock_opt" = "xyes" ]; then
   FIRST_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
   SECOND_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
   if [ "$FIRST_DIGIT" -lt "4" ]; then
-    if [ "$SECOND_DIGIT" != "16" ]; then
+    if ! [ "$SECOND_DIGIT" -eq "16" -o "$SECOND_DIGIT" -gt "17" ]; then
       if [ "x$personal_opt" = "xyes" ]; then
         echo "
-Building saa716x intree is not supported for your kernel version.
+Building saa716x/dvbsky t982 intree is not supported for your kernel version.
 
 Aborting...
 "
@@ -353,7 +353,7 @@ if [ "x$vanilla_opt" != "x" ];then
   MAJOR=$(echo "$vanilla_opt" | cut -d'.' -f1)
   VERSION=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
   if [ "$MAJOR" -lt "4" ]; then
-    if ! [ "$VERSION" -eq "10" ]; then
+    if ! [ "$VERSION" -eq "10" -o "$VERSION" -eq "16" ]; then
       if [ "x$personal_opt" = "xyes" ]; then
         MINVERSION="18"
       else
@@ -365,9 +365,9 @@ if [ "x$vanilla_opt" != "x" ];then
 \E[1;33;44m
 Minimum supported kernel version is linux-3.10.x
 
-The TBS6281/6285 driver is supported as of 3.18.x kernels.
+Compiling the TBS6281/6285 and DVBSky T982 drivers
 
-(With the exception of 3.10.x and a couple of stock kernels)
+intree is supported as of linux-3.18.x kernels.
 
 You requested a build with a $vanilla_opt kernel.
 
