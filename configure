@@ -1002,11 +1002,13 @@ fi
 
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
+  make-kpkg --rootcmd fakeroot clean
   if [ "x$test_opt" = "xno" ]; then
     export CONCURRENCY_LEVEL=2
+    make-kpkg --rootcmd fakeroot --initrd kernel_image kernel_headers
+  else
+    make-kpkg --rootcmd fakeroot --initrd kernel_image kernel_headers > ../build.log
   fi
-  make-kpkg --rootcmd fakeroot clean
-  make-kpkg --rootcmd fakeroot --initrd kernel_image kernel_headers
   if ! [ "$?" -eq "0" ]; then
     echo "
 Error(s) while compiling the kernel
