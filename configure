@@ -435,6 +435,7 @@ dvbdev.c is patched.
         patch -p0 < ../Kconfig-3.10.patch
       else
         patch -p0 < ../Kconfig.patch
+      fi
     else
       patch -p0 < ../Kconfig.patch
     fi
