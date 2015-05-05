@@ -231,6 +231,23 @@ Aborting...
   exit 0
 fi
 
+if [ "x$v4l_opt" = "xyes" ]; then
+  FIRST_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | head -n1)
+  SECOND_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | awk 'NR==2')
+  if [ "$FIRST_DIGIT" -lt "5" ]; then
+    if [ "$SECOND_DIGIT" -lt "10" ]; then
+      echo "
+Your running kernel is < 3.10.x
+
+Minimum supported version is 3.10.x
+
+Aborting...
+"
+      exit 0
+    fi
+  fi
+fi
+
 if ! [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
   if [ "x$stock_opt" = "xyes" ]; then
     echo "
