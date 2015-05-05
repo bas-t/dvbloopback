@@ -309,7 +309,7 @@ if [ "x$stock_opt" = "xyes" ]; then
   FIRST_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
   SECOND_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
   if [ "$FIRST_DIGIT" -lt "4" ]; then
-    if [ "$SECOND_DIGIT" -lt "16" ]; then
+    if [ "$SECOND_DIGIT" != "16" ]; then
       if [ "x$personal_opt" = "xyes" ]; then
         echo "
 Building saa716x intree is not supported for your kernel version.
@@ -489,7 +489,9 @@ uapi patch applied for saa716x.
         patch -p0 < ../cx23885-3.10.patch
       fi
     #else
+    #  gapped clock patch
     #  patch -p0 < ../cx23885-4.0.patch
+    #fi
       if [ "x$test_opt" = "xyes" ]; then
         echo "
 cx23885 patch applied.
@@ -536,7 +538,7 @@ if [ "x$v4l_opt" = "xyes" ]; then
   patch -p0 < ../dvbloopback.patch
   if [ "x$test_opt" = "xyes" ]; then
     echo "
-dvbloopback patch applied.
+dvbloopback module added to source tree.
 "
     confirmyes
     if [ "$?" != "0" ]; then
@@ -546,7 +548,7 @@ dvbloopback patch applied.
   patch -p0 < ../3.13-dvb-core.patch
   if [ "x$test_opt" = "xyes" ]; then
     echo "
-dvbdev.c patch applied.
+dvb-core is patched.
 "
     confirmyes
     if [ "$?" != "0" ]; then
@@ -561,7 +563,7 @@ dvbdev.c patch applied.
     patch -p0 < ../Kconfig.patch
     if [ "x$test_opt" = "xyes" ]; then
     echo "
-Kconfig patch applied.
+Kconfig patch for saa716x applied.
 "
       confirmyes
       if [ "$?" != "0" ]; then
@@ -571,7 +573,7 @@ Kconfig patch applied.
     patch -p0 < ../Makefile.patch
     if [ "x$test_opt" = "xyes" ]; then
     echo "
-Makefile patch applied.
+Makefile patch for saa716x applied.
 "
       confirmyes
       if [ "$?" != "0" ]; then
@@ -993,7 +995,6 @@ v4l source compiled.
     if [ "$?" != "0" ]; then
       exit 0
     fi
-    cd ..
   fi
 fi
 
@@ -1069,6 +1070,7 @@ v4l source is compiled. Install it? [N/y]
       depmod -a
     fi
     make install
+    cd ..
   fi
 fi
 
