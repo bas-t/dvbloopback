@@ -68,6 +68,9 @@ show_help(){
   echo "                        against your running kernel"
   echo "                        Disables --stock= and --vanilla="
   echo "                        "
+  echo " --next=<opt>           [no] 4.1 : compile linux-next(4.1 version),"
+  echo "                        disable --v4l, --vanilla and --stock"
+  echo "                        "
   echo " --adapters=<opt>       [16] Set max number of adapters that are allowed,"
   echo "                        twice the number of physical adapters is needed."
   echo "                        "
@@ -82,6 +85,7 @@ show_help(){
 stock_opt="yes"
 vanilla_opt=""
 v4l_opt="no"
+next_opt="no"
 adapters_opt="16"
 update_opt="yes"
 abi_opt="900"
@@ -98,6 +102,8 @@ for opt do
   --vanilla=*) stock_opt="no"; v4l_opt="no"; vanilla_opt="$optval"
   ;;
   --v4l=*) stock_opt="no"; vanilla_opt=""; v4l_opt="$optval"
+  ;;
+  --next=*) stock_opt="no"; v4l_opt="no"; next_opt="$optval"; vanilla_opt="$next_opt"
   ;;
   --adapters=*) adapters_opt="$optval"
   ;;
@@ -369,7 +375,7 @@ Source is downloaded.
 fi
 
 # Vanilla
-if [ "x$vanilla_opt" != "x" ];then
+if [ "x$vanilla_opt" != "x" ]; then
   MAJOR=$(echo "$vanilla_opt" | cut -d'.' -f1)
   VERSION=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
   if [ "$MAJOR" -lt "4" ]; then
@@ -399,13 +405,31 @@ Aborting...
       fi
     fi
   fi
-  if echo "$vanilla_opt" | grep "rc" > /dev/null 2>&1; then
-    wget https://www.kernel.org/pub/linux/kernel/v$MAJOR.x/testing/linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
-  else
-    wget https://www.kernel.org/pub/linux/kernel/v$MAJOR.x/linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
+  if [ "x$next_opt" = "xno" ]; then
+    if echo "$vanilla_opt" | grep "rc" > /dev/null 2>&1; then
+      wget https://www.kernel.org/pub/linux/kernel/v$MAJOR.x/testing/linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
+    else
+      wget https://www.kernel.org/pub/linux/kernel/v$MAJOR.x/linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
+    fi
+    tar -xJf linux-$vanilla_opt.tar.xz
+    cd linux-$vanilla_opt
+    make clean && make mrproper
+    if [ "x$test_opt" = "xyes" ]; then
+      echo "
+Source is downloaded.
+"
+      confirmyes
+      if [ "$?" != "0" ]; then
+        exit 0
+      fi
+    fi
   fi
-  tar -xJf linux-$vanilla_opt.tar.xz
-  cd linux-$vanilla_opt
+fi
+
+# linux-next
+if [ "x$next_opt" != "x" ]; then
+  git clone --depth=1 git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git ./linux-$next_opt || die "Error(s) while fetching Linux source"
+  cd linux-$next_opt
   make clean && make mrproper
   if [ "x$test_opt" = "xyes" ]; then
     echo "
@@ -437,6 +461,8 @@ if [ "x$v4l_opt" = "xno" ]; then
     else
       patch -p0 < ../3.13-dvb-core.patch
     fi
+  else
+    patch -p0 < ../3.13-dvb-core.patch
   fi
   if [ "x$test_opt" = "xyes" ]; then
     echo "
@@ -470,10 +496,14 @@ saa716x added, Kconfig patched for saa716x.
         exit 0
       fi
     fi
-    if [ "$SECOND_DIGIT" = "16" ]; then
-      patch -p0 < ../Makefile-3.16.patch
-    elif [ "$SECOND_DIGIT" = "10" ]; then
-      patch -p0 < ../Makefile-3.10.patch
+    if [ "$FIRST_DIGIT" -lt "4" ];then
+      if [ "$SECOND_DIGIT" = "16" ]; then
+        patch -p0 < ../Makefile-3.16.patch
+      elif [ "$SECOND_DIGIT" = "10" ]; then
+        patch -p0 < ../Makefile-3.10.patch
+      else
+        patch -p0 < ../Makefile.patch
+      fi
     else
       patch -p0 < ../Makefile.patch
     fi
@@ -921,7 +951,7 @@ If you hit 'n', 'make oldconfig' starts.
   else
     make oldconfig
   fi
-  ADAPTERS=$( cat .config | grep "CONFIG_DVB_MAX_ADAPTERS" | grep -o '[[:digit:]]\+' )
+  ADAPTERS=$(cat .config | grep "CONFIG_DVB_MAX_ADAPTERS" | grep -o '[[:digit:]]\+')
   if ! [ "$ADAPTERS" = "$adapters_opt" ]; then
     sed -i "s/CONFIG_DVB_MAX_ADAPTERS=$ADAPTERS/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" .config
   fi
@@ -1027,9 +1057,17 @@ if [ "x$vanilla_opt" != "x" ]; then
   make-kpkg --rootcmd fakeroot clean
   if [ "x$test_opt" = "xno" ]; then
     export CONCURRENCY_LEVEL=2
-    make-kpkg --rootcmd fakeroot --initrd kernel_image kernel_headers
+    if [ "x$next_opt" = "xno" ]; then
+      make-kpkg --rootcmd fakeroot --initrd kernel_image kernel_headers
+    else
+      make-kpkg --rootcmd fakeroot --initrd kernel_image
+    fi
   else
-    make-kpkg --rootcmd fakeroot --initrd kernel_image kernel_headers > ../build.log
+    if [ "x$next_opt" = "xno" ]; then
+      make-kpkg --rootcmd fakeroot --initrd kernel_image kernel_headers > ../build.log
+    else
+      make-kpkg --rootcmd fakeroot --initrd kernel_image > ../build.log
+    fi
   fi
   if ! [ "$?" -eq "0" ]; then
     echo "
