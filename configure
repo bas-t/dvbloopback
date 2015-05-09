@@ -1141,23 +1141,25 @@ fi
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
   dpkg -i *.deb
-  if echo $vanilla_opt | grep "rc" > /dev/null 2>&1; then
-    BUILDLINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/-rc/.0-rc/')build"
-    SOURCELINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/-rc/.0-rc/')source"
-    HEADERSDIR="/usr/src/$(ls -d1 */ | grep "linux" | sed 's/linux-/linux-headers-/' | sed 's/-r/.0-r/' | sed 's/\///')"
-  elif echo $vanilla_opt | grep -o '[[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+' > /dev/null 2>&1; then
-    BUILDLINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//')build"
-    SOURCELINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//')source"
-    HEADERSDIR="/usr/src/$(ls -d1 */ | grep "linux" | sed 's/linux-/linux-headers-/' | sed 's/\///')"
-  else
-    BUILDLINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/\//.0\//')build"
-    SOURCELINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/\//.0\//')source"
-    HEADERSDIR="/usr/src/$(ls -d1 */ | grep "linux" | sed 's/linux-/linux-headers-/' | sed 's/\//.0/')"
+  if [ "x$next_opt" = "xno" ]; then
+    if echo $vanilla_opt | grep "rc" > /dev/null 2>&1; then
+      BUILDLINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/-rc/.0-rc/')build"
+      SOURCELINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/-rc/.0-rc/')source"
+      HEADERSDIR="/usr/src/$(ls -d1 */ | grep "linux" | sed 's/linux-/linux-headers-/' | sed 's/-r/.0-r/' | sed 's/\///')"
+    elif echo $vanilla_opt | grep -o '[[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+' > /dev/null 2>&1; then
+      BUILDLINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//')build"
+      SOURCELINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//')source"
+      HEADERSDIR="/usr/src/$(ls -d1 */ | grep "linux" | sed 's/linux-/linux-headers-/' | sed 's/\///')"
+    else
+      BUILDLINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/\//.0\//')build"
+      SOURCELINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/\//.0\//')source"
+      HEADERSDIR="/usr/src/$(ls -d1 */ | grep "linux" | sed 's/linux-/linux-headers-/' | sed 's/\//.0/')"
+    fi
+    rm -f $BUILDLINK
+    rm -f $SOURCELINK
+    ln -s $HEADERSDIR $SOURCELINK
+    ln -s $HEADERSDIR $BUILDLINK
   fi
-  rm -f $BUILDLINK
-  rm -f $SOURCELINK
-  ln -s $HEADERSDIR $SOURCELINK
-  ln -s $HEADERSDIR $BUILDLINK
 fi
 
 if [ "x$personal_opt" = "xyes" ]; then
