@@ -427,7 +427,7 @@ Source is downloaded.
 fi
 
 # linux-next
-if [ "x$next_opt" != "x" ]; then
+if ! [ "x$next_opt" = "xno" ]; then
   git clone --depth=1 git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git ./linux-$next_opt || die "Error(s) while fetching Linux source"
   cd linux-$next_opt
   make clean && make mrproper
