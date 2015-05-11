@@ -691,43 +691,85 @@ if [ "x$stock_opt" = "xyes" ]; then
   if [ "$OS" = "Debian" ]; then
     if [ "$abi_opt" = "900" ]; then
       DEBIANKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
-      RUNNING=$(uname -r | grep "90[0-9]-amd64")
-      if [ -d /lib/modules/$DEBIANKERNEL.0-900-amd64 ]; then
-        if ! [ -d /lib/modules/$DEBIANKERNEL.0-901-amd64 ]; then
-          abi_opt="901"
-        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-902-amd64 ]; then
-          abi_opt="902"
-        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-903-amd64 ]; then
-          abi_opt="903"
-        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-904-amd64 ]; then
-          abi_opt="904"
-        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-905-amd64 ]; then
-          abi_opt="905"
-        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-906-amd64 ]; then
-          abi_opt="906"
-        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-907-amd64 ]; then
-          abi_opt="907"
-        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-908-amd64 ]; then
-          abi_opt="908"
-        elif ! [ -d /lib/modules/$DEBIANKERNEL.0-909-amd64 ]; then
-          abi_opt="909"
-        else
-          if [ "$RUNNING" = "" ]; then
-            echo "
+      if [ "$CONFIG" = "amd64" ]; then
+        RUNNING=$(uname -r | grep "90[0-9]-amd64")
+        if [ -d /lib/modules/$DEBIANKERNEL.0-900-amd64 ]; then
+          if ! [ -d /lib/modules/$DEBIANKERNEL.0-901-amd64 ]; then
+            abi_opt="901"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-902-amd64 ]; then
+            abi_opt="902"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-903-amd64 ]; then
+            abi_opt="903"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-904-amd64 ]; then
+            abi_opt="904"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-905-amd64 ]; then
+            abi_opt="905"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-906-amd64 ]; then
+            abi_opt="906"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-907-amd64 ]; then
+            abi_opt="907"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-908-amd64 ]; then
+            abi_opt="908"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-909-amd64 ]; then
+            abi_opt="909"
+          else
+            if [ "$RUNNING" = "" ]; then
+              echo "
 
 You have a total of 10 \"$DEBIANKERNEL.0-90x-amd64\" kernels installed.
 Not going to install any more of those, aborting...
 "
-            exit 0
-          else
-            echo  "
+              exit 0
+            else
+              echo  "
 
 You have a total of 10 \"$DEBIANKERNEL.0-90x-amd64\" kernels installed.
 You are currently running the $RUNNING version of those.
 Not going to install any more of those, aborting...
 "
-            exit 0
-          fi 
+              exit 0
+            fi 
+          fi
+        fi
+      else
+        RUNNING=$(uname -r | grep "90[0-9]-686-pae")
+        if [ -d /lib/modules/$DEBIANKERNEL.0-900-686-pae ]; then
+          if ! [ -d /lib/modules/$DEBIANKERNEL.0-901-686-pae ]; then
+            abi_opt="901"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-902-686-pae ]; then
+            abi_opt="902"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-903-686-pae ]; then
+            abi_opt="903"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-904-686-pae ]; then
+            abi_opt="904"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-905-686-pae ]; then
+            abi_opt="905"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-906-686-pae ]; then
+            abi_opt="906"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-907-686-pae ]; then
+            abi_opt="907"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-908-686-pae ]; then
+            abi_opt="908"
+          elif ! [ -d /lib/modules/$DEBIANKERNEL.0-909-686-pae ]; then
+            abi_opt="909"
+          else
+            if [ "$RUNNING" = "" ]; then
+              echo "
+
+You have a total of 10 \"$DEBIANKERNEL.0-90x-686-pae\" kernels installed.
+Not going to install any more of those, aborting...
+"
+              exit 0
+            else
+              echo  "
+
+You have a total of 10 \"$DEBIANKERNEL.0-90x-686-pae\" kernels installed.
+You are currently running the $RUNNING version of those.
+Not going to install any more of those, aborting...
+"
+              exit 0
+            fi 
+          fi
         fi
       fi
     fi
@@ -1098,7 +1140,11 @@ if [ "x$stock_opt" = "xyes" ]; then
   dpkg -i *.deb
   apt-get -f install
   if [ "$OS" = "Debian" ]; then
-    echo "
+    dpkg -i *.deb
+    apt-get -f install -y
+    if [ "$CONFIG" = "amd64" ]; then
+      echo "
+
 Installed:
 
 linux-image-$DEBIANKERNEL.0-$abi_opt-amd64
@@ -1108,6 +1154,19 @@ linux-headers-$DEBIANKERNEL.0-$abi_opt-common
 All done, you should reboot NOW!
 
 "
+    else
+      echo "
+
+Installed:
+
+linux-image-$DEBIANKERNEL.0-$abi_opt-686-pae
+linux-headers-$DEBIANKERNEL.0-$abi_opt-686-pae
+linux-headers-$DEBIANKERNEL.0-$abi_opt-common
+
+All done, you should reboot NOW!
+
+"
+    fi
   elif [ "$OS" = "Ubuntu" ]; then
    echo "
 Installed:
