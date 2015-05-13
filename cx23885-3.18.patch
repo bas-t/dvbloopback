@@ -1,5 +1,5 @@
---- drivers/media/pci/cx23885/cx23885-cards.c	2015-04-20 21:48:02.000000000 +0200
-+++ drivers/media/pci/cx23885/cx23885-cards.c	2015-04-24 19:56:42.286439344 +0200
+--- drivers/media/pci/cx23885/cx23885-cards.c	2015-05-05 18:39:05.000000000 +0200
++++ drivers/media/pci/cx23885/cx23885-cards.c	2015-05-13 07:44:20.489691512 +0200
 @@ -626,6 +626,11 @@
  		.name		= "Hauppauge WinTV Starburst",
  		.portb		= CX23885_MPEG_DVB,
@@ -85,8 +85,8 @@
  	case CX23885_BOARD_DVBSKY_T9580:
  		dev->sd_cx25840 = v4l2_i2c_new_subdev(&dev->v4l2_dev,
  				&dev->i2c_bus[2].i2c_adap,
---- drivers/media/pci/cx23885/cx23885-dvb.c	2015-04-20 21:48:02.000000000 +0200
-+++ drivers/media/pci/cx23885/cx23885-dvb.c	2015-04-24 19:58:18.292616693 +0200
+--- drivers/media/pci/cx23885/cx23885-dvb.c	2015-05-05 18:39:05.000000000 +0200
++++ drivers/media/pci/cx23885/cx23885-dvb.c	2015-05-13 07:46:07.579676124 +0200
 @@ -1651,6 +1651,7 @@
  			si2168_config.i2c_adapter = &adapter;
  			si2168_config.fe = &fe0->dvb.frontend;
@@ -95,7 +95,15 @@
  			memset(&info, 0, sizeof(struct i2c_board_info));
  			strlcpy(info.type, "si2168", I2C_NAME_SIZE);
  			info.addr = 0x64;
-@@ -1691,6 +1692,66 @@
+@@ -1669,6 +1670,7 @@
+ 			/* attach tuner */
+ 			memset(&si2157_config, 0, sizeof(si2157_config));
+ 			si2157_config.fe = fe0->dvb.frontend;
++			si2157_config.if_port = 1;
+ 			memset(&info, 0, sizeof(struct i2c_board_info));
+ 			strlcpy(info.type, "si2157", I2C_NAME_SIZE);
+ 			info.addr = 0x60;
+@@ -1691,6 +1693,67 @@
  			break;
  		}
  		break;
@@ -137,6 +145,7 @@
 +		/* attach tuner */
 +		memset(&si2157_config, 0, sizeof(si2157_config));
 +		si2157_config.fe = fe0->dvb.frontend;
++		si2157_config.if_port = 1;
 +		memset(&info, 0, sizeof(struct i2c_board_info));
 +		strlcpy(info.type, "si2157", I2C_NAME_SIZE);
 +		info.addr = 0x60;
@@ -162,7 +171,7 @@
  	default:
  		printk(KERN_INFO "%s: The frontend of your DVB/ATSC card "
  			" isn't supported yet\n",
-@@ -1781,6 +1842,23 @@
+@@ -1781,6 +1844,23 @@
  			(port->nr-1) * 8, 6);
  		break;
  		}
@@ -186,8 +195,8 @@
  	}
  
  	return ret;
---- drivers/media/pci/cx23885/cx23885.h	2015-04-20 21:48:02.000000000 +0200
-+++ drivers/media/pci/cx23885/cx23885.h	2015-04-24 19:56:42.286439344 +0200
+--- drivers/media/pci/cx23885/cx23885.h	2015-05-05 18:39:05.000000000 +0200
++++ drivers/media/pci/cx23885/cx23885.h	2015-05-13 07:44:20.493691437 +0200
 @@ -94,6 +94,7 @@
  #define CX23885_BOARD_DVICO_FUSIONHDTV_DVB_T_DUAL_EXP2 44
  #define CX23885_BOARD_DVBSKY_T9580             45
@@ -196,8 +205,8 @@
  
  #define GPIO_0 0x00000001
  #define GPIO_1 0x00000002
---- drivers/media/pci/cx23885/cx23885-input.c	2015-04-20 21:48:02.000000000 +0200
-+++ drivers/media/pci/cx23885/cx23885-input.c	2015-04-24 19:56:42.290439268 +0200
+--- drivers/media/pci/cx23885/cx23885-input.c	2015-05-05 18:39:05.000000000 +0200
++++ drivers/media/pci/cx23885/cx23885-input.c	2015-05-13 07:44:20.493691437 +0200
 @@ -87,6 +87,7 @@
  	case CX23885_BOARD_MYGICA_X8507:
  	case CX23885_BOARD_TBS_6980:

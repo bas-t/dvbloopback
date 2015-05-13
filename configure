@@ -531,9 +531,7 @@ uapi patch applied for saa716x.
   # cx23885 patch
   if [ "x$personal_opt" = "xyes" ];then
     if [ "$FIRST_DIGIT" -lt "4" ]; then
-      if [ "$SECOND_DIGIT" = "19" ]; then
-        patch -p0 < ../cx23885-3.19.patch
-      elif [ "$SECOND_DIGIT" = "18" ]; then
+      if [ "$SECOND_DIGIT" = "18" ]; then
         patch -p0 < ../cx23885-3.18.patch
       elif [ "$SECOND_DIGIT" = "16" ]; then
         patch -p0 < ../cx23885-3.16.patch
@@ -638,9 +636,6 @@ Makefile patch for saa716x applied.
 
     # silabs si2168 DVC-C patch
     sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
-
-    # cx23885 gapped clock patch
-    #patch -p0 < ../cx23885-4.0.patch
   fi
 
   # commit patches
@@ -895,26 +890,7 @@ Going to configure your vanilla kernel.
 
 "
   if [ "$MAJOR" -lt "4" ]; then
-    if [ "$VERSION" = "19" ]; then
-      echo -en "
-Choise: use supplied config file or
-do 'make oldconfig'. Do you want to
-use supplied kernel config?
-If you hit 'n', 'make oldconfig' starts.
-
-"
-      confirmyes "Yes, use it. [Y/n]"
-
-      if [ "$?" -eq 0 ]; then
-        if [ "$OS" = "Debian" ]; then
-          cp -f ../kernelconfig/$CONFIG/3.19/config ./.config
-        elif [ "$OS" = "Ubuntu" ]; then
-          cp -f ../kernelconfig/$CONFIG/3.19/config-ubuntu ./.config
-        fi
-      else
-        make oldconfig
-      fi
-    elif [ "$VERSION" = "18" ]; then
+    if [ "$VERSION" = "18" ]; then
       echo -en "
 Choise: use supplied config file or
 do 'make oldconfig'. Do you want to

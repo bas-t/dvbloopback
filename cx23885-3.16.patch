@@ -1,5 +1,5 @@
---- drivers/media/pci/cx23885/cx23885-cards.c	2015-02-11 09:24:50.000000000 +0100
-+++ drivers/media/pci/cx23885/cx23885-cards.c	2015-02-11 09:28:20.632441204 +0100
+--- drivers/media/pci/cx23885/cx23885-cards.c	2015-05-13 07:31:30.000000000 +0200
++++ drivers/media/pci/cx23885/cx23885-cards.c	2015-05-13 07:32:59.262547114 +0200
 @@ -621,6 +621,11 @@
  		.name		= "Hauppauge WinTV-HVR4400",
  		.portb		= CX23885_MPEG_DVB,
@@ -85,8 +85,8 @@
  		dev->sd_cx25840 = v4l2_i2c_new_subdev(&dev->v4l2_dev,
  				&dev->i2c_bus[2].i2c_adap,
  				"cx25840", 0x88 >> 1, NULL);
---- drivers/media/pci/cx23885/cx23885-dvb.c	2015-01-15 23:38:33.000000000 +0100
-+++ drivers/media/pci/cx23885/cx23885-dvb.c	2015-02-11 09:28:20.636441146 +0100
+--- drivers/media/pci/cx23885/cx23885-dvb.c	2015-03-30 12:09:09.000000000 +0200
++++ drivers/media/pci/cx23885/cx23885-dvb.c	2015-05-13 07:34:35.764727598 +0200
 @@ -71,6 +71,8 @@
  #include "tda10071.h"
  #include "a8293.h"
@@ -108,7 +108,7 @@
  	int mfe_shared = 0; /* bus not shared by default */
  	int ret;
  
-@@ -1340,6 +1347,66 @@
+@@ -1340,6 +1347,67 @@
  				   &hauppauge_a8293_config);
  		}
  		break;
@@ -150,6 +150,7 @@
 +		/* attach tuner */
 +		memset(&si2157_config, 0, sizeof(si2157_config));
 +		si2157_config.fe = fe0->dvb.frontend;
++		si2157_config.if_port = 1;
 +		memset(&info, 0, sizeof(struct i2c_board_info));
 +		strlcpy(info.type, "si2157", I2C_NAME_SIZE);
 +		info.addr = 0x60;
@@ -175,7 +176,7 @@
  	default:
  		printk(KERN_INFO "%s: The frontend of your DVB/ATSC card "
  			" isn't supported yet\n",
-@@ -1414,6 +1481,23 @@
+@@ -1414,6 +1482,23 @@
  		memcpy(port->frontends.adapter.proposed_mac, eeprom + 0xa0, 6);
  		break;
  		}
@@ -199,8 +200,8 @@
  	}
  
  	return ret;
---- drivers/media/pci/cx23885/cx23885.h	2015-01-15 23:38:33.000000000 +0100
-+++ drivers/media/pci/cx23885/cx23885.h	2015-02-11 09:28:20.636441146 +0100
+--- drivers/media/pci/cx23885/cx23885.h	2015-03-30 12:09:09.000000000 +0200
++++ drivers/media/pci/cx23885/cx23885.h	2015-05-13 07:32:59.266547039 +0200
 @@ -96,6 +96,7 @@
  #define CX23885_BOARD_TBS_6981                 40
  #define CX23885_BOARD_TBS_6980                 41
@@ -218,8 +219,8 @@
  	int (*set_frontend)(struct dvb_frontend *fe);
  };
  
---- drivers/media/pci/cx23885/cx23885-input.c	2015-01-15 23:38:33.000000000 +0100
-+++ drivers/media/pci/cx23885/cx23885-input.c	2015-02-11 09:28:20.636441146 +0100
+--- drivers/media/pci/cx23885/cx23885-input.c	2015-03-30 12:09:09.000000000 +0200
++++ drivers/media/pci/cx23885/cx23885-input.c	2015-05-13 07:32:59.266547039 +0200
 @@ -92,6 +92,7 @@
  	case CX23885_BOARD_MYGICA_X8507:
  	case CX23885_BOARD_TBS_6980:
@@ -249,8 +250,8 @@
  	default:
  		return -ENODEV;
  	}
---- drivers/media/rc/keymaps/Makefile	2015-01-15 23:38:33.000000000 +0100
-+++ drivers/media/rc/keymaps/Makefile	2015-02-11 09:37:04.101317568 +0100
+--- drivers/media/rc/keymaps/Makefile	2015-03-30 12:09:09.000000000 +0200
++++ drivers/media/rc/keymaps/Makefile	2015-05-13 07:32:59.270546963 +0200
 @@ -28,6 +28,7 @@
  			rc-dm1105-nec.o \
  			rc-dntv-live-dvb-t.o \
@@ -260,7 +261,7 @@
  			rc-encore-enltv2.o \
  			rc-encore-enltv.o \
 --- drivers/media/rc/keymaps/rc-dvbsky.c	1970-01-01 01:00:00.000000000 +0100
-+++ drivers/media/rc/keymaps/rc-dvbsky.c	2015-02-05 13:55:59.146447000 +0100
++++ drivers/media/rc/keymaps/rc-dvbsky.c	2015-05-13 07:32:59.270546963 +0200
 @@ -0,0 +1,78 @@
 +/* rc-dvbsky.c - Keytable for DVBSky Remote Controllers
 + *
