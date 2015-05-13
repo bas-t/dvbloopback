@@ -119,13 +119,13 @@
 +		case 1:
 +			i2c_bus = &dev->i2c_bus[1];
 +			si2168_config.ts_mode = SI2168_TS_PARALLEL;
-+			//si2168_config.ts_clock_gapped = true;
++			si2168_config.ts_clock_gapped = true;
 +			break;
 +		/* port c */
 +		case 2:
 +			i2c_bus = &dev->i2c_bus[0];
 +			si2168_config.ts_mode = SI2168_TS_SERIAL;
-+			//si2168_config.ts_clock_gapped = true;
++			si2168_config.ts_clock_gapped = true;
 +			break;
 +		}
 +
