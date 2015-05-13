@@ -558,8 +558,13 @@ cx23885 patch applied.
   if [ "x$personal_opt" = "xyes" ];then
     # silabs si2157 si2168 patch
     if [ "$FIRST_DIGIT" -lt "4" ]; then
+      cp -f ../drivers/media/tuners/* drivers/media/tuners/
+      cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
+    elif [ "$FIRST_DIGIT" -eq "4" ]; then
+      if [ "$SECOND_DIGIT" -lt "2" ]; then
         cp -f ../drivers/media/tuners/* drivers/media/tuners/
         cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
+      fi
     fi
 
     # silabs si2168 DVB-C patch
@@ -573,11 +578,6 @@ silabs si2168 and si2157 patch applied, si2168 is set to DVB-C.
         exit 0
       fi
     fi
-
-    # If linux source >= 4.2 patch saa716x with IF patch
-    #if [ "$FIRST_DIGIT" -eq "4" ] && [ "$SECOND_DIGIT" -gt "1" ]; then
-    #  patch -p0 < ../saa716x_IF.patch
-    #fi
   fi
 fi
 
