@@ -64,12 +64,13 @@ show_help(){
   echo "                        want to compile. Like --vanilla=3.18.12"
   echo "                        This disables --stock option"
   echo "                        "
-  echo " --v4l=<opt>            [no] yes: compile current v4l tree"
+  echo " --v4l=<opt>            [no] yes: compile current official v4l tree"
   echo "                        against your running kernel"
+  echo "                        tbs: compile Luis Alves' TBS driver repo"
   echo "                        Disables --stock= and --vanilla="
   echo "                        "
   echo " --next=<opt>           [no] 4.1 : compile linux-next(4.1 version),"
-  echo "                        disable --v4l, --vanilla and --stock"
+  echo "                        disables --v4l, --vanilla and --stock"
   echo "                        "
   echo " --adapters=<opt>       [16] Set max number of adapters that are allowed,"
   echo "                        twice the number of physical adapters is needed."
@@ -244,7 +245,7 @@ if [ -f /usr/bin/lsb_release ]; then
 fi
 
 # Check for a supported kernelversion
-if [ "x$v4l_opt" = "xyes" ]; then
+if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" ]; then
   FIRST_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | head -n1)
   SECOND_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | awk 'NR==2')
   if [ "$FIRST_DIGIT" -lt "4" ]; then
@@ -363,6 +364,9 @@ fi
 if [ "x$v4l_opt" = "xyes" ];then
   git clone git://linuxtv.org/media_build.git || die "Error(s) while fetching v4l build system"
   git clone --depth=1 git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
+elif [ "x$v4l_opt" = "xtbs" ]; then
+  git clone git://github.com/ljalves/media_build.git || die "Error(s) while fetching v4l build system"
+  git clone --depth=1 git://github.com/ljalves/linux_media.git -b latest ./media_tree || die "Error(s) while fetching v4l source tree"
   if [ "x$test_opt" = "xyes" ]; then
     echo "
 Source is downloaded.
@@ -582,7 +586,7 @@ silabs si2168 and si2157 patch applied, si2168 is set to DVB-C.
 fi
 
 # v4l
-if [ "x$v4l_opt" = "xyes" ]; then
+if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" ]; then
   cd media_tree
 
   # dvbloopback patch
@@ -611,26 +615,28 @@ dvb-core is patched.
 
   if [ "x$personal_opt" = "xyes" ];then
     # saa716x patch
-    mkdir drivers/media/pci/saa716x
-    cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
-    patch -p0 < ../Kconfig.patch
-    if [ "x$test_opt" = "xyes" ]; then
-    echo "
+    if [ "x$v4l_opt" = "xyes" ]; then
+      mkdir drivers/media/pci/saa716x
+      cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
+      patch -p0 < ../Kconfig.patch
+      if [ "x$test_opt" = "xyes" ]; then
+      echo "
 saa716x addad, Kconfig patch for saa716x applied.
 "
-      confirmyes
-      if [ "$?" != "0" ]; then
-        exit 0
+        confirmyes
+        if [ "$?" != "0" ]; then
+          exit 0
+        fi
       fi
-    fi
-    patch -p0 < ../Makefile.patch
-    if [ "x$test_opt" = "xyes" ]; then
-    echo "
+      patch -p0 < ../Makefile.patch
+      if [ "x$test_opt" = "xyes" ]; then
+      echo "
 Makefile patch for saa716x applied.
 "
-      confirmyes
-      if [ "$?" != "0" ]; then
-        exit 0
+        confirmyes
+        if [ "$?" != "0" ]; then
+          exit 0
+        fi
       fi
     fi
 
@@ -866,7 +872,7 @@ Kernel configured.
 fi
 
 # v4l
-if [ "x$v4l_opt" = "xyes" ]; then
+if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" ]; then
   make dir DIR=../media_tree
   make distclean
   make allyesconfig
@@ -1046,7 +1052,7 @@ Kernel compiled.
 fi
 
 # v4l
-if [ "x$v4l_opt" = "xyes" ]; then
+if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" ]; then
   make
   if ! [ "$?" -eq "0" ]; then
     echo "
@@ -1160,7 +1166,7 @@ All done, you should reboot NOW!
 fi
 
 # v4l
-if [ "x$v4l_opt" = "xyes" ]; then
+if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" ]; then
   confirmno "
 v4l source is compiled. Install it? [N/y]
 "
