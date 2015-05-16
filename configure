@@ -520,16 +520,6 @@ Makefile is patched for saa716x.
         exit 0
       fi
     fi
-    patch -p0 < ../uapi.patch
-    if [ "x$test_opt" = "xyes" ]; then
-      echo "
-uapi patch applied for saa716x.
-"
-      confirmyes
-      if [ "$?" != "0" ]; then
-        exit 0
-      fi
-    fi
   fi
 
   # cx23885 patch
