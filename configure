@@ -1118,10 +1118,8 @@ fi
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
   dpkg -i *.deb
-  apt-get -f install
+  apt-get -f install -y
   if [ "$OS" = "Debian" ]; then
-    dpkg -i *.deb
-    apt-get -f install -y
     if [ "$CONFIG" = "amd64" ]; then
       echo "
 
