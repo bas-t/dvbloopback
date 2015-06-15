@@ -1201,11 +1201,22 @@ fi
 
 if [ "x$personal_opt" = "xyes" ]; then
   # Install the firmware
-  if [ ! -d /lib/firmware ]; then
-    mkdir /lib/firmware
+  if [ "x$test_opt" = "xyes" ]; then
+    confirmno "
+Do you want to install firmware? [N/y]
+"
+    if [ "$?" = "0" ]; then   
+      if [ ! -d /lib/firmware ]; then
+        mkdir /lib/firmware
+      fi
+      cp -f firmware/* /lib/firmware/
+    fi
+  else
+    if [ ! -d /lib/firmware ]; then
+      mkdir /lib/firmware
+    fi
+    cp -f firmware/* /lib/firmware/
   fi
-  cp -f firmware/* /lib/firmware/
-
   # Set msi mode for saa716x budget driver
   echo "options saa716x_budget int_type=1" > /etc/modprobe.d/tbs_opensource.conf
 fi
