@@ -64,6 +64,8 @@ show_help(){
   echo "                        want to compile. Like --vanilla=3.18.12"
   echo "                        This disables --stock option"
   echo "                        "
+  echo " --headers=<opt>        [no] yes: install kernel headers package(s)"
+  echo "                        "
   echo " --v4l=<opt>            [no] yes: compile current official v4l tree"
   echo "                        against your running kernel"
   echo "                        tbs: compile Luis Alves' TBS driver repo"
@@ -85,6 +87,7 @@ show_help(){
 
 stock_opt="yes"
 vanilla_opt=""
+headers_opt="no"
 v4l_opt="no"
 next_opt="no"
 adapters_opt="16"
@@ -101,6 +104,8 @@ for opt do
   --stock=*) stock_opt="$optval"
   ;;
   --vanilla=*) stock_opt="no"; v4l_opt="no"; vanilla_opt="$optval"
+  ;;
+  --headers=*) headers_opt="$optval"
   ;;
   --v4l=*) stock_opt="no"; vanilla_opt=""; v4l_opt="$optval"
   ;;
@@ -1117,18 +1122,24 @@ fi
 
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
-  dpkg -i *.deb
-  apt-get -f install -y
+  if [ "x$headers_opt" = "xyes" ]; then
+    dpkg -i *.deb
+    apt-get -f install -y
+  else
+    dpkg -i linux-image-*
+  fi
   if [ "$OS" = "Debian" ]; then
     if [ "$CONFIG" = "amd64" ]; then
       echo "
 
 Installed:
 
-linux-image-$DEBIANKERNEL.0-$abi_opt-amd64
-linux-headers-$DEBIANKERNEL.0-$abi_opt-amd64
-linux-headers-$DEBIANKERNEL.0-$abi_opt-common
-
+linux-image-$DEBIANKERNEL.0-$abi_opt-amd64"
+      if [ "x$headers_opt" = "xyes" ]; then
+        echo "linux-headers-$DEBIANKERNEL.0-$abi_opt-amd64
+linux-headers-$DEBIANKERNEL.0-$abi_opt-common"
+      fi
+      echo "
 All done, you should reboot NOW!
 
 "
@@ -1137,23 +1148,27 @@ All done, you should reboot NOW!
 
 Installed:
 
-linux-image-$DEBIANKERNEL.0-$abi_opt-686-pae
-linux-headers-$DEBIANKERNEL.0-$abi_opt-686-pae
-linux-headers-$DEBIANKERNEL.0-$abi_opt-common
-
+linux-image-$DEBIANKERNEL.0-$abi_opt-686-pae"
+      if [ "x$headers_opt" = "xyes" ]; then
+        echo "linux-headers-$DEBIANKERNEL.0-$abi_opt-686-pae
+linux-headers-$DEBIANKERNEL.0-$abi_opt-common"
+      fi
+      echo "
 All done, you should reboot NOW!
 
 "
     fi
   elif [ "$OS" = "Ubuntu" ]; then
-   echo "
+    echo "
 Installed:
 
 linux-image-$UBUNTUKERNEL.0-$abi_opt-generic
-linux-image-extra-$UBUNTUKERNEL.0-$abi_opt-generic
-linux-headers-$UBUNTUKERNEL.0-$abi_opt-generic
-linux-headers-$UBUNTUKERNEL.0-$abi_opt
-
+linux-image-extra-$UBUNTUKERNEL.0-$abi_opt-generic"
+    if [ "x$headers_opt" = "xyes" ]; then
+      echo "linux-headers-$UBUNTUKERNEL.0-$abi_opt-generic
+linux-headers-$UBUNTUKERNEL.0-$abi_opt"
+    fi
+    echo "
 All done, you should reboot NOW!
 
 "
@@ -1177,7 +1192,11 @@ fi
 
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
-  dpkg -i *.deb
+  if [ "x$headers_opt" = "xyes" ]; then
+    dpkg -i *.deb
+  else
+    dpkg -i linux-image-*
+  fi
   if [ "x$next_opt" = "xno" ]; then
     if echo $vanilla_opt | grep "rc" > /dev/null 2>&1; then
       BUILDLINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/-rc/.0-rc/')build"
@@ -1192,10 +1211,12 @@ if [ "x$vanilla_opt" != "x" ]; then
       SOURCELINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/\//.0\//')source"
       HEADERSDIR="/usr/src/$(ls -d1 */ | grep "linux" | sed 's/linux-/linux-headers-/' | sed 's/\//.0/')"
     fi
-    rm -f $BUILDLINK
-    rm -f $SOURCELINK
-    ln -s $HEADERSDIR $SOURCELINK
-    ln -s $HEADERSDIR $BUILDLINK
+    if [ "x$headers_opt" = "xyes" ]; then
+      rm -f $BUILDLINK
+      rm -f $SOURCELINK
+      ln -s $HEADERSDIR $SOURCELINK
+      ln -s $HEADERSDIR $BUILDLINK
+    fi
   fi
 fi
 
