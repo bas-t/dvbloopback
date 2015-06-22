@@ -563,7 +563,7 @@ cx23885 patch applied.
 
   if [ "x$personal_opt" = "xyes" ];then
     # silabs si2157 si2168 patch
-    if [ "$FIRST_DIGIT" -le "4" ]; then
+    if [ "$FIRST_DIGIT" -lt "4" ]; then
       cp -f ../drivers/media/tuners/* drivers/media/tuners/
       cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
     elif [ "$FIRST_DIGIT" -eq "4" ]; then
