@@ -930,7 +930,7 @@ If you hit 'n', 'make oldconfig' starts.
       if [ "$?" -eq 0 ]; then
         cp -f ../kernelconfig/$CONFIG/3.10/config ./.config
       else
-      make oldconfig
+        make oldconfig
       fi
     fi
   elif [ "$MAJOR" -lt "5" ]; then
