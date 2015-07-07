@@ -972,6 +972,25 @@ If you hit 'n', 'make oldconfig' starts.
       else
         make oldconfig
       fi
+    elif [ "$VERSION" = "2" ]; then
+     echo -en "
+Choise: use supplied config file or
+do 'make oldconfig'. Do you want to
+use supplied kernel config?
+If you hit 'n', 'make oldconfig' starts.
+
+"
+      confirmyes "Yes, use it. [Y/n]"
+
+      if [ "$?" -eq 0 ]; then
+        if [ "$OS" = "Debian" ]; then
+          cp -f ../kernelconfig/$CONFIG/4.2/config ./.config
+        elif [ "$OS" = "Ubuntu" ]; then
+          cp -f ../kernelconfig/$CONFIG/4.2/config ./.config
+        fi
+      else
+        make oldconfig
+      fi
     else
       make oldconfig
     fi
