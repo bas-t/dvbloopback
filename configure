@@ -621,13 +621,13 @@ dvb-core is patched.
 
   if [ "x$personal_opt" = "xyes" ];then
     # saa716x patch
-    if [ "x$v4l_opt" = "xyes" ]; then
+    if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xbackup" ]; then
       mkdir drivers/media/pci/saa716x
       cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
       patch -p0 < ../Kconfig.patch
       if [ "x$test_opt" = "xyes" ]; then
         echo "
-saa716x addad, Kconfig patch for saa716x applied.
+saa716x added, Kconfig patch for saa716x applied.
 "
         confirmyes
         if [ "$?" != "0" ]; then
