@@ -644,6 +644,16 @@ Makefile patch for saa716x applied.
           exit 0
         fi
       fi
+      patch -p0 < ../cx23885-gapped-clock.patch
+      if [ "x$test_opt" = "xyes" ]; then
+      echo "
+cx23885 gapped-clock patch applied.
+"
+        confirmyes
+        if [ "$?" != "0" ]; then
+          exit 0
+        fi
+      fi
     fi
 
     # silabs si2168 DVC-C patch
