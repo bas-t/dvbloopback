@@ -69,6 +69,7 @@ show_help(){
   echo " --v4l=<opt>            [no] yes: compile current official v4l tree"
   echo "                        against your running kernel"
   echo "                        tbs: compile Luis Alves' TBS driver repo"
+  echo "                        backup: compile from own backup repo's"
   echo "                        Disables --stock= and --vanilla="
   echo "                        "
   echo " --next=<opt>           [no] 4.1 : compile linux-next(4.1 version),"
@@ -250,7 +251,7 @@ if [ -f /usr/bin/lsb_release ]; then
 fi
 
 # Check for a supported kernelversion
-if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" ]; then
+if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" -o "x$v4l_opt" = "xbackup" ]; then
   FIRST_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | head -n1)
   SECOND_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | awk 'NR==2')
   if [ "$FIRST_DIGIT" -lt "4" ]; then
@@ -376,6 +377,9 @@ if [ "x$v4l_opt" = "xyes" ];then
 elif [ "x$v4l_opt" = "xtbs" ]; then
   git clone git://github.com/ljalves/media_build.git || die "Error(s) while fetching v4l build system"
   git clone --depth=1 git://github.com/ljalves/linux_media.git -b latest ./media_tree || die "Error(s) while fetching v4l source tree"
+elif [ "x$v4l_opt" = "xbackup" ]; then
+  git clone git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
+  git clone --depth=1 git://github.com/bas-t/media_tree.git || die "Error(s) while fetching v4l source tree"
   if [ "x$test_opt" = "xyes" ]; then
     echo "
 Source is downloaded.
@@ -588,7 +592,7 @@ silabs si2168 and si2157 patch applied, si2168 is set to DVB-C.
 fi
 
 # v4l
-if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" ]; then
+if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" -o "x$v4l_opt" = "xbackup" ]; then
   cd media_tree
 
   # dvbloopback patch
@@ -622,7 +626,7 @@ dvb-core is patched.
       cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
       patch -p0 < ../Kconfig.patch
       if [ "x$test_opt" = "xyes" ]; then
-      echo "
+        echo "
 saa716x addad, Kconfig patch for saa716x applied.
 "
         confirmyes
@@ -874,7 +878,7 @@ Kernel configured.
 fi
 
 # v4l
-if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" ]; then
+if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" -o "x$v4l_opt" = "xbackup" ]; then
   make dir DIR=../media_tree
   make distclean
   make allyesconfig
@@ -1073,7 +1077,7 @@ Kernel compiled.
 fi
 
 # v4l
-if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" ]; then
+if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" -o "x$v4l_opt" = "xbackup" ]; then
   make
   if ! [ "$?" -eq "0" ]; then
     echo "
@@ -1195,7 +1199,7 @@ All done, you should reboot NOW!
 fi
 
 # v4l
-if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" ]; then
+if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xtbs" -o "x$v4l_opt" = "xbackup" ]; then
   confirmno "
 v4l source is compiled. Install it? [N/y]
 "
