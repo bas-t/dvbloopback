@@ -1,6 +1,6 @@
 --- drivers/media/pci/cx23885/cx23885-dvb.c	2015-05-06 22:04:23.000000000 +0200
 +++ drivers/media/pci/cx23885/cx23885-dvb.c	2015-05-13 07:57:49.870500436 +0200
-@@ -1896,6 +1896,7 @@
+@@ -1946,6 +1946,7 @@
  			si2168_config.i2c_adapter = &adapter;
  			si2168_config.fe = &fe0->dvb.frontend;
  			si2168_config.ts_mode = SI2168_TS_SERIAL;
@@ -8,7 +8,7 @@
  			memset(&info, 0, sizeof(struct i2c_board_info));
  			strlcpy(info.type, "si2168", I2C_NAME_SIZE);
  			info.addr = 0x64;
-@@ -1942,6 +1944,7 @@
+@@ -1993,6 +1994,7 @@
  		si2168_config.i2c_adapter = &adapter;
  		si2168_config.fe = &fe0->dvb.frontend;
  		si2168_config.ts_mode = SI2168_TS_PARALLEL;
@@ -16,7 +16,7 @@
  		memset(&info, 0, sizeof(struct i2c_board_info));
  		strlcpy(info.type, "si2168", I2C_NAME_SIZE);
  		info.addr = 0x64;
-@@ -2069,11 +2073,13 @@
+@@ -2121,11 +2123,13 @@
  		case 1:
  			i2c_bus = &dev->i2c_bus[1];
  			si2168_config.ts_mode = SI2168_TS_PARALLEL;
@@ -30,7 +30,7 @@
  			break;
  		}
  
-@@ -2159,6 +2166,7 @@
+@@ -2223,6 +2227,7 @@
  			si2168_config.i2c_adapter = &adapter;
  			si2168_config.fe = &fe0->dvb.frontend;
  			si2168_config.ts_mode = SI2168_TS_SERIAL;
