@@ -84,6 +84,8 @@ show_help(){
   echo "                        "
   echo " --test=<opt>           [no] yes: pause to review each and every step"
   echo "                        "
+  echo " --tvh=<opt>            [no] yes: don't insert dvbloopback, tvh does not need it"
+  echo "                        "
 }
 
 stock_opt="yes"
@@ -96,6 +98,7 @@ update_opt="yes"
 abi_opt="900"
 test_opt="no"
 personal_opt="yes"
+tvh_opt="no"
 
 for opt do
   optval="${opt#*=}"
@@ -121,6 +124,8 @@ for opt do
   --test=*) test_opt="$optval"
   ;;
   --personal=*) personal_opt="$optval"
+  ;;
+  --tvh=*) tvh_opt="$optval"
   ;;
   *)
   die_unknown $opt
@@ -475,25 +480,27 @@ if [ "x$v4l_opt" = "xno" ]; then
   SECOND_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
 
   # dvbloopback patch
-  mkdir drivers/media/pci/dvbloopback
-  cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
-  patch -p0 < ../dvbloopback.patch
-  if [ "$FIRST_DIGIT" -lt "4" ]; then
-    if [ "$SECOND_DIGIT" -lt "13" ]; then
-      patch -p0 < ../3.7-dvb-core.patch
+  if [ "x$tvh_opt" = "xno" ]; then
+    mkdir drivers/media/pci/dvbloopback
+    cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
+    patch -p0 < ../dvbloopback.patch
+    if [ "$FIRST_DIGIT" -lt "4" ]; then
+      if [ "$SECOND_DIGIT" -lt "13" ]; then
+        patch -p0 < ../3.7-dvb-core.patch
+      else
+        patch -p0 < ../3.13-dvb-core.patch
+      fi
     else
       patch -p0 < ../3.13-dvb-core.patch
     fi
-  else
-    patch -p0 < ../3.13-dvb-core.patch
-  fi
-  if [ "x$test_opt" = "xyes" ]; then
-    echo "
+    if [ "x$test_opt" = "xyes" ]; then
+      echo "
 dvb-core is patched, dvbloopback added.
 "
-    confirmyes
-    if [ "$?" != "0" ]; then
-      exit 0
+      confirmyes
+      if [ "$?" != "0" ]; then
+        exit 0
+      fi
     fi
   fi
 
@@ -584,7 +591,9 @@ cx23885 patch applied.
     fi
 
     # silabs si2168 DVB-C patch
-    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    if [ "x$tvh_opt" = "xno" ]; then
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    fi
     if [ "x$test_opt" = "xyes" ]; then
       echo "
 silabs si2168 and si2157 patch applied, si2168 is set to DVB-C.
@@ -602,26 +611,28 @@ if ! [ "x$v4l_opt" = "xno" ]; then
   cd media_tree
 
   # dvbloopback patch
-  mkdir drivers/media/pci/dvbloopback
-  cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
-  patch -p0 < ../dvbloopback.patch
-  if [ "x$test_opt" = "xyes" ]; then
-    echo "
+  if [ "x$tvh_opt" = "xno" ]; then
+    mkdir drivers/media/pci/dvbloopback
+    cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
+    patch -p0 < ../dvbloopback.patch
+    if [ "x$test_opt" = "xyes" ]; then
+      echo "
 dvbloopback module added to source tree.
 "
-    confirmyes
-    if [ "$?" != "0" ]; then
-      exit 0
+      confirmyes
+      if [ "$?" != "0" ]; then
+        exit 0
+      fi
     fi
-  fi
-  patch -p0 < ../3.13-dvb-core.patch
-  if [ "x$test_opt" = "xyes" ]; then
-    echo "
+    patch -p0 < ../3.13-dvb-core.patch
+    if [ "x$test_opt" = "xyes" ]; then
+      echo "
 dvb-core is patched.
 "
-    confirmyes
-    if [ "$?" != "0" ]; then
-      exit 0
+      confirmyes
+      if [ "$?" != "0" ]; then
+        exit 0
+      fi
     fi
   fi
 
@@ -663,7 +674,9 @@ cx23885 gapped-clock patch applied.
     fi
 
     # silabs si2168 DVC-C patch
-    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    if [ "x$tvh_opt" = "xno" ]; then
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    fi
   fi
 
   # commit patches
