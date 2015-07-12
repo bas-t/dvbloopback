@@ -68,8 +68,8 @@ show_help(){
   echo "                        "
   echo " --v4l=<opt>            [no] yes: compile current official v4l tree"
   echo "                        against your running kernel"
-  echo "                        tbs: compile Luis Alves' TBS driver repo"
-  echo "                        backup: compile from own backup repo's"
+  echo "                        tbs: use Luis Alves' TBS driver repo"
+  echo "                        backup: use own backup repo's"
   echo "                        Disables --stock= and --vanilla="
   echo "                        "
   echo " --next=<opt>           [no] 4.1 : compile linux-next(4.1 version),"
@@ -79,6 +79,11 @@ show_help(){
   echo "                        twice the number of physical adapters is needed."
   echo "                        "
   echo " --update=<opt>         [yes] no: don't auto-update or clean this repo"
+  echo "                        "
+  echo " --drivers=<opt>        [yes] Add support for TBS 6281/6285 and DVBSky T982 cards"
+  echo "                        "
+  echo " --dvb=<opt>            [dvbc] Set si2168 to DVB-C mode permanently"
+  echo "                        dvbt: same, but set it to DVB-T"
   echo "                        "
   echo " --abi=<opt>            [900] Debian only kernel version tweak"
   echo "                        "
@@ -97,7 +102,8 @@ adapters_opt="16"
 update_opt="yes"
 abi_opt="900"
 test_opt="no"
-personal_opt="yes"
+drivers_opt="yes"
+dvb_opt="dvbc"
 tvh_opt="no"
 
 for opt do
@@ -123,7 +129,9 @@ for opt do
   ;;
   --test=*) test_opt="$optval"
   ;;
-  --personal=*) personal_opt="$optval"
+  --drivers=*) drivers_opt="$optval"
+  ;;
+  --dvb=*) dvb_opt="$optval"
   ;;
   --tvh=*) tvh_opt="$optval"
   ;;
@@ -360,7 +368,7 @@ if [ "x$stock_opt" = "xyes" ]; then
   SECOND_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
   if [ "$FIRST_DIGIT" -lt "4" ]; then
     if ! [ "$SECOND_DIGIT" -eq "16" -o "$SECOND_DIGIT" -gt "17" ]; then
-      if [ "x$personal_opt" = "xyes" ]; then
+      if [ "x$drivers_opt" = "xyes" ]; then
         echo "
 Building saa716x/dvbsky t982 intree is not supported for your kernel version.
 
@@ -408,7 +416,7 @@ if [ "x$vanilla_opt" != "x" ]; then
   VERSION=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
   if [ "$MAJOR" -lt "4" ]; then
     if ! [ "$VERSION" -eq "10" -o "$VERSION" -eq "16" ]; then
-      if [ "x$personal_opt" = "xyes" ]; then
+      if [ "x$drivers_opt" = "xyes" ]; then
         MINVERSION="18"
       else
         MINVERSION="10"
@@ -505,7 +513,7 @@ dvb-core is patched, dvbloopback added.
   fi
 
   # saa716x patch
-  if [ "x$personal_opt" = "xyes" ];then
+  if [ "x$drivers_opt" = "xyes" ];then
     mkdir drivers/media/pci/saa716x
     cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
     if [ "$FIRST_DIGIT" -lt "4" ];then
@@ -549,7 +557,7 @@ Makefile is patched for saa716x.
   fi
 
   # cx23885 patch
-  if [ "x$personal_opt" = "xyes" ];then
+  if [ "x$drivers_opt" = "xyes" ];then
     if [ "$FIRST_DIGIT" -lt "4" ]; then
       if [ "$SECOND_DIGIT" = "18" ]; then
         patch -p0 < ../cx23885-3.18.patch
@@ -578,8 +586,8 @@ cx23885 patch applied.
     fi
   fi
 
-  if [ "x$personal_opt" = "xyes" ];then
-    # silabs si2157 si2168 patch
+  # silabs si2157 and si2168 patch
+  if [ "x$drivers_opt" = "xyes" ];then
     if [ "$FIRST_DIGIT" -lt "4" ]; then
       cp -f ../drivers/media/tuners/* drivers/media/tuners/
       cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
@@ -590,8 +598,12 @@ cx23885 patch applied.
       fi
     fi
 
-    # silabs si2168 DVB-C patch
-    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    # silabs si2168 DVB-C/T patch
+    if [ "x$dvb_opt" = "xdvbc" ]; then
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    elif [ "x$dvb_opt" = "xdvbt" ]; then
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT/' drivers/media/dvb-frontends/si2168.c
+    fi
     if [ "x$test_opt" = "xyes" ]; then
       echo "
 silabs si2168 and si2157 patch applied, si2168 is set to DVB-C.
@@ -634,8 +646,8 @@ dvb-core is patched.
     fi
   fi
 
-  if [ "x$personal_opt" = "xyes" ];then
-    # saa716x patch
+  # saa716x patch
+  if [ "x$drivers_opt" = "xyes" ];then
     if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xbackup" ]; then
       mkdir drivers/media/pci/saa716x
       cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
@@ -671,8 +683,12 @@ cx23885 gapped-clock patch applied.
       fi
     fi
 
-    # silabs si2168 DVC-C patch
-    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    # silabs si2168 DVC-C/T patch
+    if [ "x$dvb_opt" = "xdvbc" ]; then
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    elif [ "x$dvb_opt" = "xdvbt" ]; then
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT/' drivers/media/dvb-frontends/si2168.c
+    fi
   fi
 
   # commit patches
@@ -833,7 +849,7 @@ Kernel configured.
     chmod a+x debian/scripts/misc/*
     sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian.*/config/config.common.ubuntu
     sed -i "/CONFIG_DVB_LNBP22=m/a CONFIG_DVB_LOOPBACK_ADAPTER=m" debian.*/config/config.common.ubuntu
-    if [ "x$personal_opt" = "xyes" ]; then
+    if [ "x$drivers_opt" = "xyes" ]; then
       sed -i "/CONFIG_S2IO=m/a CONFIG_SAA716X_SUPPORT=y" debian.*/config/config.common.ubuntu
       sed -i "/CONFIG_SAA716X_SUPPORT=y/a CONFIG_SAA716X_BUDGET=m" debian.*/config/config.common.ubuntu
       sed -i "/CONFIG_DVB_S921=m/a CONFIG_DVB_SAA716X_CORE=m" debian.*/config/config.common.ubuntu
@@ -926,7 +942,7 @@ if [ "x$vanilla_opt" != "x" ]; then
 Going to configure your vanilla kernel.
 
 "
-  if [ "x$personal_opt" = "xyes" ]; then
+  if [ "x$drivers_opt" = "xyes" ]; then
     if [ "$MAJOR" -lt "4" ]; then
       if [ "$VERSION" = "18" ]; then
         echo -en "
@@ -1274,7 +1290,7 @@ if [ "x$vanilla_opt" != "x" ]; then
   fi
 fi
 
-if [ "x$personal_opt" = "xyes" ]; then
+if [ "x$drivers_opt" = "xyes" ]; then
   # Install the firmware
   if [ "x$test_opt" = "xyes" ]; then
     confirmno "
