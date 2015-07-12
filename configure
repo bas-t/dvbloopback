@@ -948,7 +948,7 @@ if [ "x$vanilla_opt" != "x" ]; then
 Going to configure your vanilla kernel.
 
 "
-  if [ "x$drivers_opt" = "xyes" ]; then
+  if [ "x$drivers_opt" = "xyes" ] && [ "$OS" = "Debian" ]; then
     if [ "$MAJOR" -lt "4" ]; then
       if [ "$VERSION" = "18" ]; then
         echo -en "
@@ -961,11 +961,7 @@ If you hit 'n', 'make oldconfig' starts.
         confirmyes "Yes, use it. [Y/n]"
 
         if [ "$?" -eq 0 ]; then
-          if [ "$OS" = "Debian" ]; then
-            cp -f ../kernelconfig/$CONFIG/3.18/config ./.config
-          elif [ "$OS" = "Ubuntu" ]; then
-            cp -f ../kernelconfig/$CONFIG/3.18/config-ubuntu ./.config
-          fi
+          cp -f ../kernelconfig/amd64/3.18/config ./.config
         else
           make oldconfig
         fi
@@ -980,10 +976,12 @@ If you hit 'n', 'make oldconfig' starts.
         confirmyes "Yes, use it. [Y/n]"
 
         if [ "$?" -eq 0 ]; then
-          cp -f ../kernelconfig/$CONFIG/3.10/config ./.config
+          cp -f ../kernelconfig/amd64/3.10/config ./.config
         else
           make oldconfig
         fi
+      else
+        make oldconfig
       fi
     elif [ "$MAJOR" -lt "5" ]; then
       if [ "$VERSION" = "0" ]; then
@@ -997,11 +995,7 @@ If you hit 'n', 'make oldconfig' starts.
         confirmyes "Yes, use it. [Y/n]"
 
         if [ "$?" -eq 0 ]; then
-          if [ "$OS" = "Debian" ]; then
-            cp -f ../kernelconfig/$CONFIG/4.0/config ./.config
-          elif [ "$OS" = "Ubuntu" ]; then
-            cp -f ../kernelconfig/$CONFIG/4.0/config-ubuntu ./.config
-          fi
+          cp -f ../kernelconfig/amd64/4.0/config ./.config
         else
           make oldconfig
         fi
@@ -1016,16 +1010,12 @@ If you hit 'n', 'make oldconfig' starts.
         confirmyes "Yes, use it. [Y/n]"
 
         if [ "$?" -eq 0 ]; then
-          if [ "$OS" = "Debian" ]; then
-            cp -f ../kernelconfig/$CONFIG/4.1/config ./.config
-          elif [ "$OS" = "Ubuntu" ]; then
-            cp -f ../kernelconfig/$CONFIG/4.1/config ./.config
-          fi
+          cp -f ../kernelconfig/amd64/4.1/config ./.config
         else
           make oldconfig
         fi
       elif [ "$VERSION" = "2" ]; then
-       echo -en "
+        echo -en "
 Choise: use supplied config file or
 do 'make oldconfig'. Do you want to
 use supplied kernel config?
@@ -1035,17 +1025,15 @@ If you hit 'n', 'make oldconfig' starts.
         confirmyes "Yes, use it. [Y/n]"
 
         if [ "$?" -eq 0 ]; then
-          if [ "$OS" = "Debian" ]; then
-            cp -f ../kernelconfig/$CONFIG/4.2/config ./.config
-          elif [ "$OS" = "Ubuntu" ]; then
-            cp -f ../kernelconfig/$CONFIG/4.2/config ./.config
-          fi
+          cp -f ../kernelconfig/amd64/4.2/config ./.config
         else
           make oldconfig
         fi
       else
         make oldconfig
       fi
+    else
+      make oldconfig
     fi
   else
     make oldconfig
