@@ -47,6 +47,16 @@ confirmyes(){
     esac
 }
 
+kernelconfig(){
+echo -en "
+Choise: use supplied config file or
+do 'make oldconfig'. Do you want to
+use supplied kernel config?
+If you hit 'n', 'make oldconfig' starts.
+
+"
+}
+
 show_help(){
   echo " Usage: ./configure --opt1=<opt> --opt2=<opt>"
   echo "                        "
@@ -951,13 +961,7 @@ Going to configure your vanilla kernel.
   if [ "x$drivers_opt" = "xyes" ] && [ "$OS" = "Debian" ]; then
     if [ "$MAJOR" -lt "4" ]; then
       if [ "$VERSION" = "18" ]; then
-        echo -en "
-Choise: use supplied config file or
-do 'make oldconfig'. Do you want to
-use supplied kernel config?
-If you hit 'n', 'make oldconfig' starts.
-
-"
+        kernelconfig
         confirmyes "Yes, use it. [Y/n]"
 
         if [ "$?" -eq 0 ]; then
@@ -966,13 +970,7 @@ If you hit 'n', 'make oldconfig' starts.
           make oldconfig
         fi
       elif [ "$VERSION" = "10" ]; then
-        echo -en "
-Choise: use supplied config file or
-do 'make oldconfig'. Do you want to
-use supplied kernel config?
-If you hit 'n', 'make oldconfig' starts.
-
-"
+        kernelconfig
         confirmyes "Yes, use it. [Y/n]"
 
         if [ "$?" -eq 0 ]; then
@@ -985,13 +983,7 @@ If you hit 'n', 'make oldconfig' starts.
       fi
     elif [ "$MAJOR" -lt "5" ]; then
       if [ "$VERSION" = "0" ]; then
-        echo -en "
-Choise: use supplied config file or
-do 'make oldconfig'. Do you want to
-use supplied kernel config?
-If you hit 'n', 'make oldconfig' starts.
-
-"
+        kernelconfig
         confirmyes "Yes, use it. [Y/n]"
 
         if [ "$?" -eq 0 ]; then
@@ -1000,13 +992,7 @@ If you hit 'n', 'make oldconfig' starts.
           make oldconfig
         fi
       elif [ "$VERSION" = "1" ]; then
-       echo -en "
-Choise: use supplied config file or
-do 'make oldconfig'. Do you want to
-use supplied kernel config?
-If you hit 'n', 'make oldconfig' starts.
-
-"
+        kernelconfig
         confirmyes "Yes, use it. [Y/n]"
 
         if [ "$?" -eq 0 ]; then
@@ -1015,13 +1001,7 @@ If you hit 'n', 'make oldconfig' starts.
           make oldconfig
         fi
       elif [ "$VERSION" = "2" ]; then
-        echo -en "
-Choise: use supplied config file or
-do 'make oldconfig'. Do you want to
-use supplied kernel config?
-If you hit 'n', 'make oldconfig' starts.
-
-"
+        kernelconfig
         confirmyes "Yes, use it. [Y/n]"
 
         if [ "$?" -eq 0 ]; then
