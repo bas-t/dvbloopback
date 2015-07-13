@@ -103,6 +103,9 @@ show_help(){
   echo "                        "
   echo " --tvh=<opt>            [no] yes: don't insert dvbloopback, tvh does not need it"
   echo "                        "
+  echo " --ffdecsawrapper=<opt> [yes] no: don't offer to compile ffdecsawrapper binary,"
+  echo "                        even if I don't have it."
+  echo "                        "
 }
 
 stock_opt="yes"
@@ -117,6 +120,7 @@ test_opt="no"
 drivers_opt="yes"
 dvb_opt="dvbc"
 tvh_opt="no"
+ffdecsawrapper_opt="yes"
 
 for opt do
   optval="${opt#*=}"
@@ -146,6 +150,8 @@ for opt do
   --dvb=*) dvb_opt="$optval"
   ;;
   --tvh=*) tvh_opt="$optval"
+  ;;
+  --ffdecsawrapper=*) ffdecsawrapper_opt="$optval"
   ;;
   *)
   die_unknown $opt
@@ -413,48 +419,49 @@ fi
 # If it is not in place, offer to compile and install it.
 #
 
-if ! [ -f /usr/bin/ffdecsawrapper ]; then
-  if [ "x$tvh_opt" = "xno" ]; then
-    echo -en "
+if [ "x$ffdecsawrapper_opt" = "xyes" ]; then
+  if ! [ -f /usr/bin/ffdecsawrapper ]; then
+    if [ "x$tvh_opt" = "xno" ]; then
+      echo -en "
 No /usr/bin/ffdecswrapper binary found.
 
 Do you want to compile and install it now?
 
 It will be compiled with all default options.
 "
-    confirmyes "Yes, please do. [Y/n]"
-    if [ "$?" = "0" ]; then
-      DIR=`pwd`
-      export DIR
-      cd ..
-      if [ -d descrambler ]; then
-        cd descrambler
-      else
+      confirmyes "Yes, please do. [Y/n]"
+      if [ "$?" = "0" ]; then
+        DIR=`pwd`
+        export DIR
+        cd ..
+        if [ -d descrambler ]; then
+          rm -rf descrambler
+        fi
         git clone https://github.com/bas-t/descrambler.git && cd descrambler
-      fi
-      ./configure
-      if [ "$?" != "0" ]; then
-        echo -en "
+        ./configure
+        if [ "$?" != "0" ]; then
+          echo -en "
 Error(s) encountered while compiling ffdecsawrapper.
 
 Continue anyway?
 "
-        confirmyes
-        if [ "$?" != "0" ]; then
-          exit 0
+          confirmyes
+          if [ "$?" != "0" ]; then
+            exit 0
+          fi
         fi
-      fi
-      if [ "x$test_opt" = "xyes" ]; then
-        echo "
+        if [ "x$test_opt" = "xyes" ]; then
+          echo "
 ffdecsawrapper is compiled and installed.
 "
-        confirmyes
-        if [ "$?" != "0" ]; then
-          exit 0
+          confirmyes
+          if [ "$?" != "0" ]; then
+            exit 0
+          fi
         fi
+        cd $DIR
+        unset DIR
       fi
-      cd $DIR
-      unset DIR
     fi
   fi
 fi
