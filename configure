@@ -297,6 +297,38 @@ Aborting...
       exit 0
     fi
   fi
+elif ! [ "x$vanilla_opt" = "x" ]; then
+  MAJOR=$(echo "$vanilla_opt" | cut -d'.' -f1)
+  VERSION=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
+  if [ "x$drivers_opt" = "xyes" ]; then
+    if [ "$MAJOR" -eq "3" ]; then
+      if ! [ "$VERSION" -eq "10" -o "$VERSION" -eq "16" -o "$VERSION" -eq "18" ]; then
+        echo -en "
+I backported the DVBSky T982 driver to
+
+3.10.x, 3.16.x and 3.18.x kernel series.
+
+You requested a $vanilla_opt build.
+
+Aborting...
+"
+        exit 0
+      fi
+    fi
+  else
+    if [ "$MAJOR" -eq "3" ]; then
+      if [ "$VERSION" -lt "10" ]; then
+        echo "
+Your are trying to build a $vanilla_opt kernel.
+
+Minimum supported version is 3.10.x
+
+Aborting...
+"
+        exit 0
+      fi
+    fi
+  fi
 fi
 
 # Check for proper use uf --stock= flag
@@ -424,35 +456,6 @@ fi
 
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
-  MAJOR=$(echo "$vanilla_opt" | cut -d'.' -f1)
-  VERSION=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
-  if [ "$MAJOR" -lt "4" ]; then
-    if ! [ "$VERSION" -eq "10" -o "$VERSION" -eq "16" ]; then
-      if [ "x$drivers_opt" = "xyes" ]; then
-        MINVERSION="18"
-      else
-        MINVERSION="10"
-      fi
-      # Check for minimum supported kernel version
-      if [ "$VERSION" -lt "$MINVERSION" ]; then
-        echo -en "
-\E[1;33;44m
-Minimum supported kernel version is linux-3.$MINVERSION.x
-
-Compiling the TBS6281/6285 and DVBSky T982 drivers
-
-intree is supported as of linux-3.18.x kernels.
-
-You requested a build with a $vanilla_opt kernel.
-
-Aborting...
-\E[0m
-
-"
-        exit 0
-      fi
-    fi
-  fi
   if [ "x$next_opt" = "xno" ]; then
     if echo "$vanilla_opt" | grep "rc" > /dev/null 2>&1; then
       wget https://www.kernel.org/pub/linux/kernel/v$MAJOR.x/testing/linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
