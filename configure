@@ -416,7 +416,6 @@ It will be compiled with all default options.
     if [ "$?" = "0" ]; then
       DIR=`pwd`
       export DIR
-      DIRISSET="yes"
       cd ..
       if [ -d descrambler ]; then
         cd descrambler
