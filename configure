@@ -70,7 +70,7 @@ show_help(){
   echo "                        Only for Debian stable or"
   echo "                        latest Ubuntu LTS"
   echo "                        "
-  echo " --vanilla=<bool>       specify a the vanilla kernel MINOR you"
+  echo " --vanilla=<bool>       specify a the vanilla kernel version you"
   echo "                        want to compile. Like --vanilla=3.18.12"
   echo "                        This disables --stock option"
   echo "                        "
@@ -82,7 +82,7 @@ show_help(){
   echo "                        backup: use own backup repo's"
   echo "                        Disables --stock= and --vanilla="
   echo "                        "
-  echo " --next=<opt>           [no] 4.1 : compile linux-next(4.1 MINOR),"
+  echo " --next=<opt>           [no] 4.1 : compile linux-next(4.1 version),"
   echo "                        disables --v4l, --vanilla and --stock"
   echo "                        "
   echo " --adapters=<opt>       [16] Set max number of adapters that are allowed,"
@@ -97,7 +97,7 @@ show_help(){
   echo "                        dvbt2: set it to DVB-T2"
   echo "                        no: don't do anything to s2168"
   echo "                        "
-  echo " --abi=<opt>            [900] Debian only kernel MINOR tweak"
+  echo " --abi=<opt>            [900] Debian only kernel version tweak"
   echo "                        "
   echo " --test=<opt>           [no] yes: pause to review each and every step"
   echo "                        "
@@ -283,7 +283,7 @@ if [ -f /usr/bin/lsb_release ]; then
   RELEASE=$( lsb_release -sc )
 fi
 
-# Check for a supported kernelMINOR
+# Check for a supported kernelversion
 if ! [ "x$v4l_opt" = "xno" ]; then
   FIRST_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | head -n1)
   SECOND_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | awk 'NR==2')
@@ -292,7 +292,7 @@ if ! [ "x$v4l_opt" = "xno" ]; then
       echo "
 Your running kernel is < 3.10.x
 
-Minimum supported MINOR is 3.10.x
+Minimum supported version is 3.10.x
 
 Aborting...
 "
@@ -323,7 +323,7 @@ Aborting...
         echo "
 Your are trying to build a $vanilla_opt kernel.
 
-Minimum supported MINOR is 3.10.x
+Minimum supported version is 3.10.x
 
 Aborting...
 "
@@ -467,7 +467,7 @@ if [ "x$stock_opt" = "xyes" ]; then
     if ! [ "$SECOND_DIGIT" -eq "16" -o "$SECOND_DIGIT" -gt "17" ]; then
       if [ "x$drivers_opt" = "xyes" ]; then
         echo "
-Building saa716x/dvbsky t982 intree is not supported for your kernel MINOR.
+Building saa716x/dvbsky t982 intree is not supported for your kernel version.
 
 Aborting...
 "
@@ -845,7 +845,7 @@ Not going to install any more of those, aborting...
               echo  "
 
 You have a total of 10 \"$DEBIANKERNEL.0-90x-amd64\" kernels installed.
-You are currently running the $RUNNING MINOR of those.
+You are currently running the $RUNNING version of those.
 Not going to install any more of those, aborting...
 "
               exit 0
@@ -885,7 +885,7 @@ Not going to install any more of those, aborting...
               echo  "
 
 You have a total of 10 \"$DEBIANKERNEL.0-90x-686-pae\" kernels installed.
-You are currently running the $RUNNING MINOR of those.
+You are currently running the $RUNNING version of those.
 Not going to install any more of those, aborting...
 "
               exit 0
@@ -963,7 +963,7 @@ Not going to install any more of those, aborting...
             echo  "
 
 You have a total of 10 \"$UBUNTUKERNEL.0-90x-generic\" kernels installed.
-You are currently running the $RUNNING MINOR of those.
+You are currently running the $RUNNING version of those.
 Not going to install any more of those, aborting...
 "
             exit 0
