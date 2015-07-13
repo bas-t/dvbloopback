@@ -27,3 +27,9 @@ config MEDIA_CONTROLLER_DVB
  This is currently experimental.
 
 Having done this, proceed with make oldconfig, make allyesconfig or something like that.
+
+
+Alternative use:
+
+If you like it, you could use my personal configure script.
+Do: ./configure --help to review the options
