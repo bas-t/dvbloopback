@@ -99,7 +99,7 @@ show_help(){
   echo "                        "
   echo " --abi=<opt>            [900] Debian only kernel version tweak"
   echo "                        "
-  echo " --test=<opt>           [no] yes: pause to review each and every step"
+  echo " --debug=<opt>           [no] yes: pause to review each and every step"
   echo "                        "
   echo " --tvh=<opt>            [no] yes: don't insert dvbloopback, tvh does not need it"
   echo "                        "
@@ -116,7 +116,7 @@ next_opt="no"
 adapters_opt="16"
 update_opt="yes"
 abi_opt="900"
-test_opt="no"
+debug_opt="no"
 drivers_opt="yes"
 dvb_opt="dvbc"
 tvh_opt="no"
@@ -143,7 +143,7 @@ for opt do
   ;;
   --abi=*) abi_opt="$optval"
   ;;
-  --test=*) test_opt="$optval"
+  --debug=*) debug_opt="$optval"
   ;;
   --drivers=*) drivers_opt="$optval"
   ;;
@@ -202,10 +202,10 @@ Aborting...
     echo "
 Your local clone is clean and up-to-date
 "
-    if [ "x$test_opt" = "xno" ]; then
+    if [ "x$debug_opt" = "xno" ]; then
       sleep 3
     fi
-    if [ "x$test_opt" = "xyes" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
       confirmyes
       if [ "$?" != "0" ]; then
         exit 0
@@ -450,7 +450,7 @@ Continue anyway?
             exit 0
           fi
         fi
-        if [ "x$test_opt" = "xyes" ]; then
+        if [ "x$debug_opt" = "xyes" ]; then
           echo "
 ffdecsawrapper is compiled and installed.
 "
@@ -492,7 +492,7 @@ Aborting...
       fi
     fi
   fi  
-  if [ "x$test_opt" = "xyes" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Source is downloaded.
 "
@@ -513,7 +513,7 @@ elif [ "x$v4l_opt" = "xtbs" ]; then
 elif [ "x$v4l_opt" = "xbackup" ]; then
   git clone git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
   git clone --depth=1 git://github.com/bas-t/media_tree.git || die "Error(s) while fetching v4l source tree"
-  if [ "x$test_opt" = "xyes" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Source is downloaded.
 "
@@ -535,7 +535,7 @@ if [ "x$vanilla_opt" != "x" ]; then
     tar -xJf linux-$vanilla_opt.tar.xz
     cd linux-$vanilla_opt
     make clean && make mrproper
-    if [ "x$test_opt" = "xyes" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
       echo "
 Source is downloaded.
 "
@@ -552,7 +552,7 @@ if ! [ "x$next_opt" = "xno" ]; then
   git clone --depth=1 git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git ./linux-$next_opt || die "Error(s) while fetching Linux source"
   cd linux-$next_opt
   make clean && make mrproper
-  if [ "x$test_opt" = "xyes" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Source is downloaded.
 "
@@ -586,7 +586,7 @@ if [ "x$v4l_opt" = "xno" ]; then
     else
       patch -p0 < ../3.13-dvb-core.patch
     fi
-    if [ "x$test_opt" = "xyes" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
       echo "
 dvb-core is patched, dvbloopback added.
 "
@@ -610,7 +610,7 @@ dvb-core is patched, dvbloopback added.
     else
       patch -p0 < ../Kconfig.patch
     fi
-    if [ "x$test_opt" = "xyes" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
       echo "
 saa716x added, Kconfig patched for saa716x.
 "
@@ -630,7 +630,7 @@ saa716x added, Kconfig patched for saa716x.
     else
       patch -p0 < ../Makefile.patch
     fi
-    if [ "x$test_opt" = "xyes" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
       echo "
 Makefile is patched for saa716x.
 "
@@ -660,7 +660,7 @@ Makefile is patched for saa716x.
     elif [ "$FIRST_DIGIT" -gt "4" ]; then
       patch -p0 < ../cx23885-gapped-clock.patch
     fi
-    if [ "x$test_opt" = "xyes" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
       echo "
 cx23885 patch applied.
 "
@@ -691,7 +691,7 @@ cx23885 patch applied.
     elif [ "x$dvb_opt" = "xdvbt2" ]; then
       sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT2/' drivers/media/dvb-frontends/si2168.c
     fi
-    if [ "x$test_opt" = "xyes" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
       echo "
 silabs si2168 and si2157 patch applied, si2168 is set to DVB-C.
 "
@@ -712,7 +712,7 @@ if ! [ "x$v4l_opt" = "xno" ]; then
     mkdir drivers/media/pci/dvbloopback
     cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
     patch -p0 < ../dvbloopback.patch
-    if [ "x$test_opt" = "xyes" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
       echo "
 dvbloopback module added to source tree.
 "
@@ -722,7 +722,7 @@ dvbloopback module added to source tree.
       fi
     fi
     patch -p0 < ../3.13-dvb-core.patch
-    if [ "x$test_opt" = "xyes" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
       echo "
 dvb-core is patched.
 "
@@ -739,7 +739,7 @@ dvb-core is patched.
       mkdir drivers/media/pci/saa716x
       cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
       patch -p0 < ../Kconfig.patch
-      if [ "x$test_opt" = "xyes" ]; then
+      if [ "x$debug_opt" = "xyes" ]; then
         echo "
 saa716x added, Kconfig patch for saa716x applied.
 "
@@ -749,7 +749,7 @@ saa716x added, Kconfig patch for saa716x applied.
         fi
       fi
       patch -p0 < ../Makefile.patch
-      if [ "x$test_opt" = "xyes" ]; then
+      if [ "x$debug_opt" = "xyes" ]; then
       echo "
 Makefile patch for saa716x applied.
 "
@@ -759,7 +759,7 @@ Makefile patch for saa716x applied.
         fi
       fi
       patch -p0 < ../cx23885-gapped-clock.patch
-      if [ "x$test_opt" = "xyes" ]; then
+      if [ "x$debug_opt" = "xyes" ]; then
       echo "
 cx23885 gapped-clock patch applied.
 "
@@ -783,7 +783,7 @@ cx23885 gapped-clock patch applied.
   # commit patches
   git add -A
   git commit -a -m 'Add drivers, patch dvb-core.'
-  if [ "x$test_opt" = "xyes" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Patches are committed to media_tree.
 "
@@ -797,7 +797,7 @@ Patches are committed to media_tree.
 
   # make install patch
   patch -p0 < ../v4l-make-install.patch
-  if [ "x$test_opt" = "xyes" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
     echo "
 make install patch applied to media_build repo.
 "
@@ -809,7 +809,7 @@ make install patch applied to media_build repo.
 
   # commit patch
   git commit -a -m 'Install drivers in /lib/modules/`uname -r`/updates/media'
-  if [ "x$test_opt" = "xyes" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Patches are committed to media_build.
 "
@@ -924,7 +924,7 @@ Not going to install any more of those, aborting...
       fakeroot make -f debian/rules.gen setup_i386_none_686-pae_real
       sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian/build/build_i386_none_686-pae/.config
     fi
-    if [ "x$test_opt" = "xyes" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
       echo "
 Kernel configured.
 "
@@ -995,7 +995,7 @@ Not going to install any more of those, aborting...
     sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian.*/control.stub
     sed -i "s/0-$_ABINAME/0-$abi_opt/g" debian.*/changelog
     fakeroot debian/rules clean
-    if [ "x$test_opt" = "xyes" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
       echo "
 Kernel configured.
 "
@@ -1014,7 +1014,7 @@ if ! [ "x$v4l_opt" = "xno" ]; then
   make allyesconfig
   sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" v4l/.config
   sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" v4l/.config
-  if [ "x$test_opt" = "xyes" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
     echo "
 v4l source configured.
 "
@@ -1073,7 +1073,7 @@ Going to configure your vanilla kernel.
   if cat .config | grep "CONFIG_MEDIA_CONTROLLER_DVB=y" > /dev/null 2>&1; then
     sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" .config
   fi
-  if [ "x$test_opt" = "xyes" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Kernel configured.
 "
@@ -1093,14 +1093,14 @@ if [ "x$stock_opt" = "xyes" ]; then
   if [ "$OS" = "Debian" ]; then
     if [ "$CONFIG" = "amd64" ]; then
       fakeroot make -f debian/rules.gen binary-arch_amd64_none_real
-      if [ "x$test_opt" = "xyes" ]; then
+      if [ "x$debug_opt" = "xyes" ]; then
         fakeroot make -f debian/rules.gen binary-arch_amd64_none_amd64
       else
         fakeroot make -j2 -f debian/rules.gen binary-arch_amd64_none_amd64
       fi
     else
       fakeroot make -f debian/rules.gen binary-arch_i386_none_real
-      if [ "x$test_opt" = "xyes" ]; then
+      if [ "x$debug_opt" = "xyes" ]; then
         fakeroot make -f debian/rules.gen binary-arch_i386_none_686-pae
       else
         fakeroot make -j2 -f debian/rules.gen binary-arch_i386_none_686-pae
@@ -1130,7 +1130,7 @@ Aborting...
     rm -f linux-tools*
     rm -f linux-cloud*
   fi
-  if [ "x$test_opt" = "xyes" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Kernel compiled.
 "
@@ -1156,7 +1156,7 @@ Aborting...
 "
     exit 1
   fi
-  if [ "x$test_opt" = "xyes" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
     echo "
 v4l source compiled.
 "
@@ -1170,7 +1170,7 @@ fi
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
   make-kpkg --rootcmd fakeroot clean
-  if [ "x$test_opt" = "xno" ]; then
+  if [ "x$debug_opt" = "xno" ]; then
     export CONCURRENCY_LEVEL=2
     if [ "x$next_opt" = "xno" ]; then
       make-kpkg --rootcmd fakeroot --initrd kernel_image kernel_headers
@@ -1193,7 +1193,7 @@ Aborting...
     exit 1
   fi
   cd ..
-  if [ "x$test_opt" = "xyes" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Kernel compiled.
 "
@@ -1265,7 +1265,7 @@ fi
 
 # v4l
 if ! [ "x$v4l_opt" = "xno" ]; then
-  if [ "x$test_opt" = "xyes" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Going to install v4l modules.
 "
@@ -1314,7 +1314,7 @@ fi
 
 if [ "x$drivers_opt" = "xyes" ]; then
   # Install the firmware
-  if [ "x$test_opt" = "xyes" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
     confirmno "
 Do you want to install firmware? [N/y]
 "
