@@ -13,7 +13,7 @@ obj-$(CONFIG_DVB_LOOPBACK_ADAPTER) += dvbloopback/
 to drivers/media/pci/Makefile
 
 Patch drivers/media/dvb-core/dvbdev.c the usual way,
-example patches are in the ffdecsawrapper repo.
+example patches are in this repo.
 
 For v4l tree or linux-4.1 or higher,
 in drivers/media/Kconfig comment out:
@@ -21,6 +21,7 @@ in drivers/media/Kconfig comment out:
 config MEDIA_CONTROLLER_DVB
 	bool "Enable Media controller for DVB"
 	depends on MEDIA_CONTROLLER
+    depends on BROKEN
 	---help---
 	  Enable the media controller API support for DVB.
 
