@@ -302,6 +302,16 @@ Aborting...
 elif ! [ "x$vanilla_opt" = "x" ]; then
   MAJOR=$(echo "$vanilla_opt" | cut -d'.' -f1)
   MINOR=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
+  if [ "$MAJOR" -lt "3" ]; then
+    echo -en "
+You requested a build for a $vanilla_opt kernel.
+
+Minimum supported kernelseries is 3.10.x
+
+Aborting...
+"
+    exit 0
+  fi
   if [ "x$drivers_opt" = "xyes" ]; then
     if [ "$MAJOR" -eq "3" ]; then
       if ! [ "$MINOR" -eq "10" -o "$MINOR" -eq "18" ]; then
