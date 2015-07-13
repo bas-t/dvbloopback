@@ -441,6 +441,7 @@ ffdecsawrapper is compiled and installed.
         fi
       fi
       cd $DIR
+      unset DIR
     fi
   fi
 fi
@@ -1336,8 +1337,4 @@ Do you want to install firmware? [N/y]
   fi
   # Set msi mode for saa716x budget driver
   echo "options saa716x_budget int_type=1" > /etc/modprobe.d/tbs_opensource.conf
-fi
-
-if [ "$DIRISSET" = "yes" ]; then
-  unset DIR
 fi
