@@ -1212,7 +1212,8 @@ static int __init dvblb_init(void)
 static void __exit cleanup_dvblb_module(void)
 {
 	int i;
-	info("Unregistering ca loopback devices");
+	printk("dvbloopback: unregistering %d adapters\n", num_adapters);
+	//info("Unregistering ca loopback devices");
 	for(i = 0; i < num_adapters; i++) {
 		if(0 == dvblb_global[i].init)
 			break;
