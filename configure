@@ -1031,7 +1031,7 @@ if [ "x$vanilla_opt" != "x" ]; then
 Going to configure your vanilla kernel.
 
 "
-  if [ "x$drivers_opt" = "xyes" ] && [ "$OS" = "Debian" ]; then
+  if [ "x$drivers_opt" = "xyes" ] && [ "$OS" = "Debian" ] && [ "$CONFIG" = "amd64" ]; then
     if [ "$MAJOR" -lt "4" ]; then
       if [ "$MINOR" = "18" ]; then
         kernelconfig
