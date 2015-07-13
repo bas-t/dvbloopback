@@ -196,7 +196,9 @@ Aborting...
     echo "
 Your local clone is clean and up-to-date
 "
-    sleep 3
+    if [ "x$test_opt" = "xno" ]; then
+      sleep 3
+    fi
     if [ "x$test_opt" = "xyes" ]; then
       confirmyes
       if [ "$?" != "0" ]; then
