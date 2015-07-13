@@ -304,11 +304,11 @@ elif ! [ "x$vanilla_opt" = "x" ]; then
   MINOR=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
   if [ "x$drivers_opt" = "xyes" ]; then
     if [ "$MAJOR" -eq "3" ]; then
-      if ! [ "$MINOR" -eq "10" -o "$MINOR" -eq "16" -o "$MINOR" -eq "18" ]; then
+      if ! [ "$MINOR" -eq "10" -o "$MINOR" -eq "18" ]; then
         echo -en "
 I backported the DVBSky T982 driver to
 
-3.10.x, 3.16.x and 3.18.x kernel series.
+3.10.x and 3.18.x kernel series.
 
 You requested a $vanilla_opt build.
 
@@ -1019,7 +1019,6 @@ Going to configure your vanilla kernel.
       if [ "$MINOR" = "18" ]; then
         kernelconfig
         confirmyes "Yes, use it. [Y/n]"
-
         if [ "$?" -eq 0 ]; then
           cp -f ../kernelconfig/amd64/3.18/config ./.config
         else
@@ -1028,48 +1027,24 @@ Going to configure your vanilla kernel.
       elif [ "$MINOR" = "10" ]; then
         kernelconfig
         confirmyes "Yes, use it. [Y/n]"
-
         if [ "$?" -eq 0 ]; then
           cp -f ../kernelconfig/amd64/3.10/config ./.config
         else
           make oldconfig
         fi
-      else
-        make oldconfig
-      fi
-    elif [ "$MAJOR" -lt "5" ]; then
-      if [ "$MINOR" = "0" ]; then
-        kernelconfig
-        confirmyes "Yes, use it. [Y/n]"
-
-        if [ "$?" -eq 0 ]; then
-          cp -f ../kernelconfig/amd64/4.0/config ./.config
-        else
-          make oldconfig
-        fi
-      elif [ "$MINOR" = "1" ]; then
-        kernelconfig
-        confirmyes "Yes, use it. [Y/n]"
-
-        if [ "$?" -eq 0 ]; then
-          cp -f ../kernelconfig/amd64/4.1/config ./.config
-        else
-          make oldconfig
-        fi
-      elif [ "$MINOR" = "2" ]; then
-        kernelconfig
-        confirmyes "Yes, use it. [Y/n]"
-
-        if [ "$?" -eq 0 ]; then
-          cp -f ../kernelconfig/amd64/4.2/config ./.config
-        else
-          make oldconfig
-        fi
-      else
-        make oldconfig
       fi
     else
-      make oldconfig
+      if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
+        kernelconfig
+        confirmyes "Yes, use it. [Y/n]"
+        if [ "$?" -eq 0 ]; then
+          cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ./.config
+        else
+          make oldconfig
+        fi
+      else
+        make oldconfig
+      fi
     fi
   else
     make oldconfig
