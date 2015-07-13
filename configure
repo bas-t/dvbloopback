@@ -377,18 +377,149 @@ if [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
 Missing dependency build-essential, marking for installation.
 
 "
-    apt-get install build-essential -y || die "Error installing dependency build-essential"
+    apt-get install build-essential -y || die "Error installing dependency asciidoc"
+  fi
+  if ! dpkg-query -l asciidoc | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency asciidoc, marking for installation.
+
+"
+    apt-get install asciidoc --no-install-recommends -y || die "Error installing dependency asciidoc"
+  fi
+  if ! dpkg-query -l binutils-dev | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency binutils-dev, marking for installation.
+
+"
+    apt-get install binutils-dev --no-install-recommends -y || die "Error installing dependency binutils-dev"
+  fi
+  if ! dpkg-query -l bison | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency bison, marking for installation.
+
+"
+    apt-get install bison --no-install-recommends -y || die "Error installing dependency bison"
+  fi
+  if ! dpkg-query -l crash | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency crash, marking for installation.
+
+"
+    apt-get install crash --no-install-recommends -y || die "Error installing dependency crash"
+  fi
+  if ! dpkg-query -l devscripts | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency devscripts, marking for installation.
+
+"
+    apt-get install devscripts --no-install-recommends -y || die "Error installing dependency devscripts"
+  fi
+  if ! dpkg-query -l libelf-dev | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency libelf-dev, marking for installation.
+
+"
+    apt-get install libelf-dev --no-install-recommends -y || die "Error installing dependency libelf-dev"
+  fi
+  if ! dpkg-query -l fakeroot | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency fakeroot, marking for installation.
+
+"
+    apt-get install fakeroot --no-install-recommends -y || die "Error installing dependency fakeroot"
+  fi
+  if ! dpkg-query -l flex | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency flex, marking for installation.
+
+"
+    apt-get install flex --no-install-recommends -y || die "Error installing dependency flex"
+  fi
+  if ! dpkg-query -l initramfs-tools | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency initramfs-tools, marking for installation.
+
+"
+    apt-get install initramfs-tools --no-install-recommends -y || die "Error installing dependency initramfs-tools"
+  fi
+  if ! dpkg-query -l kernel-package | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency kernel-package, marking for installation.
+
+"
+    apt-get install kernel-package --no-install-recommends -y || die "Error installing dependency kernel-package"
+  fi
+  if ! dpkg-query -l kernel-wedge | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency kernel-wedge, marking for installation.
+
+"
+    apt-get install kernel-wedge --no-install-recommends -y || die "Error installing dependency kernel-wedge"
+  fi
+  if ! dpkg-query -l libdigest-sha-perl | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency libdigest-sha-perl, marking for installation.
+
+"
+    apt-get install libdigest-sha-perl --no-install-recommends -y || die "Error installing dependency libdigest-sha-perl"
+  fi
+  if ! dpkg-query -l libfile-fcntllock-perl | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency libfile-fcntllock-perl, marking for installation.
+
+"
+    apt-get install libfile-fcntllock-perl --no-install-recommends -y || die "Error installing dependency libfile-fcntllock-perl"
+  fi
+  if ! dpkg-query -l libproc-processtable-perl | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency libproc-processtable-perl, marking for installation.
+
+"
+    apt-get install libproc-processtable-perl --no-install-recommends -y || die "Error installing dependency libproc-processtable-perl"
+  fi
+  if ! dpkg-query -l bin86 | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency bin86, marking for installation.
+
+"
+    apt-get install bin86 --no-install-recommends -y || die "Error installing dependency bin86"
+  fi
+  if ! dpkg-query -l makedumpfile | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency makedumpfile, marking for installation.
+
+"
+    apt-get install makedumpfile --no-install-recommends -y || die "Error installing dependency makedumpfile"
+  fi
+  if ! dpkg-query -l libncurses5 | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency libncurses5, marking for installation.
+
+"
+    apt-get install libncurses5 --no-install-recommends -y || die "Error installing dependency libncurses5"
+  fi
+  if ! dpkg-query -l libncurses5-dev | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency libncurses5-dev, marking for installation.
+
+"
+    apt-get install libncurses5-dev --no-install-recommends -y || die "Error installing dependency libncurses5-dev"
+  fi
+  if ! dpkg-query -l patch | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency patch, marking for installation.
+
+"
+    apt-get install patch --no-install-recommends -y || die "Error installing dependency patch"
+  fi
+  if ! dpkg-query -l patchutils | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency patchutils, marking for installation.
+
+"
+    apt-get install patchutils --no-install-recommends -y || die "Error installing dependency patchutils"
   fi
   apt-get build-dep --no-install-recommends linux -y
-  if ! [ "$?" -eq "0" ]; then
-    echo "
-Error(s) while installing build dependencies
-
-Aborting...
-"
-    exit 1
-  fi
-  apt-get install kernel-package bin86 devscripts makedumpfile libelf-dev binutils-dev fakeroot crash kernel-wedge libncurses5 libncurses5-dev asciidoc flex bison initramfs-tools patch patchutils libfile-fcntllock-perl libproc-processtable-perl libdigest-sha-perl --no-install-recommends -y
   if ! [ "$?" -eq "0" ]; then
     echo "
 Error(s) while installing build dependencies
