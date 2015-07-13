@@ -21,7 +21,7 @@ in drivers/media/Kconfig comment out:
 config MEDIA_CONTROLLER_DVB
 	bool "Enable Media controller for DVB"
 	depends on MEDIA_CONTROLLER
-    depends on BROKEN
+	depends on BROKEN
 	---help---
 	  Enable the media controller API support for DVB.
 
