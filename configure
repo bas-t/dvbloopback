@@ -418,7 +418,11 @@ It will be compiled with all default options.
       export DIR
       DIRISSET="yes"
       cd ..
-      git clone https://github.com/bas-t/descrambler.git && cd descrambler
+      if [ -d descrambler ]; then
+        cd descrambler
+      else
+        git clone https://github.com/bas-t/descrambler.git && cd descrambler
+      fi
       ./configure
       if [ "$?" != "0" ]; then
         echo -en "
