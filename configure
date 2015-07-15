@@ -288,7 +288,7 @@ fi
 if [ -f /usr/bin/lsb_release ]; then
   OS=$( lsb_release -si )
   RELEASE=$( lsb_release -sc )
-  if [ "$OS" = "Ubuntu" ]; then
+  if [ "$OS" != "Debian" ]; then
     drivers_opt="no"
   fi
 fi
