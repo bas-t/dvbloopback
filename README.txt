@@ -2,6 +2,8 @@ Loopback kernel driver for DVB devices
 
 Use:
 
+NB: minimum supported kernel series is 3.10.x
+
 copy the dvbloopback dir into the drivers/media/pci dir of the kernel/v4l tree
 
 Add
