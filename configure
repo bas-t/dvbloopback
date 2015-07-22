@@ -840,14 +840,14 @@ si2168 and si2157 added/updated.
     if [ "x$dvb_opt" = "xdvbc" ]; then
       sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A, SYS_DVBT, SYS_DVBT2/' drivers/media/dvb-frontends/si2168.c
     elif [ "x$dvb_opt" = "xdvbt" ]; then
-      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT/' drivers/media/dvb-frontends/si2168.c
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
     elif [ "x$dvb_opt" = "xdvbt2" ]; then
-      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT2/' drivers/media/dvb-frontends/si2168.c
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT2, SYS_DVBT, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
     fi
     if [ "x$dvb_opt" = "xdvbc" -o "x$dvb_opt" = "xdvbt" -o "x$dvb_opt" = "xdvbt2" ]; then
       if [ "x$debug_opt" = "xyes" ]; then
         echo "
-si2168 is set to $dvb_opt mode permanently.
+Primary DVB system for si2168 is set to $dvb_opt 
 "
         confirmyes
         if [ "$?" != "0" ]; then
@@ -925,18 +925,18 @@ cx23885 gapped-clock patch applied.
       fi
     fi
 
-    # silabs si2168 DVC-C/T patch
+    # silabs si2168 DVB-C/T patch
     if [ "x$dvb_opt" = "xdvbc" ]; then
       sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A, SYS_DVBT, SYS_DVBT2/' drivers/media/dvb-frontends/si2168.c
     elif [ "x$dvb_opt" = "xdvbt" ]; then
-      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT/' drivers/media/dvb-frontends/si2168.c
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
     elif [ "x$dvb_opt" = "xdvbt2" ]; then
-      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT2/' drivers/media/dvb-frontends/si2168.c
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT2, SYS_DVBT, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
     fi
     if [ "x$dvb_opt" = "xdvbc" -o "x$dvb_opt" = "xdvbt" -o "x$dvb_opt" = "xdvbt2" ]; then
       if [ "x$debug_opt" = "xyes" ]; then
         echo "
-si2168 is set to $dvb_opt mode permanently.
+Primary DVB system for si2168 is set to $dvb_opt 
 "
         confirmyes
         if [ "$?" != "0" ]; then
