@@ -97,6 +97,8 @@ show_help(){
   echo "                        dvbt: same, but set it to DVB-T"
   echo "                        dvbt2: set it to DVB-T2"
   echo "                        no: don't do anything to s2168"
+  echo "                        This is only for progs like MythTV, that can't handle multistandard"
+  echo "                        frontends. MythTV only sees the primary DVB system."
   echo "                        "
   echo " --abi=<opt>            [900] Debian only kernel version tweak"
   echo "                        "
