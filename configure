@@ -1204,7 +1204,9 @@ Going to configure your vanilla kernel.
       if [ "$MINOR" = "18" ]; then
         kernelconfig
         confirmyes "Yes, use it. [Y/n]"
-        if [ "$?" -eq 0 ]; then
+        if [ "$response" = "p" ] || [ "$response" = "P" ]; then
+          cp -f ../kernelconfig/amd64/3.18/config-personalized ./.config
+        elif [ "$?" -eq 0 ]; then
           cp -f ../kernelconfig/amd64/3.18/config ./.config
         else
           make oldconfig
@@ -1212,17 +1214,21 @@ Going to configure your vanilla kernel.
       elif [ "$MINOR" = "10" ]; then
         kernelconfig
         confirmyes "Yes, use it. [Y/n]"
-        if [ "$?" -eq 0 ]; then
+        if [ "$response" = "p" ] || [ "$response" = "P" ]; then
+          cp -f ../kernelconfig/amd64/3.10/config-personalized ./.config
+        elif [ "$?" -eq 0 ]; then
           cp -f ../kernelconfig/amd64/3.10/config ./.config
         else
           make oldconfig
         fi
       fi
     else
-      if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
+      if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ] || [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config-personalized ]; then
         kernelconfig
         confirmyes "Yes, use it. [Y/n]"
-        if [ "$?" -eq 0 ]; then
+        if [ "$response" = "p" ] || [ "$response" = "P" ]; then
+          cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/config-personalized ./.config
+        elif [ "$?" -eq 0 ]; then
           cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ./.config
         else
           make oldconfig
