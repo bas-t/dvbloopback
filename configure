@@ -80,6 +80,7 @@ $DIR/../kernelconfig/amd64/$MAJOR.$MINOR/config-personalized
 Aborting...
 
 "
+              unset DIR
               exit 1
             fi
             ;;            
