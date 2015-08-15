@@ -52,11 +52,15 @@ echo -en "
 Choise: use supplied config file or
 do 'make oldconfig'. Do you want to
 use supplied kernel config?
+
 If you hit 'n', 'make oldconfig' starts.
+
+If you hit 'p', you'll be using a localmodconfig
+that works on my servers, but probably not for you.
 
 "
     # call with a prompt string or use a default
-    read -r -p "${1:-Yes, use it. [Y/n]} " response
+    read -r -p "${1:-Yes, use it. [Y/n/p]} " response
     case $response in
         [yY][eE][sS]|[yY]) 
             cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ./.config
