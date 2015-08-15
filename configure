@@ -112,7 +112,7 @@ show_help(){
   echo "                        "
   echo " --next=<opt>           [no] 4.1 : compile linux-next."
   echo "                        This version number should be >= current RC version"
-  echo "                        disables --v4l, --vanilla and --stock"
+  echo "                        disables --v4l, --vanilla and --stock, no headers."
   echo "                        "
   echo " --adapters=<opt>       [16] Set max number of adapters that are allowed,"
   echo "                        twice the number of physical adapters is needed."
@@ -166,7 +166,7 @@ for opt do
   ;;
   --v4l=*) stock_opt="no"; vanilla_opt=""; v4l_opt="$optval"
   ;;
-  --next=*) stock_opt="no"; v4l_opt="no"; next_opt="$optval"; vanilla_opt="$next_opt"
+  --next=*) stock_opt="no"; v4l_opt="no"; headers_opt="no"; next_opt="$optval"; vanilla_opt="$next_opt"
   ;;
   --adapters=*) adapters_opt="$optval"
   ;;
@@ -1459,11 +1459,12 @@ fi
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
   if [ "x$headers_opt" = "xyes" ]; then
-    dpkg -i *.deb
+    dpkg -i linux-image-* && sleep 2
+    dpkg -i linux-headers-*
   else
     dpkg -i linux-image-*
   fi
-  if [ "x$next_opt" = "xno" ]; then
+  if [ "x$headers_opt" = "xyes" ]; then
     if echo $vanilla_opt | grep "rc" > /dev/null 2>&1; then
       BUILDLINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/-rc/.0-rc/')build"
       SOURCELINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/-rc/.0-rc/')source"
@@ -1477,12 +1478,10 @@ if [ "x$vanilla_opt" != "x" ]; then
       SOURCELINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/\//.0\//')source"
       HEADERSDIR="/usr/src/$(ls -d1 */ | grep "linux" | sed 's/linux-/linux-headers-/' | sed 's/\//.0/')"
     fi
-    if [ "x$headers_opt" = "xyes" ]; then
-      rm -f $BUILDLINK
-      rm -f $SOURCELINK
-      ln -s $HEADERSDIR $SOURCELINK
-      ln -s $HEADERSDIR $BUILDLINK
-    fi
+    rm -f $BUILDLINK
+    rm -f $SOURCELINK
+    ln -s $HEADERSDIR $SOURCELINK
+    ln -s $HEADERSDIR $BUILDLINK
   fi
   if [ "$?" = "0" ]; then
     if [ "x$headers_opt" = "xyes" ]; then
