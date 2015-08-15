@@ -137,7 +137,7 @@ show_help(){
   echo "                        "
   echo " --abi=<opt>            [900] Debian only kernel version tweak"
   echo "                        "
-  echo " --debug=<opt>           [no] yes: pause to review each and every step"
+  echo " --debug=<opt>          [no] yes: pause to review each and every step"
   echo "                        "
   echo " --tvh=<opt>            [no] yes: don't insert dvbloopback, tvh does not need it"
   echo "                        "
@@ -621,6 +621,8 @@ Continue anyway?
 "
           confirmyes
           if [ "$?" != "0" ]; then
+            cd $DIR
+            unset DIR
             exit 0
           fi
         fi
@@ -630,6 +632,8 @@ ffdecsawrapper is compiled and installed.
 "
           confirmyes
           if [ "$?" != "0" ]; then
+            cd $DIR
+            unset DIR
             exit 0
           fi
         fi
