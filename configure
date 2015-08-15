@@ -418,7 +418,7 @@ if [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
 Missing dependency build-essential, marking for installation.
 
 "
-    apt-get install build-essential -y || die "Error installing dependency asciidoc"
+    apt-get install build-essential -y || die "Error installing dependency build-essential"
   fi
   if ! dpkg-query -l asciidoc | grep "ii" > /dev/null 2>&1; then
     echo "
