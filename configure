@@ -1230,18 +1230,10 @@ Going to configure your vanilla kernel.
 
 "
   if [ "$OS" = "Debian" ] && [ "$CONFIG" = "amd64" ]; then
-    if [ "$MAJOR" -lt "4" ]; then
-      if [ "$MINOR" = "18" -o "$MINOR" = "10" ]; then
-        kernelconfig
-      else
-        make oldconfig
-      fi
+    if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
+      kernelconfig
     else
-      if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
-        kernelconfig
-      else
-        make oldconfig
-      fi
+      make oldconfig
     fi
   else
     make oldconfig
