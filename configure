@@ -59,23 +59,30 @@ If you hit 'p', you'll be using a localmodconfig
 that works on my servers, but probably not for you.
 
 "
+if [ "$OS" = "Debian" ]; then
+  FILE="config"
+  PFILE="config-personalized"
+elif [ "$OS" = "Ubuntu" ]; then
+  FILE="ubuntuconfig"
+  PFILE="ubuntuconfig-personalized"
+fi
     # call with a prompt string or use a default
     read -r -p "${1:-Yes, use it. [Y/n/p]} " response
     case $response in
         [yY][eE][sS]|[yY]) 
-            cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ./.config
+            cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/$FILE ./.config
             ;;
         [nN][oO]|[nN])
             make oldconfig
             ;;
         [pP])
-            if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config-personalized ]; then
-              cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/config-personalized ./.config
+            if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/$PFILE ]; then
+              cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/$PFILE ./.config
             else
               echo -en "
 Missing config file:
 
-$DIR/../kernelconfig/amd64/$MAJOR.$MINOR/config-personalized
+$DIR/../kernelconfig/amd64/$MAJOR.$MINOR/$PFILE
 
 Aborting...
 
@@ -1242,11 +1249,20 @@ fi
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
   echo -en "
-Going to configure your vanilla kernel.
+Going to configure your $vanilla_opt vanilla kernel.
 
 "
   if [ "$OS" = "Debian" ] && [ "$CONFIG" = "amd64" ]; then
     if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
+      DIR=`pwd`
+      export DIR
+      kernelconfig
+      unset DIR
+    else
+      make oldconfig
+    fi
+  elif [ "$OS" = "Ubuntu" ] && [ "$CONFIG" = "amd64" ]; then
+    if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/ubuntuconfig ]; then
       DIR=`pwd`
       export DIR
       kernelconfig
