@@ -1,10 +1,20 @@
 #!/bin/bash
 
+env_clean(){
+for i in DIR MAJOR MINOR OS RELEASE FIRST_DIGIT SECOND_DIGIT CONCURRENCY_LEVEL
+do
+if ! [ -z ${i+x} ]; then
+  unset $i
+fi
+done
+}
+
 die(){
     echo -en "
 \E[1;33;44m$1, aborting...\E[0m
 
 "
+    env_clean
     exit 1
 }
 
@@ -15,6 +25,7 @@ die_unknown(){
 run ./configure --help for valid options\E[0m
 
 "
+    env_clean
     exit 1
 }
 
@@ -87,9 +98,7 @@ $DIR/../kernelconfig/amd64/$MAJOR.$MINOR/$PFILE
 Aborting...
 
 "
-              unset DIR
-              unset MAJOR
-              unset MINOR
+              env_clean
               exit 1
             fi
             ;;            
@@ -226,6 +235,7 @@ Aborting...
 \E[0m
 
 "
+    env_clean
     exit 1
   fi
   LOCAL=$(git rev-parse @{0})
@@ -251,6 +261,7 @@ Your local clone is clean and up-to-date
     if [ "x$debug_opt" = "xyes" ]; then
       confirmyes
       if [ "$?" != "0" ]; then
+        env_clean
         exit 0
       fi
     fi
@@ -276,6 +287,7 @@ Aborting...
 \E[0m
 
 "
+      env_clean
       exit 1
     else
       echo -en "
@@ -292,6 +304,7 @@ Arrow up and enter will get you there.
 
 
 "
+      env_clean
       exit 0
     fi
   elif [ "$GITSTATUS" -eq "2" -o "$GITSTATUS" -eq "3" ]; then
@@ -309,6 +322,7 @@ Aborting...
 \E[0m
 
 "
+    env_clean
     exit 1
   fi    
 fi
@@ -323,6 +337,7 @@ Aborting...
 \E[0m
 
 "
+  env_clean
   exit 0
 fi
 
@@ -348,6 +363,7 @@ Minimum supported version is 3.10.x
 
 Aborting...
 "
+      env_clean
       exit 0
     fi
   fi
@@ -364,6 +380,7 @@ Minimum supported kernelseries is 3.10.x
 
 Aborting...
 "
+    env_clean
     exit 0
   fi
   if [ "x$drivers_opt" = "xyes" ]; then
@@ -383,6 +400,7 @@ vanilla kernel series and Debian Jessie's stock kernel (3.16.x).
 
 Aborting...
 "
+        env_clean
         exit 0
       fi
     fi
@@ -396,6 +414,7 @@ Minimum supported version is 3.10.x
 
 Aborting...
 "
+        env_clean
         exit 0
       fi
     fi
@@ -414,6 +433,7 @@ in Debian and Ubuntu only. You can compile the
 v4l tree or a vanilla kernel. Aborting....
 
 "
+    env_clean
     exit 0
   fi
 fi
@@ -574,6 +594,7 @@ Error(s) while installing build dependencies
 
 Aborting...
 "
+    env_clean
     exit 1
   fi
   if ! [ "x$v4l_opt" = "xno" ]; then
@@ -588,6 +609,7 @@ Error(s) while installing kernel headers, or no kernel source available.
 
 Aborting...
 "
+      env_clean
       exit 1
     fi
   fi
@@ -627,7 +649,7 @@ Continue anyway?
           confirmyes
           if [ "$?" != "0" ]; then
             cd $DIR
-            unset DIR
+            env_clean
             exit 0
           fi
         fi
@@ -638,7 +660,7 @@ ffdecsawrapper is compiled and installed.
           confirmyes
           if [ "$?" != "0" ]; then
             cd $DIR
-            unset DIR
+            env_clean
             exit 0
           fi
         fi
@@ -671,6 +693,7 @@ Building saa716x/dvbsky t982 intree is not supported for your kernel version.
 
 Aborting...
 "
+        env_clean
         exit 1
       fi
     fi
@@ -681,6 +704,7 @@ Source is downloaded.
 "
     confirmyes
     if [ "$?" != "0" ]; then
+      env_clean
       exit 0
     fi
   fi
@@ -702,6 +726,7 @@ Source is downloaded.
 "
     confirmyes
     if [ "$?" != "0" ]; then
+      env_clean
       exit 0
     fi
   fi
@@ -724,6 +749,7 @@ Source is downloaded.
 "
       confirmyes
       if [ "$?" != "0" ]; then
+        env_clean
         exit 0
       fi
     fi
@@ -741,6 +767,7 @@ Source is downloaded.
 "
     confirmyes
     if [ "$?" != "0" ]; then
+      env_clean
       exit 0
     fi
   fi
@@ -775,6 +802,7 @@ dvb-core is patched, dvbloopback added.
 "
       confirmyes
       if [ "$?" != "0" ]; then
+        env_clean
         exit 0
       fi
     fi
@@ -799,6 +827,7 @@ saa716x added, Kconfig patched for saa716x.
 "
       confirmyes
       if [ "$?" != "0" ]; then
+        env_clean
         exit 0
       fi
     fi
@@ -819,6 +848,7 @@ Makefile is patched for saa716x.
 "
       confirmyes
       if [ "$?" != "0" ]; then
+        env_clean
         exit 0
       fi
     fi
@@ -849,6 +879,7 @@ cx23885 patch applied.
 "
       confirmyes
       if [ "$?" != "0" ]; then
+        env_clean
         exit 0
       fi
     fi
@@ -865,6 +896,7 @@ si2168 and si2157 added/updated.
 "
         confirmyes
         if [ "$?" != "0" ]; then
+          env_clean
           exit 0
         fi
       fi
@@ -878,6 +910,7 @@ si2168 and si2157 added/updated.
 "
           confirmyes
           if [ "$?" != "0" ]; then
+            env_clean
             exit 0
           fi
         fi
@@ -899,6 +932,7 @@ Primary DVB system for si2168 is set to $dvb_opt
 "
         confirmyes
         if [ "$?" != "0" ]; then
+          env_clean
           exit 0
         fi
       fi
@@ -921,6 +955,7 @@ dvbloopback module added to source tree.
 "
       confirmyes
       if [ "$?" != "0" ]; then
+        env_clean
         exit 0
       fi
     fi
@@ -931,6 +966,7 @@ dvb-core is patched.
 "
       confirmyes
       if [ "$?" != "0" ]; then
+        env_clean
         exit 0
       fi
     fi
@@ -948,6 +984,7 @@ saa716x added, Kconfig patch for saa716x applied.
 "
         confirmyes
         if [ "$?" != "0" ]; then
+          env_clean
           exit 0
         fi
       fi
@@ -958,6 +995,7 @@ Makefile patch for saa716x applied.
 "
         confirmyes
         if [ "$?" != "0" ]; then
+          env_clean
           exit 0
         fi
       fi
@@ -968,6 +1006,7 @@ cx23885 gapped-clock patch applied.
 "
         confirmyes
         if [ "$?" != "0" ]; then
+          env_clean
           exit 0
         fi
       fi
@@ -988,6 +1027,7 @@ Primary DVB system for si2168 is set to $dvb_opt
 "
         confirmyes
         if [ "$?" != "0" ]; then
+          env_clean
           exit 0
         fi
       fi
@@ -1003,6 +1043,7 @@ Patches are committed to media_tree.
 "
     confirmyes
     if [ "$?" != "0" ]; then
+      env_clean
       exit 0
     fi
   fi
@@ -1017,6 +1058,7 @@ make install patch applied to media_build repo.
 "
     confirmyes
     if [ "$?" != "0" ]; then
+      env_clean
       exit 0
     fi
   fi
@@ -1029,6 +1071,7 @@ Patches are committed to media_build.
 "
     confirmyes
     if [ "$?" != "0" ]; then
+      env_clean
       exit 0
     fi
   fi
@@ -1078,6 +1121,7 @@ if [ "x$stock_opt" = "xyes" ]; then
 You have a total of 10 \"$DEBIANKERNEL.0-90x-amd64\" kernels installed.
 Not going to install any more of those, aborting...
 "
+              env_clean
               exit 0
             else
               echo  "
@@ -1086,6 +1130,7 @@ You have a total of 10 \"$DEBIANKERNEL.0-90x-amd64\" kernels installed.
 You are currently running the $RUNNING version of those.
 Not going to install any more of those, aborting...
 "
+              env_clean
               exit 0
             fi 
           fi
@@ -1118,6 +1163,7 @@ Not going to install any more of those, aborting...
 You have a total of 10 \"$DEBIANKERNEL.0-90x-686-pae\" kernels installed.
 Not going to install any more of those, aborting...
 "
+              env_clean
               exit 0
             else
               echo  "
@@ -1126,6 +1172,7 @@ You have a total of 10 \"$DEBIANKERNEL.0-90x-686-pae\" kernels installed.
 You are currently running the $RUNNING version of those.
 Not going to install any more of those, aborting...
 "
+              env_clean
               exit 0
             fi 
           fi
@@ -1151,6 +1198,7 @@ Kernel configured.
 "
       confirmyes
       if [ "$?" != "0" ]; then
+        env_clean
         exit 0
       fi
     fi
@@ -1196,6 +1244,7 @@ Kernel configured.
 You have a total of 10 \"$UBUNTUKERNEL.0-90x-generic\" kernels installed.
 Not going to install any more of those, aborting...
 "
+            env_clean
             exit 0
           else
             echo  "
@@ -1204,6 +1253,7 @@ You have a total of 10 \"$UBUNTUKERNEL.0-90x-generic\" kernels installed.
 You are currently running the $RUNNING version of those.
 Not going to install any more of those, aborting...
 "
+            env_clean
             exit 0
           fi 
         fi
@@ -1222,6 +1272,7 @@ Kernel configured.
 "
       confirmyes
       if [ "$?" != "0" ]; then
+        env_clean
         exit 0
       fi
     fi
@@ -1241,6 +1292,7 @@ v4l source configured.
 "
     confirmyes
     if [ "$?" != "0" ]; then
+      env_clean
       exit 0
     fi
   fi
@@ -1288,6 +1340,7 @@ Kernel configured.
 "
     confirmyes
     if [ "$?" != "0" ]; then
+      env_clean
       exit 0
     fi
   fi
@@ -1321,6 +1374,7 @@ Error(s) while compiling the kernel
 
 Aborting...
 "
+      env_clean
       exit 1
     fi
     cd ..
@@ -1333,6 +1387,7 @@ Error(s) while compiling the kernel
 
 Aborting...
 "
+      env_clean
       exit 1
     fi
     cd ..
@@ -1345,6 +1400,7 @@ Kernel compiled.
 "
     confirmyes
     if [ "$?" != "0" ]; then
+      env_clean
       exit 0
     fi
   fi
@@ -1363,6 +1419,7 @@ the error(s) will probably be fixed upstream by then.
 
 Aborting...
 "
+    env_clean
     exit 1
   fi
   if [ "x$debug_opt" = "xyes" ]; then
@@ -1371,6 +1428,7 @@ v4l source compiled.
 "
     confirmyes
     if [ "$?" != "0" ]; then
+      env_clean
       exit 0
     fi
   fi
@@ -1393,6 +1451,7 @@ Error(s) while compiling the kernel
 
 Aborting...
 "
+    env_clean
     exit 1
   fi
   cd ..
@@ -1402,6 +1461,7 @@ Kernel compiled.
 "
     confirmyes
     if [ "$?" != "0" ]; then
+      env_clean
       exit 0
     fi
   fi
@@ -1474,6 +1534,7 @@ Going to install v4l modules.
 "
     confirmyes
     if [ "$?" != "0" ]; then
+      env_clean
       exit 0
     fi
   fi
@@ -1548,3 +1609,4 @@ Do you want to install firmware? [N/y]
   # Set msi mode for saa716x budget driver
   echo "options saa716x_budget int_type=1" > /etc/modprobe.d/tbs_opensource.conf
 fi
+env_clean
