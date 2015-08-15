@@ -75,7 +75,7 @@ that works on my servers, but probably not for you.
               echo -en "
 Missing config file:
 
-../kernelconfig/amd64/$MAJOR.$MINOR/config-personalized
+$DIR/../kernelconfig/amd64/$MAJOR.$MINOR/config-personalized
 
 Aborting...
 
@@ -1235,7 +1235,10 @@ Going to configure your vanilla kernel.
 "
   if [ "$OS" = "Debian" ] && [ "$CONFIG" = "amd64" ]; then
     if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
+      DIR=`pwd`
+      export DIR
       kernelconfig
+      unset DIR
     else
       make oldconfig
     fi
