@@ -99,45 +99,43 @@ show_help(){
   echo "                        "
   echo " --help                 Print this message"
   echo "                        "
-  echo " --stock=<opt>          [yes] When running a Debian/Ubuntu"
-  echo "                        stock kernel, recompile it with"
-  echo "                        dvbloopback driver and dvb-core patch"
-  echo "                        Only for Debian stable or"
-  echo "                        Ubuntu Trusty LTS"
+  echo " --stock=<opt>          [yes] When running a Debian/Ubuntu stock kernel,"
+  echo "                        recompile it with dvbloopback driver and dvb-core patch."
+  echo "                        Only for Debian stable and Ubuntu LTS (version 16.04.x)."
   echo "                        "
-  echo " --vanilla=<bool>       specify a the vanilla kernel version you"
+  echo " --vanilla=<bool>       Specify a the vanilla kernel version you"
   echo "                        want to compile. Like --vanilla=3.18.12"
-  echo "                        This disables --stock option"
+  echo "                        This disables the --stock= flag."
   echo "                        "
-  echo " --headers=<opt>        [no] yes: install kernel headers package(s)"
+  echo " --headers=<opt>        [no] yes: install kernel headers package(s)."
   echo "                        "
   echo " --v4l=<opt>            [no] yes: compile current official v4l tree"
-  echo "                        against your running kernel"
-  echo "                        tbs: use Luis Alves' OS TBS driver repo"
-  echo "                        backup: use own backup repo's"
-  echo "                        Disables --stock= and --vanilla="
+  echo "                        against your running kernel."
+  echo "                        tbs: use Luis Alves' OS TBS driver repo."
+  echo "                        backup: use own backup repo's."
+  echo "                        Disables --stock= and --vanilla= flags."
   echo "                        "
   echo " --next=<opt>           [no] 4.1 : compile linux-next."
-  echo "                        This version number should be >= current RC version"
-  echo "                        disables --v4l, --vanilla and --stock, no headers."
+  echo "                        This version number should be >= current RC version."
+  echo "                        disables --v4l, --vanilla and --stock flags, no headers."
   echo "                        "
   echo " --adapters=<opt>       [16] Set max number of adapters that are allowed,"
   echo "                        twice the number of physical adapters is needed."
   echo "                        "
-  echo " --update=<opt>         [yes] no: don't auto-update or clean this repo"
+  echo " --update=<opt>         [yes] no: don't auto-update or clean this repo."
   echo "                        "
-  echo " --drivers=<opt>        [yes] no: don't add support for TBS 6281/6285 and DVBSky T982 cards"
+  echo " --drivers=<opt>        [yes] no: don't add support for TBS 6281/6285 and DVBSky T982 cards."
   echo "                        "
-  echo " --dvb=<opt>            [dvbc] Set si2168 to DVB-C mode permanently"
-  echo "                        dvbt: same, but set it to DVB-T"
-  echo "                        dvbt2: set it to DVB-T2"
-  echo "                        no: don't do anything to s2168"
+  echo " --dvb=<opt>            [dvbc] Set si2168 primary mode to DVB-C permanently."
+  echo "                        dvbt: same, but set it to DVB-T."
+  echo "                        dvbt2: set it to DVB-T2."
+  echo "                        no: don't do anything to s2168."
   echo "                        This is only for progs like MythTV, that can't handle multistandard"
   echo "                        frontends. MythTV only sees the primary DVB system."
   echo "                        "
-  echo " --abi=<opt>            [900] Debian only kernel version tweak"
+  echo " --abi=<opt>            [900] Debian/Ubuntu only kernel version tweak."
   echo "                        "
-  echo " --debug=<opt>          [no] yes: pause to review each and every step"
+  echo " --debug=<opt>          [no] yes: pause to review (almost) each and every step."
   echo "                        "
   echo " --tvh=<opt>            [no] yes: don't insert dvbloopback, tvh does not need it"
   echo "                        "
@@ -397,7 +395,7 @@ Aborting...
   fi
 fi
 
-# Check for proper use uf --stock= flag
+# Check for proper use of --stock= flag
 if ! [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
   if [ "x$stock_opt" = "xyes" ]; then
     echo "
@@ -415,11 +413,6 @@ fi
 
 # Get build-deps, Debian only.
 if [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
-  if uname -a | grep "x86_64" > /dev/null 2>&1; then
-    CONFIG="amd64"
-  else
-    CONFIG="i386"
-  fi
   if ! dpkg-query -l build-essential | grep "ii" > /dev/null 2>&1; then
     echo "
 Missing dependency build-essential, marking for installation.
@@ -1037,6 +1030,13 @@ fi
 #
 # Configure the source
 #
+
+# Are we running amd64 or what?
+if uname -a | grep "x86_64" > /dev/null 2>&1; then
+  CONFIG="amd64"
+else
+  CONFIG="i386"
+fi
 
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
