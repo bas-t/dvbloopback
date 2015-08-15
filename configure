@@ -81,6 +81,8 @@ Aborting...
 
 "
               unset DIR
+              unset MAJOR
+              unset MINOR
               exit 1
             fi
             ;;            
