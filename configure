@@ -1246,6 +1246,8 @@ Going to configure your vanilla kernel.
   else
     make oldconfig
   fi
+  unset MAJOR
+  unset MINOR
   ADAPTERS=$(cat .config | grep "CONFIG_DVB_MAX_ADAPTERS" | grep -o '[[:digit:]]\+')
   if ! [ "$ADAPTERS" = "$adapters_opt" ]; then
     sed -i "s/CONFIG_DVB_MAX_ADAPTERS=$ADAPTERS/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" .config
