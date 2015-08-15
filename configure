@@ -55,6 +55,34 @@ use supplied kernel config?
 If you hit 'n', 'make oldconfig' starts.
 
 "
+    # call with a prompt string or use a default
+    read -r -p "${1:-Yes, use it. [Y/n]} " response
+    case $response in
+        [yY][eE][sS]|[yY]) 
+            cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ./.config
+            ;;
+        [nN][oO]|[nN])
+            make oldconfig
+            ;;
+        [pP])
+            if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config-personalized ]; then
+              cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/config-personalized ./.config
+            else
+              echo -en "
+Missing config file:
+
+../kernelconfig/amd64/$MAJOR.$MINOR/config-personalized
+
+Aborting...
+
+"
+              exit 1
+            fi
+            ;;            
+        *)
+            cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ./.config
+            ;;
+    esac
 }
 
 show_help(){
@@ -314,6 +342,8 @@ Aborting...
 elif ! [ "x$vanilla_opt" = "x" ]; then
   MAJOR=$(echo "$vanilla_opt" | cut -d'.' -f1)
   MINOR=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
+  export MAJOR
+  export MINOR
   if [ "$MAJOR" -lt "3" ]; then
     echo -en "
 You requested a build for a $vanilla_opt kernel.
@@ -1201,38 +1231,14 @@ Going to configure your vanilla kernel.
 "
   if [ "$OS" = "Debian" ] && [ "$CONFIG" = "amd64" ]; then
     if [ "$MAJOR" -lt "4" ]; then
-      if [ "$MINOR" = "18" ]; then
+      if [ "$MINOR" = "18" -o "$MINOR" = "10" ]; then
         kernelconfig
-        confirmyes "Yes, use it. [Y/n]"
-        if [ "$response" = "p" ] || [ "$response" = "P" ]; then
-          cp -f ../kernelconfig/amd64/3.18/config-personalized ./.config
-        elif [ "$?" -eq 0 ]; then
-          cp -f ../kernelconfig/amd64/3.18/config ./.config
-        else
-          make oldconfig
-        fi
-      elif [ "$MINOR" = "10" ]; then
-        kernelconfig
-        confirmyes "Yes, use it. [Y/n]"
-        if [ "$response" = "p" ] || [ "$response" = "P" ]; then
-          cp -f ../kernelconfig/amd64/3.10/config-personalized ./.config
-        elif [ "$?" -eq 0 ]; then
-          cp -f ../kernelconfig/amd64/3.10/config ./.config
-        else
-          make oldconfig
-        fi
+      else
+        make oldconfig
       fi
     else
-      if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ] || [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config-personalized ]; then
+      if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
         kernelconfig
-        confirmyes "Yes, use it. [Y/n]"
-        if [ "$response" = "p" ] || [ "$response" = "P" ]; then
-          cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/config-personalized ./.config
-        elif [ "$?" -eq 0 ]; then
-          cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ./.config
-        else
-          make oldconfig
-        fi
       else
         make oldconfig
       fi
