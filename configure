@@ -365,11 +365,16 @@ Aborting...
     if [ "$MAJOR" -eq "3" ]; then
       if ! [ "$MINOR" -eq "10" -o "$MINOR" -eq "18" ]; then
         echo -en "
-I backported the DVBSky T982 driver to
+You are trying to compile TBS 6281/6285 and DVBSky T982 drivers
 
-3.10.x and 3.18.x kernel series.
+directly into a $vanilla_opt vanilla kernel, using the --drivers=yes
 
-You requested a $vanilla_opt build.
+flag with ./configure.
+
+I only backported the DVBSky T982 driver to 3.10.x and 3.18.x
+
+vanilla kernel series and Debian Jessie's stock kernel (3.16.x).
+
 
 Aborting...
 "
