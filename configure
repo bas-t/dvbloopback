@@ -348,6 +348,8 @@ if [ -f /usr/bin/lsb_release ]; then
   if ! [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
     drivers_opt="no"
   fi
+else
+  drivers_opt="no"
 fi
 
 # Check for a supported kernelversion
@@ -686,10 +688,22 @@ if [ "x$stock_opt" = "xyes" ]; then
   FIRST_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
   SECOND_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
   if [ "$FIRST_DIGIT" -lt "4" ]; then
-    if ! [ "$SECOND_DIGIT" -eq "16" -o "$SECOND_DIGIT" -gt "17" ]; then
+    if ! [ "$SECOND_DIGIT" -eq "16" ]; then
       if [ "x$drivers_opt" = "xyes" ]; then
         echo "
-Building saa716x/dvbsky t982 intree is not supported for your kernel version.
+You requested a (re)build of a Debian/Ubuntu $FIRST_DIGIT.$SECOND_DIGIT kernel with extra drivers.
+
+Building Debian/Ubuntu stock kernels with  TBS 6281/6285 and DVBSky T982 support in-tree in the
+
+3.x kernel series is only supported for 3.16.x kernels. If you don't need those extra drivers, do:
+
+./configure --drivers=no
+
+If you are running Ubuntu 14.04 LTS, and need the extra drivers, you could 'sudo apt-get install linux-image-generic-lts-utopic', reboot with it and run ./configure again.
+
+linux-image-generic-lts-utopic is a 3.16.x kernel and qualifies for the extra drivers.
+
+If you are (still) running Debian Wheezy, with a >=3.10.x kernel, either upgrade to Jessie, or get your 3.16 kernel from backports (not recommended).
 
 Aborting...
 "
