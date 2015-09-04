@@ -346,10 +346,14 @@ if [ -f /usr/bin/lsb_release ]; then
   OS=$( lsb_release -si )
   RELEASE=$( lsb_release -sc )
   if ! [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
-    drivers_opt="no"
+    if ! [ -f "/etc/arch-release" ] > /dev/null  2>&1; then
+      drivers_opt="no"
+    fi
   fi
 else
-  drivers_opt="no"
+  if ! [ -f "/etc/arch-release" ] > /dev/null  2>&1; then
+    drivers_opt="no"
+  fi
 fi
 
 # Check for a supported kernelversion
