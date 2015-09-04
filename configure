@@ -1019,7 +1019,7 @@ Makefile patch for saa716x applied.
       fi
       patch -p0 < ../cx23885-gapped-clock.patch
       if [ "x$debug_opt" = "xyes" ]; then
-      echo "
+        echo "
 cx23885 gapped-clock patch applied.
 "
         confirmyes
@@ -1054,7 +1054,11 @@ Primary DVB system for si2168 is set to $dvb_opt
 
   # commit patches
   git add -A
-  git commit -a -m 'Add drivers, patch dvb-core.'
+  if [ "x$tvh_opt" = "xno" ]; then
+    git commit -a -m 'Add drivers, patch dvb-core.'
+  else
+    git commit -a -m 'Add drivers.'
+  fi
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Patches are committed to media_tree.
