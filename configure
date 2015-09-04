@@ -1629,6 +1629,19 @@ Do you want to install firmware? [N/y]
     cp -f firmware/* /lib/firmware/
   fi
   # Set msi mode for saa716x budget driver
-  echo "options saa716x_budget int_type=1" > /etc/modprobe.d/tbs_opensource.conf
+  if ! cat /etc/modprobe.d/tbs_opensource.conf | grep "int_type=1" > /dev/null 2>&1; then
+    echo "
+Do you want to set \"options saa716x_budget int_type=1\"
+
+in /etc/modprobe.d/tbs_opensource.conf?
+
+"
+    confirmyes "Yes, please do."
+    if [ "$?" != "0" ]; then
+      env_clean
+      exit 0
+    fi
+    echo "options saa716x_budget int_type=1" > /etc/modprobe.d/tbs_opensource.conf
+  fi
 fi
 env_clean
