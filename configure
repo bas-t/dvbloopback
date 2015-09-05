@@ -836,8 +836,12 @@ dvb-core is patched, dvbloopback added.
       else
         patch -p0 < ../Kconfig.patch
       fi
-    else
-      patch -p0 < ../Kconfig.patch
+    elif [ "$FIRST_DIGIT" -eq "4" ]; then
+      if [ "$SECOND_DIGIT" -lt "2" ]; then
+        patch -p0 < ../Kconfig.patch
+      else
+        patch -p0 < ../Kconfig-4.2.patch
+      fi
     fi
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
