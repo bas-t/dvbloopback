@@ -1,0 +1,10 @@
+--- drivers/media/pci/Makefile	2015-08-30 20:34:09.000000000 +0200
++++ drivers/media/pci/Makefile	2015-09-05 09:33:45.303163140 +0200
+@@ -23,6 +23,7 @@
+ obj-$(CONFIG_VIDEO_BT848) += bt8xx/
+ obj-$(CONFIG_VIDEO_SAA7134) += saa7134/
+ obj-$(CONFIG_VIDEO_SAA7164) += saa7164/
++obj-$(CONFIG_SAA716X_CORE) += saa716x/
+ obj-$(CONFIG_VIDEO_TW68) += tw68/
+ obj-$(CONFIG_VIDEO_DT3155) += dt3155/
+ obj-$(CONFIG_VIDEO_MEYE) += meye/
