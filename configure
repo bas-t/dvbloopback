@@ -1003,7 +1003,7 @@ dvb-core is patched.
     if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xbackup" ]; then
       mkdir drivers/media/pci/saa716x
       cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
-      patch -p0 < ../Kconfig.patch
+      patch -p0 < ../Kconfig-4.2.patch
       if [ "x$debug_opt" = "xyes" ]; then
         echo "
 saa716x added, Kconfig patch for saa716x applied.
@@ -1014,7 +1014,7 @@ saa716x added, Kconfig patch for saa716x applied.
           exit 0
         fi
       fi
-      patch -p0 < ../Makefile.patch
+      patch -p0 < ../Makefile-4.2.patch
       if [ "x$debug_opt" = "xyes" ]; then
       echo "
 Makefile patch for saa716x applied.
