@@ -864,8 +864,9 @@ saa716x added, Kconfig patched for saa716x.
     elif [ "$FIRST_DIGIT" -eq "4" ]; then
       if [ "$SECOND_DIGIT" -lt "2" ]; then
         patch -p0 < ../Makefile.patch
-    else
-      patch -p0 < ../Makefile-4.2.patch
+      else
+        patch -p0 < ../Makefile-4.2.patch
+      fi
     fi
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
