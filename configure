@@ -120,7 +120,7 @@ show_help(){
   echo "                        Only for Debian stable and Ubuntu LTS (version 16.04.x)."
   echo "                        "
   echo " --vanilla=<bool>       Specify a the vanilla kernel version you"
-  echo "                        want to compile. Like --vanilla=3.18.12"
+  echo "                        want to compile. Like --vanilla=4.1.8"
   echo "                        This disables the --stock= flag."
   echo "                        "
   echo " --headers=<opt>        [no] yes: install kernel headers package(s)."
@@ -393,17 +393,15 @@ Aborting...
   fi
   if [ "x$drivers_opt" = "xyes" ]; then
     if [ "$MAJOR" -eq "3" ]; then
-      if ! [ "$MINOR" -eq "10" -o "$MINOR" -eq "18" ]; then
+      if ! [ "$MINOR" -eq "10" ]; then
         echo -en "
-You are trying to compile TBS 6281/6285 and DVBSky T982 drivers
+You are trying to compile TBS 6281/6285 and DVBSky T982 drivers directly
 
-directly into a $vanilla_opt vanilla kernel, using the --drivers=yes
+into a $vanilla_opt vanilla kernel, using the --drivers=yes flag.
 
-flag with ./configure.
+I only backported the DVBSky T982 driver to 3.10.x vanilla kernel
 
-I only backported the DVBSky T982 driver to 3.10.x and 3.18.x
-
-vanilla kernel series and Debian Jessie's stock kernel (3.16.x).
+series and Debian Jessie's stock kernel (3.16.x).
 
 
 Aborting...
@@ -897,9 +895,7 @@ Makefile is patched for saa716x.
   # cx23885 patch
   if [ "x$drivers_opt" = "xyes" ];then
     if [ "$FIRST_DIGIT" -lt "4" ]; then
-      if [ "$SECOND_DIGIT" = "18" ]; then
-        patch -p0 < ../cx23885-3.18.patch
-      elif [ "$SECOND_DIGIT" = "16" ]; then
+      if [ "$SECOND_DIGIT" = "16" ]; then
         patch -p0 < ../cx23885-3.16.patch
       elif [ "$SECOND_DIGIT" = "10" ]; then
         patch -p0 < ../cx23885-3.10.patch
