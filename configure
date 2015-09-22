@@ -213,6 +213,8 @@ done
 
 export abi_opt
 
+DIR=`pwd`
+
 # Check git status
 if [ "x$update_opt" = "xyes" ]; then
   rm -rf linux* > /dev/null 2>&1
@@ -638,8 +640,6 @@ It will be compiled with all default options.
 "
       confirmyes "Yes, please do. [Y/n]"
       if [ "$?" = "0" ]; then
-        DIR=`pwd`
-        export DIR
         cd ..
         if [ -d descrambler ]; then
           rm -rf descrambler
@@ -671,7 +671,6 @@ ffdecsawrapper is compiled and installed.
           fi
         fi
         cd $DIR
-        unset DIR
       fi
     fi
   fi
@@ -1352,18 +1351,14 @@ Going to configure your $vanilla_opt vanilla kernel.
   if [ "$OS" = "Debian" ] && [ "$CONFIG" = "amd64" ]; then
     if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
       DIR=`pwd`
-      export DIR
       kernelconfig
-      unset DIR
     else
       make oldconfig
     fi
   elif [ "$OS" = "Ubuntu" ] && [ "$CONFIG" = "amd64" ]; then
     if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/ubuntuconfig ]; then
       DIR=`pwd`
-      export DIR
       kernelconfig
-      unset DIR
     else
       make oldconfig
     fi
