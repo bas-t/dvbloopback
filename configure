@@ -635,6 +635,7 @@ No /usr/bin/ffdecswrapper binary found.
 Do you want to compile and install it now?
 
 It will be compiled with all default options.
+
 "
       confirmyes "Yes, please do. [Y/n]"
       if [ "$?" = "0" ]; then
@@ -1105,7 +1106,11 @@ Patches are committed to media_tree.
   cd ../media_build
 
   # make install patch
-  patch -p0 < ../v4l-make-install.patch
+  if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xbackup" ]; then
+    patch -p0 < ../v4l-make-install.patch
+  else
+    patch -p0 < ../tbs-v4l-make-install.patch
+  fi
   if [ "$?" != "0" ]; then
     echo "
 make-install patch did not cleanly apply.
