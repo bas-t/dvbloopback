@@ -731,7 +731,7 @@ Source is downloaded.
 fi
 
 # v4l
-if [ "x4v4l_opt" != "x" ]; then
+if [ "x4vl_opt" != "x" ]; then
   echo "
 Going to clone the v4l buildsystem of choise.
 "
