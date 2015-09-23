@@ -680,6 +680,10 @@ fi
 
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
+  echo "
+Going to download the kernel source.
+"
+  sleep 3
   if uname -a | egrep 'Debian|Ubuntu' > /dev/null  2>&1; then
     apt-get source linux-image-`uname -r` -y || die "Error(s) while fetching Debian Linux source"
   else
@@ -726,6 +730,12 @@ Source is downloaded.
 fi
 
 # v4l
+if [ "x4v4l_opt" != "x" ]; then
+  echo "
+Going to clone the v4l buildsystem of choise.
+"
+  sleep 3
+fi
 if [ "x$v4l_opt" = "xyes" ];then
   git clone git://linuxtv.org/media_build.git || die "Error(s) while fetching v4l build system"
   git clone --depth=1 git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
@@ -749,6 +759,10 @@ fi
 
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
+  echo "
+Going to download the kernel source.
+"
+  sleep 3
   if [ "x$next_opt" = "xno" ]; then
     if echo "$vanilla_opt" | grep "rc" > /dev/null 2>&1; then
       wget https://www.kernel.org/pub/linux/kernel/v$MAJOR.x/testing/linux-$vanilla_opt.tar.xz || die "Error(s) while fetching Linux source"
