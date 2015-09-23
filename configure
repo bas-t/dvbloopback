@@ -1106,6 +1106,19 @@ Patches are committed to media_tree.
 
   # make install patch
   patch -p0 < ../v4l-make-install.patch
+  if [ "$?" != "0" ]; then
+    echo "
+make-install patch did not cleanly apply.
+
+Please open a ticket at https://github.com/bas-t/dvbloopback/issues
+
+and either hand me a updated patch, or ask me to update it.
+
+Aborting...
+"
+    env_clean
+    exit 0
+  fi
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 make install patch applied to media_build repo.
