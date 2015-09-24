@@ -1450,7 +1450,11 @@ Error(s) while compiling the v4l source.
 This happens quite often, it is a common upstream problem.
 
 Try again tomorrow, or in a couple of days,
-the error(s) will probably be fixed upstream by then.
+the error(s) will probably be fixed upstream by then,
+unless you are building Luis Alves' repo (--v4l=tbs).
+He did not update it for quite some time. It should still
+work for somewhat older kernels though. I guess up to
+linux-4.1.x, but did not test that.
 
 Aborting...
 "
