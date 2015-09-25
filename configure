@@ -76,8 +76,6 @@ If you hit 'n', 'make oldconfig' starts.
         [nN][oO]|[nN])
             make oldconfig
             ;;
-
-            ;;            
         *)
             cp -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ./.config
             ;;
