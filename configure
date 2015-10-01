@@ -134,6 +134,7 @@ show_help(){
   echo " --ffdecsawrapper=<opt> [yes] no: don't offer to compile ffdecsawrapper binary,"
   echo "                        even if I don't have it."
   echo "                        "
+  exit 0
 }
 
 stock_opt="yes"
