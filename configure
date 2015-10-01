@@ -113,6 +113,7 @@ show_help(){
   echo "                        "
   echo " --adapters=<opt>       [16] Set max number of adapters that are allowed,"
   echo "                        twice the number of physical adapters is needed."
+  echo "                        Max number is 32, since the kernel allowes 64."
   echo "                        "
   echo " --update=<opt>         [yes] no: don't auto-update or clean this repo."
   echo "                        "
