@@ -133,6 +133,7 @@ show_help(){
   echo " --debug=<opt>          [no] yes: pause to review (almost) each and every step."
   echo "                        "
   echo " --tvh=<opt>            [no] yes: don't insert dvbloopback, tvh does not need it"
+  echo "                        Setting --tvh to yes disables --ffdecsawrapper flag"
   echo "                        "
   echo " --ffdecsawrapper=<opt> [yes] no: don't offer to compile ffdecsawrapper binary,"
   echo "                        even if you don't have it."
