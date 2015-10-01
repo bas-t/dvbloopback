@@ -128,6 +128,7 @@ show_help(){
   echo "                        MythTV only sees the primary DVB system."
   echo "                        "
   echo " --abi=<opt>            [900] Debian/Ubuntu only kernel version tweak."
+  echo "                        Only set this option if you realy know what you do."
   echo "                        "
   echo " --debug=<opt>          [no] yes: pause to review (almost) each and every step."
   echo "                        "
