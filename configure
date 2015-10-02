@@ -91,6 +91,8 @@ show_help(){
   echo "                        "
   echo " --stock=<opt>          [yes] When running a Debian/Ubuntu stock kernel,"
   echo "                        recompile it with dvbloopback driver and dvb-core patch."
+  echo "                        comment out any 'backport' lines in your sources.list"
+  echo "                        'apt-get source' doesn't distinguish normal sources from backports" 
   echo "                        Only for Debian stable and Ubuntu LTS (version 16.04.x)."
   echo "                        "
   echo " --vanilla=<bool>       Specify a the vanilla kernel version you"
@@ -667,11 +669,7 @@ if [ "x$stock_opt" = "xyes" ]; then
 Going to download the kernel source.
 "
   sleep 3
-  if uname -a | egrep 'Debian|Ubuntu' > /dev/null  2>&1; then
-    apt-get source linux-image-`uname -r` -y || die "Error(s) while fetching Debian Linux source"
-  else
-    apt-get source linux -y || die "Error(s) while fetching Debian Linux source"
-  fi
+  apt-get source linux -y || die "Error(s) while fetching Debian Linux source"
   cd linux-*
   FIRST_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
   SECOND_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
