@@ -1,0 +1,42 @@
+--- drivers/media/v4l2-core/videobuf2-dma-contig.c	2015-10-03 13:52:18.000000000 +0200
++++ drivers/media/v4l2-core/videobuf2-dma-contig.c	2015-10-09 11:04:02.800535670 +0200
+@@ -120,7 +120,8 @@
+ 	if (!sgt || buf->db_attach)
+ 		return;
+ 
+-	dma_sync_sg_for_device(buf->dev, sgt->sgl, sgt->nents, buf->dma_dir);
++	dma_sync_sg_for_device(buf->dev, sgt->sgl, sgt->orig_nents,
++				buf->dma_dir);
+ }
+ 
+ static void vb2_dc_finish(void *buf_priv)
+@@ -132,7 +133,7 @@
+ 	if (!sgt || buf->db_attach)
+ 		return;
+ 
+-	dma_sync_sg_for_cpu(buf->dev, sgt->sgl, sgt->nents, buf->dma_dir);
++	dma_sync_sg_for_cpu(buf->dev, sgt->sgl, sgt->orig_nents, buf->dma_dir);
+ }
+ 
+ /*********************************************/
+--- drivers/media/v4l2-core/videobuf2-dma-sg.c	2015-10-03 13:52:18.000000000 +0200
++++ drivers/media/v4l2-core/videobuf2-dma-sg.c	2015-10-09 11:01:25.520529546 +0200
+@@ -210,7 +210,8 @@
+ 	if (buf->db_attach)
+ 		return;
+ 
+-	dma_sync_sg_for_device(buf->dev, sgt->sgl, sgt->nents, buf->dma_dir);
++	dma_sync_sg_for_device(buf->dev, sgt->sgl, sgt->orig_nents,
++				buf->dma_dir);
+ }
+ 
+ static void vb2_dma_sg_finish(void *buf_priv)
+@@ -222,7 +223,7 @@
+ 	if (buf->db_attach)
+ 		return;
+ 
+-	dma_sync_sg_for_cpu(buf->dev, sgt->sgl, sgt->nents, buf->dma_dir);
++	dma_sync_sg_for_cpu(buf->dev, sgt->sgl, sgt->orig_nents, buf->dma_dir);
+ }
+ 
+ static inline int vma_is_io(struct vm_area_struct *vma)
