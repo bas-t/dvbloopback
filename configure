@@ -627,6 +627,7 @@ It will be compiled with all default options.
           rm -rf descrambler
         fi
         git clone https://github.com/bas-t/descrambler.git && cd descrambler
+        git checkout stable
         ./configure
         if [ "$?" != "0" ]; then
           echo -en "
