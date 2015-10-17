@@ -610,52 +610,39 @@ fi
 #
 
 if [ "x$ffdecsawrapper_opt" = "xyes" ]; then
-  if ! [ -f /usr/bin/ffdecsawrapper ]; then
-    if [ "x$tvh_opt" = "xno" ]; then
+  if [ "x$tvh_opt" = "xno" ]; then
+    cd ..
+    if [ -d descrambler ]; then
+      rm -rf descrambler
+    fi
+    git clone https://github.com/bas-t/descrambler.git && cd descrambler
+    git checkout stable
+    ./configure
+    if [ "$?" != "0" ]; then
       echo -en "
-No /usr/bin/ffdecswrapper binary found.
-
-Do you want to compile and install it now?
-
-It will be compiled with all default options.
-
-"
-      confirmyes "Yes, please do. [Y/n]"
-      if [ "$?" = "0" ]; then
-        cd ..
-        if [ -d descrambler ]; then
-          rm -rf descrambler
-        fi
-        git clone https://github.com/bas-t/descrambler.git && cd descrambler
-        git checkout stable
-        ./configure
-        if [ "$?" != "0" ]; then
-          echo -en "
 Error(s) encountered while compiling ffdecsawrapper.
 
 Continue anyway?
 "
-          confirmyes
-          if [ "$?" != "0" ]; then
-            cd $DIR
-            env_clean
-            exit 0
-          fi
-        fi
-        if [ "x$debug_opt" = "xyes" ]; then
-          echo "
-ffdecsawrapper is compiled and installed.
-"
-          confirmyes
-          if [ "$?" != "0" ]; then
-            cd $DIR
-            env_clean
-            exit 0
-          fi
-        fi
+      confirmyes
+      if [ "$?" != "0" ]; then
         cd $DIR
+        env_clean
+        exit 0
       fi
     fi
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
+ffdecsawrapper is compiled and installed.
+"
+      confirmyes
+      if [ "$?" != "0" ]; then
+        cd $DIR
+        env_clean
+        exit 0
+      fi
+    fi
+    cd $DIR
   fi
 fi
 
