@@ -979,6 +979,16 @@ if ! [ "x$v4l_opt" = "xno" ]; then
 
   # vb2 patch
   patch -p0 < ../vb2.patch
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+vb2 patch applied.
+"
+    confirmyes
+    if [ "$?" != "0" ]; then
+      env_clean
+      exit 0
+    fi
+  fi
 
   # dvbloopback patch
   if [ "x$tvh_opt" = "xno" ]; then
@@ -1089,18 +1099,14 @@ Patches are committed to media_tree.
   cd ../media_build
 
   # make install patch
-  if [ "x$v4l_opt" = "xyes" -o "x$v4l_opt" = "xbackup" ]; then
-    patch -p0 < ../v4l-make-install.patch
-  else
-    patch -p0 < ../tbs-v4l-make-install.patch
-  fi
+  patch -p0 < ../v4l-make-install.patch
   if [ "$?" != "0" ]; then
     echo "
 make-install patch did not cleanly apply.
 
 Please open a ticket at https://github.com/bas-t/dvbloopback/issues
 
-and either hand me a updated patch, or ask me to update it.
+and either hand me an updated patch, or ask me to update it.
 
 Aborting...
 "
@@ -1182,7 +1188,7 @@ Not going to install any more of those, aborting...
               echo  "
 
 You have a total of 10 \"$DEBIANKERNEL.0-90x-amd64\" kernels installed.
-You are currently running the $RUNNING version of those.
+You are currently running the $RUNNING version.
 Not going to install any more of those, aborting...
 "
               env_clean
@@ -1224,7 +1230,7 @@ Not going to install any more of those, aborting...
               echo  "
 
 You have a total of 10 \"$DEBIANKERNEL.0-90x-686-pae\" kernels installed.
-You are currently running the $RUNNING version of those.
+You are currently running the $RUNNING version.
 Not going to install any more of those, aborting...
 "
               env_clean
@@ -1305,7 +1311,7 @@ Not going to install any more of those, aborting...
             echo  "
 
 You have a total of 10 \"$UBUNTUKERNEL.0-90x-generic\" kernels installed.
-You are currently running the $RUNNING version of those.
+You are currently running the $RUNNING version.
 Not going to install any more of those, aborting...
 "
             env_clean
