@@ -918,7 +918,7 @@ si2168 and si2157 added/updated.
         fi
       fi
     elif [ "$FIRST_DIGIT" -eq "4" ]; then
-      if [ "$SECOND_DIGIT" -lt "2" ]; then
+      if [ "$SECOND_DIGIT" -lt "3" ]; then
         cp -f ../drivers/media/tuners/* drivers/media/tuners/
         cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
         if [ "x$debug_opt" = "xyes" ]; then
