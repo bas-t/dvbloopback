@@ -659,7 +659,7 @@ Going to download the kernel source.
   apt-get source linux -y || die "Error(s) while fetching Debian Linux source"
   cd linux-*
   FIRST_DIGIT=$(echo `pwd` | rev | cut -d'/' -f1 | rev | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
-  SECOND_DIGIT=$( echo `pwd` | rev | cut -d'/' -f1 | rev | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
+  SECOND_DIGIT=$(echo `pwd` | rev | cut -d'/' -f1 | rev | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
   if [ "$FIRST_DIGIT" -lt "4" ]; then
     if ! [ "$SECOND_DIGIT" -eq "16" ]; then
       if [ "x$drivers_opt" = "xyes" ]; then
