@@ -194,17 +194,6 @@ for opt do
   esac
 done
 
-if pwd | grep -o '[[:digit:]]\+' > /dev/null 2>&1; then
-  echo "
-Your are running from `pwd` and it contains one or more digits.
-
-Please run from a dir that does not contain digits.
-
-Aborting...
-"
-  exit 1
-fi
-
 export abi_opt
 
 DIR=`pwd`
@@ -669,8 +658,8 @@ Going to download the kernel source.
   sleep 3
   apt-get source linux -y || die "Error(s) while fetching Debian Linux source"
   cd linux-*
-  FIRST_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
-  SECOND_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
+  FIRST_DIGIT=$(echo `pwd` | rev | cut -d'/' -f1 | rev | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
+  SECOND_DIGIT=$( echo `pwd` | rev | cut -d'/' -f1 | rev | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
   if [ "$FIRST_DIGIT" -lt "4" ]; then
     if ! [ "$SECOND_DIGIT" -eq "16" ]; then
       if [ "x$drivers_opt" = "xyes" ]; then
@@ -801,8 +790,8 @@ fi
 
 # Common (stock and vanilla kernels)
 if [ "x$v4l_opt" = "xno" ]; then
-  FIRST_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
-  SECOND_DIGIT=$(echo `pwd` | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
+  FIRST_DIGIT=$(echo `pwd` | rev | cut -d'/' -f1 | rev | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
+  SECOND_DIGIT=$(echo `pwd` | rev | cut -d'/' -f1 | rev | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
 
   # dvbloopback patch
   if [ "x$tvh_opt" = "xno" ]; then
@@ -1164,7 +1153,7 @@ fi
 if [ "x$stock_opt" = "xyes" ]; then
   if [ "$OS" = "Debian" ]; then
     if [ "$abi_opt" = "900" ]; then
-      DEBIANKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
+      DEBIANKERNEL=$(echo `pwd` | rev | cut -d'/' -f1 | rev | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
       if [ "$CONFIG" = "amd64" ]; then
         RUNNING=$(uname -r | grep "90[0-9]-amd64")
         if [ -d /lib/modules/$DEBIANKERNEL.0-900-amd64 ]; then
@@ -1285,7 +1274,7 @@ Kernel configured.
       sed -i "/CONFIG_DVB_S921=m/a CONFIG_DVB_SAA716X_CORE=m" debian.*/config/config.common.ubuntu
     fi
     fakeroot debian/rules updateconfigs
-    UBUNTUKERNEL=$(echo `pwd` | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
+    UBUNTUKERNEL=$(echo `pwd` | rev | cut -d'/' -f1 | rev | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
     _ABINAME=$(cat debian/changelog | head -1 | grep -o '[[:digit:]]\+' | head -4 | awk 'NR==4')
     export _ABINAME
     if [ "$abi_opt" = "900" ]; then
