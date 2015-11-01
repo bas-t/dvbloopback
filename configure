@@ -194,6 +194,17 @@ for opt do
   esac
 done
 
+if pwd | grep -o '[[:digit:]]\+' > /dev/null 2>&1; then
+  echo "
+Your are running from `pwd` and it contains one or more digits.
+
+Please run from a dir that does not contain digits.
+
+Aborting...
+"
+  exit 1
+fi
+
 export abi_opt
 
 DIR=`pwd`
