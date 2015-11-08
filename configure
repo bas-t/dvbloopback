@@ -710,6 +710,9 @@ if [ "x$v4l_opt" = "xyes" ];then
 elif [ "x$v4l_opt" = "xbackup" ]; then
   git clone git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
   git clone --depth=1 git://github.com/bas-t/media_tree.git || die "Error(s) while fetching v4l source tree"
+elif [ "x$v4l_opt" = "x3.10" ]; then
+  git clone -b 3.10 git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
+  git clone --depth=1 -b 3.10 git://github.com/bas-t/media_tree.git || die "Error(s) while fetching v4l source tree"
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Source is downloaded.
@@ -1020,28 +1023,30 @@ dvb-core is patched.
 
   # saa716x patch
   if [ "x$drivers_opt" = "xyes" ];then
-    mkdir drivers/media/pci/saa716x
-    cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
-    patch -p0 < ../Kconfig-4.2.patch
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
+    if ! [ "x$v4l_opt" = "x3.10" ]; then
+      mkdir drivers/media/pci/saa716x
+      cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
+      patch -p0 < ../Kconfig-4.2.patch
+      if [ "x$debug_opt" = "xyes" ]; then
+        echo "
 saa716x added, Kconfig patch for saa716x applied.
 "
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
+        confirmyes
+        if [ "$?" != "0" ]; then
+          env_clean
+          exit 0
+        fi
       fi
-    fi
-    patch -p0 < ../Makefile-4.2.patch
-    if [ "x$debug_opt" = "xyes" ]; then
-    echo "
+      patch -p0 < ../Makefile-4.2.patch
+      if [ "x$debug_opt" = "xyes" ]; then
+      echo "
 Makefile patch for saa716x applied.
 "
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
+        confirmyes
+        if [ "$?" != "0" ]; then
+          env_clean
+          exit 0
+        fi
       fi
     fi
     patch -p0 < ../cx23885-gapped-clock.patch
@@ -1058,22 +1063,24 @@ cx23885 gapped-clock patch applied.
   fi
 
   # silabs si2168 DVB-C/T patch
-  if [ "x$dvb_opt" = "xdvbc" ]; then
-    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
-  elif [ "x$dvb_opt" = "xdvbt" ]; then
-    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
-  elif [ "x$dvb_opt" = "xdvbt2" ]; then
-    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT2, SYS_DVBT, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
-  fi
-  if [ "x$dvb_opt" = "xdvbc" -o "x$dvb_opt" = "xdvbt" -o "x$dvb_opt" = "xdvbt2" ]; then
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
+  if ! [ "x$v4l_opt" = "x3.10" ]; then
+    if [ "x$dvb_opt" = "xdvbc" ]; then
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    elif [ "x$dvb_opt" = "xdvbt" ]; then
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    elif [ "x$dvb_opt" = "xdvbt2" ]; then
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT2, SYS_DVBT, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    fi
+    if [ "x$dvb_opt" = "xdvbc" -o "x$dvb_opt" = "xdvbt" -o "x$dvb_opt" = "xdvbt2" ]; then
+      if [ "x$debug_opt" = "xyes" ]; then
+        echo "
 Primary DVB system for si2168 is set to $dvb_opt 
 "
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
+        confirmyes
+        if [ "$?" != "0" ]; then
+          env_clean
+          exit 0
+        fi
       fi
     fi
   fi
@@ -1099,9 +1106,10 @@ Patches are committed to media_tree.
   cd ../media_build
 
   # make install patch
-  patch -p0 < ../v4l-make-install.patch
-  if [ "$?" != "0" ]; then
-    echo "
+  if ! [ "x$v4l_opt" = "x3.10" ]; then
+    patch -p0 < ../v4l-make-install.patch
+    if [ "$?" != "0" ]; then
+      echo "
 make-install patch did not cleanly apply.
 
 Please open a ticket at https://github.com/bas-t/dvbloopback/issues
@@ -1110,30 +1118,33 @@ and either hand me an updated patch, or ask me to update it.
 
 Aborting...
 "
-    env_clean
-    exit 0
-  fi
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
-make install patch applied to media_build repo.
-"
-    confirmyes
-    if [ "$?" != "0" ]; then
       env_clean
       exit 0
+    fi
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
+make install patch applied to media_build repo.
+"
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
+      fi
     fi
   fi
 
   # commit patch
-  git commit -a -m 'Install drivers in /lib/modules/`uname -r`/updates/media'
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
+  if ! [ "x$v4l_opt" = "x3.10" ]; then
+    git commit -a -m 'Install drivers in /lib/modules/`uname -r`/updates/media'
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
 Patches are committed to media_build.
 "
-    confirmyes
-    if [ "$?" != "0" ]; then
-      env_clean
-      exit 0
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
+      fi
     fi
   fi
 fi
