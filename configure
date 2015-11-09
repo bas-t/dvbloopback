@@ -605,8 +605,7 @@ Aborting...
 fi
 
 #
-# Check for ffdecsawrapper binary.
-# If it is not in place, offer to compile and install it.
+# Download descrambler repo and run ./configure
 #
 
 if [ "x$ffdecsawrapper_opt" = "xyes" ]; then
@@ -616,7 +615,6 @@ if [ "x$ffdecsawrapper_opt" = "xyes" ]; then
       rm -rf descrambler
     fi
     git clone https://github.com/bas-t/descrambler.git && cd descrambler
-    git checkout stable
     ./configure
     if [ "$?" != "0" ]; then
       echo -en "
