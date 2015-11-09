@@ -648,7 +648,7 @@ Continue anyway?
     fi
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
-ffdecsawrapper is compiled and installed.
+ffdecsawrapper is (re)compiled and installed.
 "
       confirmyes
       if [ "$?" != "0" ]; then
