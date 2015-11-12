@@ -1041,48 +1041,76 @@ dvb-core is patched.
     fi
   fi
 
-  # saa716x patch
+  # DVBSky T982 support
   if [ "x$drivers_opt" = "xyes" ];then
-    if [ "x$v4l_opt" = "xyes" ]; then
-      mkdir drivers/media/pci/saa716x
-      cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
-      patch -p0 < ../Kconfig-4.2.patch
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
-saa716x added, Kconfig patch for saa716x applied.
-"
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
-      fi
-      patch -p0 < ../Makefile-4.2.patch
-      if [ "x$debug_opt" = "xyes" ]; then
+    cp -f ../drivers/media/tuners/* drivers/media/tuners/
+    cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
+    if [ "x$debug_opt" = "xyes" ]; then
       echo "
-Makefile patch for saa716x applied.
+si2168 and si2157 added/updated.
 "
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
       fi
     fi
-    if [ "x$v4l_opt" = "xyes" ]; then
-      patch -p0 < ../cx23885-gapped-clock.patch
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
-cx23885 gapped-clock patch applied.
+    if [ "$V4L_VERSION" = "18" ]; then
+      patch -p0 < ../cx23885-3.18.patch
+    elif [ "$V4L_VERSION" = "10" ]; then
+      patch -p0 < ../cx23885-3.10.patch
+    fi
+  fi
+
+  # saa716x patch
+  if [ "x$drivers_opt" = "xyes" ];then
+    mkdir drivers/media/pci/saa716x
+    cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
+    if [ "$V4L_VERSION" = "10" ]; then
+      patch -p0 < ../Kconfig-3.10.patch
+    else
+      patch -p0 < ../Kconfig-4.2.patch
+    fi
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
+saa716x added, Kconfig patch for saa716x applied.
 "
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
+      fi
+    fi
+    if [ "$V4L_VERSION" = "10" ]; then
+      patch -p0 < ../Makefile-3.10.patch
+    else
+      patch -p0 < ../Makefile-4.2.patch
+    fi
+    if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+Makefile patch for saa716x applied.
+"
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
       fi
     fi
   fi
+  if [ "x$v4l_opt" = "xyes" ]; then
+    patch -p0 < ../cx23885-gapped-clock.patch
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
+cx23885 gapped-clock patch applied.
+"
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
+      fi
+    fi
+  fi
+fi
 
   # silabs si2168 DVB-C/T patch
   if [ "x$dvb_opt" = "xdvbc" ]; then
