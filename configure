@@ -363,18 +363,19 @@ Aborting...
 "
       exit 1
     fi
-  fi
-  if [ "$FIRST_DIGIT" -lt "4" ]; then
-    if [ "$SECOND_DIGIT" -lt "10" ]; then
-      echo "
+  else
+    if [ "$FIRST_DIGIT" -lt "4" ]; then
+      if [ "$SECOND_DIGIT" -lt "10" ]; then
+        echo "
 Your running kernel is < 3.10.x
 
 Minimum supported version is 3.10.x
 
 Aborting...
 "
-      env_clean
-      exit 0
+        env_clean
+        exit 0
+      fi
     fi
   fi
 elif ! [ "x$vanilla_opt" = "x" ]; then
