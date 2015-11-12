@@ -720,21 +720,22 @@ if [ "x$v4l_opt" != "xno" ]; then
 Going to clone the v4l buildsystem of choise.
 "
   sleep 3
-fi
-if [ "x$v4l_opt" = "xyes" ];then
-  git clone git://linuxtv.org/media_build.git || die "Error(s) while fetching v4l build system"
-  git clone --depth=1 git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
-else
-  git clone git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
-  git clone --depth=1 -b $v4l_opt git://github.com/bas-t/linux-stable.git media_tree || die "Error(s) while fetching v4l source tree"
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
+
+  if [ "x$v4l_opt" = "xyes" ];then
+    git clone git://linuxtv.org/media_build.git || die "Error(s) while fetching v4l build system"
+    git clone --depth=1 git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
+  else
+    git clone git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
+    git clone --depth=1 -b $v4l_opt git://github.com/bas-t/linux-stable.git media_tree || die "Error(s) while fetching v4l source tree"
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
 Source is downloaded.
 "
-    confirmyes
-    if [ "$?" != "0" ]; then
-      env_clean
-      exit 0
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
+      fi
     fi
   fi
 fi
