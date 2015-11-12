@@ -1,7 +1,7 @@
 #!/bin/bash
 
 env_clean(){
-for i in DIR MAJOR MINOR OS RELEASE FIRST_DIGIT SECOND_DIGIT CONCURRENCY_LEVEL
+for i in DIR MAJOR MINOR OS RELEASE FIRST_DIGIT SECOND_DIGIT CONCURRENCY_LEVEL V4L_VERSION
 do
 if ! [ -z ${i+x} ]; then
   unset $i
@@ -342,19 +342,22 @@ fi
 
 # Check for a supported kernelversion
 if ! [ "x$v4l_opt" = "xno" ]; then
+  if ! [ "x$v4l_opt" = "xyes" ]; then
+    V4L_VERSION=$(echo $v4l_opt | grep -o '[[:digit:]]\+' | awk 'NR==2')
+  fi
   FIRST_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | head -n1)
   SECOND_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | awk 'NR==2')
-  if [ "x$v4l_opt" = "x3.10" ]; then
+  if ! [ "x$v4l_opt" = "xyes" ]; then
     if [ "$FIRST_DIGIT" -lt "4" ]; then
       echo "
-Minimum supported kernel series is 4.1.x
+Minimum supported kernel series is 4.2.x
 
 Aborting...
 "
       exit 1
-    elif [ "$FIRST_DIGIT" -lt "5" ] && [ "$SECOND_DIGIT" -lt "1" ]; then
+    elif [ "$FIRST_DIGIT" -lt "5" ] && [ "$SECOND_DIGIT" -lt "2" ]; then
       echo "
-Minimum supported kernel series is 4.1.x
+Minimum supported kernel series is 4.2.x
 
 Aborting...
 "
@@ -721,12 +724,9 @@ fi
 if [ "x$v4l_opt" = "xyes" ];then
   git clone git://linuxtv.org/media_build.git || die "Error(s) while fetching v4l build system"
   git clone --depth=1 git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
-elif [ "x$v4l_opt" = "x3.10" ]; then
+else
   git clone git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
-  git clone --depth=1 -b 3.10.0 git://github.com/bas-t/linux-stable.git media_tree || die "Error(s) while fetching v4l source tree"
-elif [ "x$v4l_opt" = "x3.18" ]; then
-  git clone git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
-  git clone --depth=1 -b 3.18.0 git://github.com/bas-t/linux-stable.git media_tree || die "Error(s) while fetching v4l source tree"
+  git clone --depth=1 -b $v4l_opt git://github.com/bas-t/linux-stable.git media_tree || die "Error(s) while fetching v4l source tree"
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Source is downloaded.
@@ -995,7 +995,7 @@ if ! [ "x$v4l_opt" = "xno" ]; then
   cd media_tree
 
   # vb2 patch
-  if ! [ "x$v4l_opt" = "x3.10" -o "x$v4l_opt" = "x3.18" ]; then
+  if [ "x$v4l_opt" = "xyes" ]; then
     patch -p0 < ../vb2.patch
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
@@ -1024,7 +1024,7 @@ dvbloopback module added to source tree.
         exit 0
       fi
     fi
-    if ! [ "x$v4l_opt" = "x3.10" ]; then
+    if ! [ "$V4L_VERSION" = "10" ]; then
       patch -p0 < ../3.13-dvb-core.patch
     else
       patch -p0 < ../3.7-dvb-core.patch
@@ -1043,7 +1043,7 @@ dvb-core is patched.
 
   # saa716x patch
   if [ "x$drivers_opt" = "xyes" ];then
-    if ! [ "x$v4l_opt" = "x3.10" -o "x$v4l_opt" = "x3.18" ]; then
+    if [ "x$v4l_opt" = "xyes" ]; then
       mkdir drivers/media/pci/saa716x
       cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
       patch -p0 < ../Kconfig-4.2.patch
@@ -1069,7 +1069,7 @@ Makefile patch for saa716x applied.
         fi
       fi
     fi
-    if ! [ "x$v4l_opt" = "x3.10" -o "x$v4l_opt" = "x3.18" ]; then
+    if [ "x$v4l_opt" = "xyes" ]; then
       patch -p0 < ../cx23885-gapped-clock.patch
       if [ "x$debug_opt" = "xyes" ]; then
         echo "
@@ -1085,24 +1085,22 @@ cx23885 gapped-clock patch applied.
   fi
 
   # silabs si2168 DVB-C/T patch
-  if ! [ "x$v4l_opt" = "x3.10" -o "x$v4l_opt" = "x3.18" ]; then
-    if [ "x$dvb_opt" = "xdvbc" ]; then
-      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
-    elif [ "x$dvb_opt" = "xdvbt" ]; then
-      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
-    elif [ "x$dvb_opt" = "xdvbt2" ]; then
-      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT2, SYS_DVBT, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
-    fi
-    if [ "x$dvb_opt" = "xdvbc" -o "x$dvb_opt" = "xdvbt" -o "x$dvb_opt" = "xdvbt2" ]; then
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
+  if [ "x$dvb_opt" = "xdvbc" ]; then
+    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+  elif [ "x$dvb_opt" = "xdvbt" ]; then
+    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+  elif [ "x$dvb_opt" = "xdvbt2" ]; then
+    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT2, SYS_DVBT, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+  fi
+  if [ "x$dvb_opt" = "xdvbc" -o "x$dvb_opt" = "xdvbt" -o "x$dvb_opt" = "xdvbt2" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
 Primary DVB system for si2168 is set to $dvb_opt 
 "
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
       fi
     fi
   fi
@@ -1128,7 +1126,7 @@ Patches are committed to media_tree.
   cd ../media_build
 
   # make install patch
-  if ! [ "x$v4l_opt" = "x3.10" -o "x$v4l_opt" = "x3.18" ]; then
+  if [ "x$v4l_opt" = "xyes" ]; then
     patch -p0 < ../v4l-make-install.patch
     if [ "$?" != "0" ]; then
       echo "
@@ -1154,11 +1152,11 @@ make install patch applied to media_build repo.
       fi
     fi
   else
-    git checkout $v4l_opt
+    git checkout 3.$V4L_VERSION
   fi
 
   # commit patch
-  if ! [ "x$v4l_opt" = "x3.10" -o "x$v4l_opt" = "x3.18" ]; then
+  if [ "x$v4l_opt" = "xyes" ]; then
     git commit -a -m 'Install drivers in /lib/modules/`uname -r`/updates/media'
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
