@@ -103,9 +103,8 @@ show_help(){
   echo "                        "
   echo " --v4l=<opt>            [no] yes: compile current official v4l tree"
   echo "                        against your running kernel."
-  echo "                        backup: use own backup repo's."
   echo "                        Disables --stock= and --vanilla= flags."
-  echo "                        Warning: using the --v4l flag can corrupt your system"
+  echo "                        Warning: using the --v4l flag is not recommended."
   echo "                        "
   echo " --next=<opt>           [no] 4.1 : compile linux-next."
   echo "                        This version number should be >= current RC version."
@@ -722,12 +721,12 @@ fi
 if [ "x$v4l_opt" = "xyes" ];then
   git clone git://linuxtv.org/media_build.git || die "Error(s) while fetching v4l build system"
   git clone --depth=1 git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
-elif [ "x$v4l_opt" = "xbackup" ]; then
-  git clone git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
-  git clone --depth=1 git://github.com/bas-t/media_tree.git || die "Error(s) while fetching v4l source tree"
 elif [ "x$v4l_opt" = "x3.10" ]; then
-  git clone -b 3.10 git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
-  git clone --depth=1 -b 3.10 git://github.com/bas-t/media_tree.git || die "Error(s) while fetching v4l source tree"
+  git clone git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
+  git clone --depth=1 -b 3.10.0 git://github.com/bas-t/linux-stable.git media_tree || die "Error(s) while fetching v4l source tree"
+elif [ "x$v4l_opt" = "x3.18" ]; then
+  git clone git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
+  git clone --depth=1 -b 3.18.0 git://github.com/bas-t/linux-stable.git media_tree || die "Error(s) while fetching v4l source tree"
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Source is downloaded.
@@ -996,7 +995,7 @@ if ! [ "x$v4l_opt" = "xno" ]; then
   cd media_tree
 
   # vb2 patch
-  if ! [ "x$v4l_opt" = "x3.10" ]; then
+  if ! [ "x$v4l_opt" = "x3.10" -o "x$v4l_opt" = "x3.18" ]; then
     patch -p0 < ../vb2.patch
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
@@ -1025,7 +1024,11 @@ dvbloopback module added to source tree.
         exit 0
       fi
     fi
-    patch -p0 < ../3.13-dvb-core.patch
+    if ! [ "x$v4l_opt" = "x3.10" ]; then
+      patch -p0 < ../3.13-dvb-core.patch
+    else
+      patch -p0 < ../3.7-dvb-core.patch
+    fi
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
 dvb-core is patched.
@@ -1040,7 +1043,7 @@ dvb-core is patched.
 
   # saa716x patch
   if [ "x$drivers_opt" = "xyes" ];then
-    if ! [ "x$v4l_opt" = "x3.10" ]; then
+    if ! [ "x$v4l_opt" = "x3.10" -o "x$v4l_opt" = "x3.18" ]; then
       mkdir drivers/media/pci/saa716x
       cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
       patch -p0 < ../Kconfig-4.2.patch
@@ -1066,7 +1069,7 @@ Makefile patch for saa716x applied.
         fi
       fi
     fi
-    if ! [ "x$v4l_opt" = "x3.10" ]; then
+    if ! [ "x$v4l_opt" = "x3.10" -o "x$v4l_opt" = "x3.18" ]; then
       patch -p0 < ../cx23885-gapped-clock.patch
       if [ "x$debug_opt" = "xyes" ]; then
         echo "
@@ -1082,7 +1085,7 @@ cx23885 gapped-clock patch applied.
   fi
 
   # silabs si2168 DVB-C/T patch
-  if ! [ "x$v4l_opt" = "x3.10" ]; then
+  if ! [ "x$v4l_opt" = "x3.10" -o "x$v4l_opt" = "x3.18" ]; then
     if [ "x$dvb_opt" = "xdvbc" ]; then
       sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
     elif [ "x$dvb_opt" = "xdvbt" ]; then
@@ -1125,7 +1128,7 @@ Patches are committed to media_tree.
   cd ../media_build
 
   # make install patch
-  if ! [ "x$v4l_opt" = "x3.10" ]; then
+  if ! [ "x$v4l_opt" = "x3.10" -o "x$v4l_opt" = "x3.18" ]; then
     patch -p0 < ../v4l-make-install.patch
     if [ "$?" != "0" ]; then
       echo "
@@ -1150,10 +1153,12 @@ make install patch applied to media_build repo.
         exit 0
       fi
     fi
+  else
+    git checkout $v4l_opt
   fi
 
   # commit patch
-  if ! [ "x$v4l_opt" = "x3.10" ]; then
+  if ! [ "x$v4l_opt" = "x3.10" -o "x$v4l_opt" = "x3.18" ]; then
     git commit -a -m 'Install drivers in /lib/modules/`uname -r`/updates/media'
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
