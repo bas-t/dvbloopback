@@ -1110,7 +1110,6 @@ cx23885 gapped-clock patch applied.
       fi
     fi
   fi
-fi
 
   # silabs si2168 DVB-C/T patch
   if [ "x$dvb_opt" = "xdvbc" ]; then
