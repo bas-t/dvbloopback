@@ -99,7 +99,7 @@ show_help(){
   echo "                        want to compile. Like --vanilla=4.1.8"
   echo "                        This disables the --stock= flag."
   echo "                        "
-  echo " --headers=<opt>        [no] yes: install kernel headers package(s)."
+  echo " --headers=<opt>        [yes] no: don't install kernel headers package(s)."
   echo "                        "
   echo " --v4l=<opt>            [no] yes: compile current official v4l tree"
   echo "                        against your running kernel."
@@ -144,7 +144,7 @@ show_help(){
 
 stock_opt="yes"
 vanilla_opt=""
-headers_opt="no"
+headers_opt="yes"
 v4l_opt="no"
 next_opt="no"
 adapters_opt="16"
