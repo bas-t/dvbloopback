@@ -350,14 +350,14 @@ if ! [ "x$v4l_opt" = "xno" ]; then
   if ! [ "x$v4l_opt" = "xyes" ]; then
     if [ "$FIRST_DIGIT" -lt "4" ]; then
       echo "
-Minimum supported kernel series is 4.2.x
+Minimum supported kernel series is 4.1.x
 
 Aborting...
 "
       exit 1
-    elif [ "$FIRST_DIGIT" -lt "5" ] && [ "$SECOND_DIGIT" -lt "2" ]; then
+    elif [ "$FIRST_DIGIT" -lt "5" ] && [ "$SECOND_DIGIT" -lt "1" ]; then
       echo "
-Minimum supported kernel series is 4.2.x
+Minimum supported kernel series is 4.1.x
 
 Aborting...
 "
