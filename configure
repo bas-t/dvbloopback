@@ -815,7 +815,7 @@ fi
 
 # All
 if ! [ "x$usercopy_opt" = "x0" ]; then
-  patch -p0 < ../usercopy-import.patch
+  patch --directory=.. -p0 < ../usercopy-import.patch
   patch -p0 < ../usercopy-export.patch
   if [ "x$debug_opt" = "xyes" ]; then
     echo "

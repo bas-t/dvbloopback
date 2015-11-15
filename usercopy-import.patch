@@ -1,5 +1,5 @@
---- ../dvbloopback/dvb_loopback.c
-+++ ../dvbloopback/dvb_loopback.c
+--- dvbloopback/dvb_loopback.c
++++ dvbloopback/dvb_loopback.c
 @@ -113,102 +113,6 @@ static void rvfree(void *mem, unsigned long size)
  	vfree(mem);
  }
