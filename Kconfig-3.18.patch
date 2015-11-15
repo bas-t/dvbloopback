@@ -1,7 +1,5 @@
-diff --git a/drivers/media/pci/Kconfig b/drivers/media/pci/Kconfig
-index f8cec8e..953ef58 100644
---- a/drivers/media/pci/Kconfig
-+++ b/drivers/media/pci/Kconfig
+--- drivers/media/pci/Kconfig
++++ drivers/media/pci/Kconfig
 @@ -30,6 +30,7 @@ source "drivers/media/pci/cx23885/Kconfig"
  source "drivers/media/pci/cx25821/Kconfig"
  source "drivers/media/pci/cx88/Kconfig"
