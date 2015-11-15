@@ -29,6 +29,17 @@ run ./configure --help for valid options\E[0m
     exit 1
 }
 
+_patch(){
+if ! [ "$?" -eq "0" ]; then
+  echo "
+Could not apply the patch.
+Aborting...
+"
+  env_clean
+  exit 1
+fi
+}
+
 confirmno(){
     # call with a prompt string or use a default
     read -r -p "${1:-Are you sure? [y/N]} " response
@@ -816,7 +827,9 @@ fi
 # All
 if ! [ "x$usercopy_opt" = "x0" ]; then
   patch --directory=.. -p0 < ../usercopy-import.patch
+  _patch
   patch -p0 < ../usercopy-export.patch
+  _patch
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 usercopy patches aplied.
@@ -830,6 +843,7 @@ usercopy patches aplied.
 fi
 if [ "x$usercopy_opt" = "x1" ]; then
   patch -p0 < ../usercopy-failsafe.patch
+  _patch
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 usercopy failsafe patch applied.
@@ -852,14 +866,18 @@ if [ "x$v4l_opt" = "xno" ]; then
     mkdir drivers/media/pci/dvbloopback
     cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
     patch -p0 < ../dvbloopback.patch
+    _patch
     if [ "$FIRST_DIGIT" -lt "4" ]; then
       if [ "$SECOND_DIGIT" -lt "13" ]; then
         patch -p0 < ../3.7-dvb-core.patch
+        _patch
       else
         patch -p0 < ../3.13-dvb-core.patch
+        _patch
       fi
     else
       patch -p0 < ../3.13-dvb-core.patch
+      _patch
     fi
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
@@ -880,14 +898,18 @@ dvb-core is patched, dvbloopback added.
     if [ "$FIRST_DIGIT" -lt "4" ];then
       if [ "$SECOND_DIGIT" -eq "10" ];then
         patch -p0 < ../Kconfig-3.10.patch
+        _patch
       else
         patch -p0 < ../Kconfig.patch
+        _patch
       fi
     elif [ "$FIRST_DIGIT" -eq "4" ]; then
       if [ "$SECOND_DIGIT" -lt "2" ]; then
         patch -p0 < ../Kconfig.patch
+        _patch
       else
         patch -p0 < ../Kconfig-4.2.patch
+        _patch
       fi
     fi
     if [ "x$debug_opt" = "xyes" ]; then
@@ -903,16 +925,21 @@ saa716x added, Kconfig patched for saa716x.
     if [ "$FIRST_DIGIT" -lt "4" ]; then
       if [ "$SECOND_DIGIT" = "16" ]; then
         patch -p0 < ../Makefile-3.16.patch
+        _patch
       elif [ "$SECOND_DIGIT" = "10" ]; then
         patch -p0 < ../Makefile-3.10.patch
+        _patch
       else
         patch -p0 < ../Makefile.patch
+        _patch
       fi
     elif [ "$FIRST_DIGIT" -eq "4" ]; then
       if [ "$SECOND_DIGIT" -lt "2" ]; then
         patch -p0 < ../Makefile.patch
+        _patch
       else
         patch -p0 < ../Makefile-4.2.patch
+        _patch
       fi
     fi
     if [ "x$debug_opt" = "xyes" ]; then
@@ -932,17 +959,22 @@ Makefile is patched for saa716x.
     if [ "$FIRST_DIGIT" -lt "4" ]; then
       if [ "$SECOND_DIGIT" = "16" ]; then
         patch -p0 < ../cx23885-3.16.patch
+        _patch
       elif [ "$SECOND_DIGIT" = "10" ]; then
         patch -p0 < ../cx23885-3.10.patch
+        _patch
       fi
     elif [ "$FIRST_DIGIT" -eq "4" ]; then
       if [ "$SECOND_DIGIT" -lt "2" ]; then
         patch -p0 < ../cx23885-4.0.patch
+        _patch
       else
         patch -p0 < ../cx23885-gapped-clock.patch
+        _patch
       fi
     elif [ "$FIRST_DIGIT" -gt "4" ]; then
       patch -p0 < ../cx23885-gapped-clock.patch
+      _patch
     fi
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
@@ -1011,8 +1043,10 @@ Primary DVB system for si2168 is set to $dvb_opt
     # vb2 patch
     if [ "$FIRST_DIGIT" -eq "3" -a "$SECOND_DIGIT" -lt "19" ]; then
       patch -p0 < ../vb2-1.patch
+      _patch
     else
       patch -p0 < ../vb2.patch
+      _patch
       if [ "x$debug_opt" = "xyes" ]; then
         echo "
 vb2 patch applied. 
@@ -1033,6 +1067,7 @@ if ! [ "x$v4l_opt" = "xno" ]; then
   # vb2 patch
   if [ "x$v4l_opt" = "xyes" ]; then
     patch -p0 < ../vb2.patch
+    _patch
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
 vb2 patch applied.
@@ -1050,6 +1085,7 @@ vb2 patch applied.
     mkdir drivers/media/pci/dvbloopback
     cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
     patch -p0 < ../dvbloopback.patch
+    _patch
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
 dvbloopback module added to source tree.
@@ -1062,8 +1098,10 @@ dvbloopback module added to source tree.
     fi
     if ! [ "$V4L_VERSION" = "10" ]; then
       patch -p0 < ../3.13-dvb-core.patch
+      _patch
     else
       patch -p0 < ../3.7-dvb-core.patch
+      _patch
     fi
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
@@ -1094,8 +1132,10 @@ si2168 and si2157 added/updated.
       fi
       if [ "$V4L_VERSION" = "18" ]; then
         patch -p0 < ../cx23885-3.18.patch
+        _patch
       elif [ "$V4L_VERSION" = "10" ]; then
         patch -p0 < ../cx23885-3.10.patch
+        _patch
       fi
     fi
   fi
@@ -1106,10 +1146,13 @@ si2168 and si2157 added/updated.
     cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
     if [ "$V4L_VERSION" = "10" ]; then
       patch -p0 < ../Kconfig-3.10.patch
+      _patch
     elif [ "$V4L_VERSION" = "18" ]; then
       patch -p0 < ../Kconfig-3.18.patch
+      _patch
     else
       patch -p0 < ../Kconfig-4.2.patch
+      _patch
     fi
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
@@ -1123,10 +1166,13 @@ saa716x added, Kconfig patch for saa716x applied.
     fi
     if [ "$V4L_VERSION" = "10" ]; then
       patch -p0 < ../Makefile-3.10.patch
+      _patch
     elif [ "$V4L_VERSION" = "18" ]; then
       patch -p0 < ../Makefile.patch
+      _patch
     else
       patch -p0 < ../Makefile-4.2.patch
+      _patch
     fi
     if [ "x$debug_opt" = "xyes" ]; then
     echo "
@@ -1141,6 +1187,7 @@ Makefile patch for saa716x applied.
   fi
   if [ "x$v4l_opt" = "xyes" ]; then
     patch -p0 < ../cx23885-gapped-clock.patch
+    _patch
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
 cx23885 gapped-clock patch applied.
@@ -1197,19 +1244,7 @@ Patches are committed to media_tree.
   # make install patch
   if [ "x$v4l_opt" = "xyes" ]; then
     patch -p0 < ../v4l-make-install.patch
-    if [ "$?" != "0" ]; then
-      echo "
-make-install patch did not cleanly apply.
-
-Please open a ticket at https://github.com/bas-t/dvbloopback/issues
-
-and either hand me an updated patch, or ask me to update it.
-
-Aborting...
-"
-      env_clean
-      exit 0
-    fi
+    _patch
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
 make install patch applied to media_build repo.
