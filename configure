@@ -155,6 +155,7 @@ drivers_opt="yes"
 dvb_opt="dvbc"
 tvh_opt="no"
 ffdecsawrapper_opt="yes"
+usercopy_opt="0"
 
 for opt do
   optval="${opt#*=}"
@@ -186,6 +187,8 @@ for opt do
   --tvh=*) tvh_opt="$optval"
   ;;
   --ffdecsawrapper=*) ffdecsawrapper_opt="$optval"
+  ;;
+  --usercopy=*) usercopy_opt="$optval"
   ;;
   *)
   die_unknown $opt
@@ -741,6 +744,7 @@ Source is downloaded.
       fi
     fi
   fi
+  cd media_tree
 fi
 
 # Vanilla
@@ -808,6 +812,35 @@ fi
 #
 # Patch the source
 #
+
+# All
+if ! [ "x$usercopy_opt" = "x0" ]; then
+  patch -p0 < ../usercopy-import.patch
+  patch -p0 < ../usercopy-export.patch
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+usercopy patches aplied.
+"
+    confirmyes
+    if [ "$?" != "0" ]; then
+      env_clean
+      exit 0
+    fi
+  fi
+fi
+if [ "x$usercopy_opt" = "x1" ]; then
+  patch -p0 < ../usercopy-failsafe.patch
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+usercopy failsafe patch applied.
+"
+    confirmyes
+    if [ "$?" != "0" ]; then
+      env_clean
+      exit 0
+    fi
+  fi
+fi
 
 # Common (stock and vanilla kernels)
 if [ "x$v4l_opt" = "xno" ]; then
@@ -996,7 +1029,6 @@ fi
 
 # v4l
 if ! [ "x$v4l_opt" = "xno" ]; then
-  cd media_tree
 
   # vb2 patch
   if [ "x$v4l_opt" = "xyes" ]; then
