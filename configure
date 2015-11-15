@@ -1091,6 +1091,8 @@ saa716x added, Kconfig patch for saa716x applied.
     fi
     if [ "$V4L_VERSION" = "10" ]; then
       patch -p0 < ../Makefile-3.10.patch
+    elif [ "$V4L_VERSION" = "18" ]; then
+      patch -p0 < ../Makefile.patch
     else
       patch -p0 < ../Makefile-4.2.patch
     fi
