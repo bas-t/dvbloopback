@@ -1074,6 +1074,8 @@ si2168 and si2157 added/updated.
     cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
     if [ "$V4L_VERSION" = "10" ]; then
       patch -p0 < ../Kconfig-3.10.patch
+    elif [ "$V4L_VERSION" = "18" ]; then
+      patch -p0 < ../Kconfig-3.18.patch
     else
       patch -p0 < ../Kconfig-4.2.patch
     fi
