@@ -651,7 +651,9 @@ Continue anyway?
     fi
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
-ffdecsawrapper is (re)compiled and installed.
+You have either chosen not to (re)compile ffdecsawrapper,
+
+or ffdecsawrapper is (re)compiled and installed.
 "
       confirmyes
       if [ "$?" != "0" ]; then
