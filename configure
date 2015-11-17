@@ -1044,7 +1044,7 @@ Primary DVB system for si2168 is set to $dvb_opt
     if [ "$FIRST_DIGIT" -eq "3" -a "$SECOND_DIGIT" -lt "19" ]; then
       patch -p0 < ../vb2-1.patch
       _patch
-    elif [ "$FIRST_DIGIT" -eq "4" -a "$SECOND_DIGIT" -lt "3" ]; then
+    elif [ "$FIRST_DIGIT" -eq "4" -a "$SECOND_DIGIT" -lt "4" ]; then
       patch -p0 < ../vb2.patch
       _patch
       if [ "x$debug_opt" = "xyes" ]; then
@@ -1722,6 +1722,9 @@ if [ "x$vanilla_opt" != "x" ]; then
     dpkg -i linux-headers-*
   else
     dpkg -i linux-image-*
+  fi
+  if ! [ "x$next_opt" = "xno" ]; then
+    headers_opt="no"
   fi
   if [ "x$headers_opt" = "xyes" ]; then
     if echo $vanilla_opt | grep "rc" > /dev/null 2>&1; then
