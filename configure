@@ -863,7 +863,7 @@ if [ "x$v4l_opt" = "xno" ]; then
 
 
   # 4.4-rc1 fixes
-  if [ "x$vanilla_opt" = "4.4-rc1" ]; then
+  if [ "$vanilla_opt" = "4.4-rc1" ]; then
     patch -p1 < ../ioc_libcfs_ping_test.patch
     _patch
     patch -p1 < ../pci_set_dma_mask.patch
