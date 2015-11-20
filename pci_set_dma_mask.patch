@@ -1,3 +1,5 @@
+diff --git a/drivers/media/pci/cx23885/cx23885-core.c b/drivers/media/pci/cx23885/cx23885-core.c
+index 35759a9..e8f8472 100644
 --- a/drivers/media/pci/cx23885/cx23885-core.c
 +++ b/drivers/media/pci/cx23885/cx23885-core.c
 @@ -1992,9 +1992,9 @@ static int cx23885_initdev(struct pci_dev *pci_dev,
@@ -12,9 +14,11 @@
  		goto fail_context;
  	}
  
+diff --git a/drivers/media/pci/cx25821/cx25821-core.c b/drivers/media/pci/cx25821/cx25821-core.c
+index dbc695f..cdf1a42 100644
 --- a/drivers/media/pci/cx25821/cx25821-core.c
 +++ b/drivers/media/pci/cx25821/cx25821-core.c
-@@ -1319,7 +1319,8 @@ static int cx25821_initdev(struct pci_dev *pci_dev,
+@@ -1319,9 +1319,9 @@ static int cx25821_initdev(struct pci_dev *pci_dev,
  		dev->pci_lat, (unsigned long long)dev->base_io_addr);
  
  	pci_set_master(pci_dev);
@@ -22,8 +26,12 @@
 +	err = pci_set_dma_mask(pci_dev, 0xffffffff);
 +	if (err) {
  		pr_err("%s/0: Oops: no 32bit PCI DMA ???\n", dev->name);
- 		err = -EIO;
+-		err = -EIO;
  		goto fail_irq;
+ 	}
+ 
+diff --git a/drivers/media/pci/cx88/cx88-alsa.c b/drivers/media/pci/cx88/cx88-alsa.c
+index 0ed1b65..1b5268f 100644
 --- a/drivers/media/pci/cx88/cx88-alsa.c
 +++ b/drivers/media/pci/cx88/cx88-alsa.c
 @@ -890,9 +890,9 @@ static int snd_cx88_create(struct snd_card *card, struct pci_dev *pci,
@@ -38,6 +46,8 @@
  		cx88_core_put(core, pci);
  		return err;
  	}
+diff --git a/drivers/media/pci/cx88/cx88-mpeg.c b/drivers/media/pci/cx88/cx88-mpeg.c
+index 9db7767..f34c229 100644
 --- a/drivers/media/pci/cx88/cx88-mpeg.c
 +++ b/drivers/media/pci/cx88/cx88-mpeg.c
 @@ -393,7 +393,8 @@ static int cx8802_init_common(struct cx8802_dev *dev)
@@ -50,6 +60,8 @@
  		printk("%s/2: Oops: no 32bit PCI DMA ???\n",dev->core->name);
  		return -EIO;
  	}
+diff --git a/drivers/media/pci/cx88/cx88-video.c b/drivers/media/pci/cx88/cx88-video.c
+index 0de1ad5..aef9acf 100644
 --- a/drivers/media/pci/cx88/cx88-video.c
 +++ b/drivers/media/pci/cx88/cx88-video.c
 @@ -1314,9 +1314,9 @@ static int cx8800_initdev(struct pci_dev *pci_dev,
@@ -64,6 +76,8 @@
  		goto fail_core;
  	}
  	dev->alloc_ctx = vb2_dma_sg_init_ctx(&pci_dev->dev);
+diff --git a/drivers/media/pci/netup_unidvb/netup_unidvb_core.c b/drivers/media/pci/netup_unidvb/netup_unidvb_core.c
+index 60b2d46..3fdbd81 100644
 --- a/drivers/media/pci/netup_unidvb/netup_unidvb_core.c
 +++ b/drivers/media/pci/netup_unidvb/netup_unidvb_core.c
 @@ -810,7 +810,7 @@ static int netup_unidvb_initdev(struct pci_dev *pci_dev,
@@ -75,6 +89,8 @@
  		dev_err(&pci_dev->dev,
  			"%s(): 32bit PCI DMA is not supported\n", __func__);
  		goto pci_detect_err;
+diff --git a/drivers/media/pci/saa7134/saa7134-core.c b/drivers/media/pci/saa7134/saa7134-core.c
+index e79d63e..f720cea 100644
 --- a/drivers/media/pci/saa7134/saa7134-core.c
 +++ b/drivers/media/pci/saa7134/saa7134-core.c
 @@ -951,9 +951,9 @@ static int saa7134_initdev(struct pci_dev *pci_dev,
@@ -89,6 +105,8 @@
  		goto fail1;
  	}
  
+diff --git a/drivers/media/pci/saa7164/saa7164-core.c b/drivers/media/pci/saa7164/saa7164-core.c
+index 8f36b48..8bbd092 100644
 --- a/drivers/media/pci/saa7164/saa7164-core.c
 +++ b/drivers/media/pci/saa7164/saa7164-core.c
 @@ -1264,9 +1264,9 @@ static int saa7164_initdev(struct pci_dev *pci_dev,
@@ -103,6 +121,8 @@
  		goto fail_irq;
  	}
  
+diff --git a/drivers/media/pci/tw68/tw68-core.c b/drivers/media/pci/tw68/tw68-core.c
+index 8c5655d..4e77618 100644
 --- a/drivers/media/pci/tw68/tw68-core.c
 +++ b/drivers/media/pci/tw68/tw68-core.c
 @@ -257,9 +257,9 @@ static int tw68_initdev(struct pci_dev *pci_dev,
@@ -117,6 +137,8 @@
  		goto fail1;
  	}
  
+diff --git a/drivers/net/ethernet/amd/pcnet32.c b/drivers/net/ethernet/amd/pcnet32.c
+index e2afabf..7ccebae 100644
 --- a/drivers/net/ethernet/amd/pcnet32.c
 +++ b/drivers/net/ethernet/amd/pcnet32.c
 @@ -1500,10 +1500,11 @@ pcnet32_probe_pci(struct pci_dev *pdev, const struct pci_device_id *ent)
@@ -133,3 +155,20 @@
  	}
  	if (!request_region(ioaddr, PCNET32_TOTAL_SIZE, "pcnet32_probe_pci")) {
  		if (pcnet32_debug & NETIF_MSG_PROBE)
+diff --git a/include/asm-generic/pci-dma-compat.h b/include/asm-generic/pci-dma-compat.h
+index eafce7b..c110843 100644
+--- a/include/asm-generic/pci-dma-compat.h
++++ b/include/asm-generic/pci-dma-compat.h
+@@ -6,6 +6,12 @@
+ 
+ #include <linux/dma-mapping.h>
+ 
++static inline int
++pci_dma_supported(struct pci_dev *hwdev, u64 mask)
++{
++	return dma_supported(hwdev == NULL ? NULL : &hwdev->dev, mask);
++}
++
+ static inline void *
+ pci_alloc_consistent(struct pci_dev *hwdev, size_t size,
+ 		     dma_addr_t *dma_handle)
