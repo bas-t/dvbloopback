@@ -648,7 +648,7 @@ if [ "x$ffdecsawrapper_opt" = "xyes" ]; then
     if [ -d descrambler ]; then
       rm -rf descrambler
     fi
-    git clone https://github.com/bas-t/descrambler.git && cd descrambler
+    git clone -b stable https://github.com/bas-t/descrambler.git && cd descrambler
     ./configure
     if [ "$?" != "0" ]; then
       echo -en "
