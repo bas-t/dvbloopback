@@ -102,9 +102,6 @@ show_help(){
   echo "                        "
   echo " --stock=<opt>          [yes] When running a Debian/Ubuntu stock kernel,"
   echo "                        recompile it with dvbloopback driver and dvb-core patch."
-  echo "                        comment out any 'backport' lines in your sources.list"
-  echo "                        'apt-get source' doesn't distinguish normal sources from backports" 
-  echo "                        Only for Debian stable and Ubuntu LTS (version 16.04.x)."
   echo "                        "
   echo " --vanilla=<bool>       Specify a the vanilla kernel version you"
   echo "                        want to compile. Like --vanilla=4.1.8"
@@ -123,8 +120,7 @@ show_help(){
   echo "                        Warning: using the --next flag can corrupt your system"
   echo "                        "
   echo " --adapters=<opt>       [16] Set max number of adapters that are allowed,"
-  echo "                        twice the number of physical adapters is needed."
-  echo "                        Max number is 32, since the kernel allowes 64."
+  echo "                        twice the number of your physical adapters is needed."
   echo "                        "
   echo " --update=<opt>         [yes] no: don't auto-update or clean this repo."
   echo "                        "
@@ -777,23 +773,6 @@ Source is downloaded.
       if [ "$?" != "0" ]; then
         env_clean
         exit 0
-      fi
-    fi
-  fi
-  # nvidia hack
-  if [ "x$tvh_opt" = "xyes" ]; then
-    if cat kernel/workqueue.c | grep "EXPORT_SYMBOL_GPL(flush_workqueue)" > /dev/null 2>&1; then
-      sed -i "s/EXPORT_SYMBOL_GPL(flush_workqueue)/EXPORT_SYMBOL(flush_workqueue)/" kernel/workqueue.c
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
-nvidia hack applied to kernel/workqueue.c
-
-"
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
       fi
     fi
   fi
