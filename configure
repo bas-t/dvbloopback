@@ -644,10 +644,6 @@ fi
 
 if [ "x$ffdecsawrapper_opt" = "xyes" ]; then
   if [ "x$tvh_opt" = "xno" ]; then
-    cd ..
-    if [ -d descrambler ]; then
-      rm -rf descrambler
-    fi
     git clone -b stable https://github.com/bas-t/descrambler.git && cd descrambler
     ./configure
     if [ "$?" != "0" ]; then
@@ -1488,7 +1484,6 @@ Going to configure your $vanilla_opt vanilla kernel.
 "
   if [ "$OS" = "Debian" ] && [ "$CONFIG" = "amd64" ]; then
     if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
-      DIR=`pwd`
       kernelconfig
     else
       make oldconfig
