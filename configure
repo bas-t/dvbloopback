@@ -795,7 +795,7 @@ Going to download the kernel source.
     fi
     tar -xJf linux-$vanilla_opt.tar.xz
     cd linux-$vanilla_opt
-    if [ "$FIRST_DIGIT" -eq "4" ] && [ "$SECOND_DIGIT" -gt "0" ]; then
+    if [ "$MAJOR" -eq "4" ] && [ "$MINOR" -gt "0" ]; then
       if ! cat drivers/media/Kconfig | grep "BROKEN" > /dev/null 2>&1; then
         echo "
 Mauro may have decided that \"MEDIA_CONTROLLER_DVB\" is not broken anymore.
