@@ -1,5 +1,5 @@
---- drivers/media/pci/Kconfig	2015-03-26 14:00:21.000000000 +0100
-+++ drivers/media/pci/Kconfig	2015-04-08 21:25:45.592661996 +0200
+--- linux/drivers/media/pci/Kconfig	2015-03-26 14:00:21.000000000 +0100
++++ linux/drivers/media/pci/Kconfig	2015-04-08 21:25:45.592661996 +0200
 @@ -36,6 +36,7 @@
  if MEDIA_DIGITAL_TV_SUPPORT
  	comment "Media digital TV PCI Adapters"
@@ -8,8 +8,8 @@
  source "drivers/media/pci/b2c2/Kconfig"
  source "drivers/media/pci/pluto2/Kconfig"
  source "drivers/media/pci/dm1105/Kconfig"
---- drivers/media/pci/Makefile	2015-03-26 14:00:21.000000000 +0100
-+++ drivers/media/pci/Makefile	2015-04-08 21:26:34.223691236 +0200
+--- linux/drivers/media/pci/Makefile	2015-03-26 14:00:21.000000000 +0100
++++ linux/drivers/media/pci/Makefile	2015-04-08 21:26:34.223691236 +0200
 @@ -17,6 +17,7 @@
  obj-$(CONFIG_VIDEO_IVTV) += ivtv/
  obj-$(CONFIG_VIDEO_ZORAN) += zoran/

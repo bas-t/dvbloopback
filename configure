@@ -111,6 +111,7 @@ show_help(){
   echo "                        "
   echo " --v4l=<opt>            [no] yes: compile current official v4l tree"
   echo "                        against your running kernel."
+  echo "                        endriss: use Oliver Endriss' sources."
   echo "                        Disables --stock= and --vanilla= flags."
   echo "                        Warning: using the --v4l flag is not recommended."
   echo "                        "
@@ -352,63 +353,64 @@ else
 fi
 
 # Check for a supported kernelversion
-if ! [ "x$v4l_opt" = "xno" ]; then
-  if ! [ "x$v4l_opt" = "xyes" ]; then
-    V4L_VERSION=$(echo $v4l_opt | grep -o '[[:digit:]]\+' | awk 'NR==2')
-  fi
-  FIRST_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | head -n1)
-  SECOND_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | awk 'NR==2')
-  if ! [ "x$v4l_opt" = "xyes" ]; then
-    if [ "$FIRST_DIGIT" -lt "4" ]; then
-      echo "
-Minimum supported kernel series is 4.1.x
-
-Aborting...
-"
-      exit 1
-    elif [ "$FIRST_DIGIT" -lt "5" ] && [ "$SECOND_DIGIT" -lt "1" ]; then
-      echo "
-Minimum supported kernel series is 4.1.x
-
-Aborting...
-"
-      exit 1
+if ! [ "x$v4l_opt" = "xendriss" ]; then
+  if ! [ "x$v4l_opt" = "xno" ]; then
+    if ! [ "x$v4l_opt" = "xyes" ]; then
+      V4L_VERSION=$(echo $v4l_opt | grep -o '[[:digit:]]\+' | awk 'NR==2')
     fi
-  else
-    if [ "$FIRST_DIGIT" -lt "4" ]; then
-      if [ "$SECOND_DIGIT" -lt "10" ]; then
+    FIRST_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | head -n1)
+    SECOND_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | awk 'NR==2')
+    if ! [ "x$v4l_opt" = "xyes" ]; then
+      if [ "$FIRST_DIGIT" -lt "4" ]; then
         echo "
+Minimum supported kernel series is 4.1.x
+
+Aborting...
+"
+        exit 1
+      elif [ "$FIRST_DIGIT" -lt "5" ] && [ "$SECOND_DIGIT" -lt "1" ]; then
+        echo "
+Minimum supported kernel series is 4.1.x
+
+Aborting...
+"
+        exit 1
+      fi
+    else
+      if [ "$FIRST_DIGIT" -lt "4" ]; then
+        if [ "$SECOND_DIGIT" -lt "10" ]; then
+          echo "
 Your running kernel is < 3.10.x
 
 Minimum supported version is 3.10.x
 
 Aborting...
 "
-        env_clean
-        exit 0
+          env_clean
+          exit 0
+        fi
       fi
     fi
-  fi
-elif ! [ "x$vanilla_opt" = "x" ]; then
-  MAJOR=$(echo "$vanilla_opt" | cut -d'.' -f1)
-  MINOR=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
-  export MAJOR
-  export MINOR
-  if [ "$MAJOR" -lt "3" ]; then
-    echo -en "
+  elif ! [ "x$vanilla_opt" = "x" ]; then
+    MAJOR=$(echo "$vanilla_opt" | cut -d'.' -f1)
+    MINOR=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
+    export MAJOR
+    export MINOR
+    if [ "$MAJOR" -lt "3" ]; then
+      echo -en "
 You requested a build for a $vanilla_opt kernel.
 
 Minimum supported kernelseries is 3.10.x
 
 Aborting...
 "
-    env_clean
-    exit 0
-  fi
-  if [ "x$drivers_opt" = "xyes" ]; then
-    if [ "$MAJOR" -eq "3" ]; then
-      if ! [ "$MINOR" -eq "10" ]; then
-        echo -en "
+      env_clean
+      exit 0
+    fi
+    if [ "x$drivers_opt" = "xyes" ]; then
+      if [ "$MAJOR" -eq "3" ]; then
+        if ! [ "$MINOR" -eq "10" ]; then
+          echo -en "
 You are trying to compile TBS 6281/6285 and DVBSky T982 drivers directly
 
 into a $vanilla_opt vanilla kernel, using the --drivers=yes flag.
@@ -420,22 +422,23 @@ series and Debian Jessie's stock kernel (3.16.x).
 
 Aborting...
 "
-        env_clean
-        exit 0
+          env_clean
+          exit 0
+        fi
       fi
-    fi
-  else
-    if [ "$MAJOR" -eq "3" ]; then
-      if [ "$MINOR" -lt "10" ]; then
-        echo "
+    else
+      if [ "$MAJOR" -eq "3" ]; then
+        if [ "$MINOR" -lt "10" ]; then
+          echo "
 Your are trying to build a $vanilla_opt kernel.
 
 Minimum supported version is 3.10.x
 
 Aborting...
 "
-        env_clean
-        exit 0
+          env_clean
+          exit 0
+        fi
       fi
     fi
   fi
@@ -460,6 +463,15 @@ fi
 
 # Get build-deps, Debian only.
 if [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
+  if [ "x$v4l_opt" = "xendriss" ]; then
+    if ! dpkg-query -l mercurial | grep "ii" > /dev/null 2>&1; then
+      echo "
+Missing dependency mercurial, marking for installation.
+
+"
+      apt-get install mercurial -y || die "Error installing dependency mercurial"
+    fi
+  fi
   if ! dpkg-query -l build-essential | grep "ii" > /dev/null 2>&1; then
     echo "
 Missing dependency build-essential, marking for installation.
@@ -764,6 +776,8 @@ Source is downloaded.
         exit 0
       fi
     fi
+  elif [ "x$v4l_opt" = "xendriss" ];then
+    hg clone http://linuxtv.org/hg/~endriss/media_build_experimental
   else
     git clone git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
     git clone --depth=1 -b $v4l_opt git://github.com/bas-t/linux-stable.git media_tree || die "Error(s) while fetching v4l source tree"
@@ -778,7 +792,9 @@ Source is downloaded.
       fi
     fi
   fi
-  cd media_tree
+  if ! [ "x$v4l_opt" = "xendriss" ];then
+    cd media_tree
+  fi
 fi
 
 # Vanilla
@@ -1080,50 +1096,16 @@ fi
 
 # v4l
 if ! [ "x$v4l_opt" = "xno" ]; then
-
-  # dvbloopback patch
-  if [ "x$tvh_opt" = "xno" ]; then
-    mkdir drivers/media/pci/dvbloopback
-    cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
-    patch -p0 < ../dvbloopback.patch
-    _patch
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
-dvbloopback module added to source tree.
-"
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
-      fi
-    fi
-    if ! [ "$V4L_VERSION" = "10" ]; then
-      patch -p0 < ../3.13-dvb-core.patch
+  if ! [ "x$v4l_opt" = "xendriss" ];then
+    # dvbloopback patch
+    if [ "x$tvh_opt" = "xno" ]; then
+      mkdir drivers/media/pci/dvbloopback
+      cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
+      patch -p1 < ../dvbloopback.patch
       _patch
-    else
-      patch -p0 < ../3.7-dvb-core.patch
-      _patch
-    fi
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
-dvb-core is patched.
-"
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
-      fi
-    fi
-  fi
-
-  # DVBSky T982 support
-  if [ "x$drivers_opt" = "xyes" ]; then
-    if ! [ "x$v4l_opt" = "xyes" ]; then
-      cp -f ../drivers/media/tuners/* drivers/media/tuners/
-      cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
       if [ "x$debug_opt" = "xyes" ]; then
         echo "
-si2168 and si2157 added/updated.
+dvbloopback module added to source tree.
 "
         confirmyes
         if [ "$?" != "0" ]; then
@@ -1131,148 +1113,195 @@ si2168 and si2157 added/updated.
           exit 0
         fi
       fi
-      if [ "$V4L_VERSION" = "18" ]; then
-        patch -p0 < ../cx23885-3.18.patch
+      if ! [ "$V4L_VERSION" = "10" ]; then
+        patch -p0 < ../3.13-dvb-core.patch
         _patch
-      elif [ "$V4L_VERSION" = "10" ]; then
-        patch -p0 < ../cx23885-3.10.patch
+      else
+        patch -p0 < ../3.7-dvb-core.patch
         _patch
       fi
+      if [ "x$debug_opt" = "xyes" ]; then
+        echo "
+dvb-core is patched.
+"
+        confirmyes
+        if [ "$?" != "0" ]; then
+          env_clean
+          exit 0
+        fi
+      fi
     fi
-  fi
 
-  # saa716x patch
-  if [ "x$drivers_opt" = "xyes" ];then
-    mkdir drivers/media/pci/saa716x
-    cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
-    if [ "$V4L_VERSION" = "10" ]; then
-      patch -p0 < ../Kconfig-3.10.patch
-      _patch
-    elif [ "$V4L_VERSION" = "18" ]; then
-      patch -p0 < ../Kconfig-3.18.patch
-      _patch
-    else
-      patch -p0 < ../Kconfig-4.2.patch
-      _patch
+    # DVBSky T982 support
+    if [ "x$drivers_opt" = "xyes" ]; then
+      if ! [ "x$v4l_opt" = "xyes" ]; then
+        cp -f ../drivers/media/tuners/* drivers/media/tuners/
+        cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
+        if [ "x$debug_opt" = "xyes" ]; then
+          echo "
+si2168 and si2157 added/updated.
+"
+          confirmyes
+          if [ "$?" != "0" ]; then
+            env_clean
+            exit 0
+          fi
+        fi
+        if [ "$V4L_VERSION" = "18" ]; then
+          patch -p0 < ../cx23885-3.18.patch
+          _patch
+        elif [ "$V4L_VERSION" = "10" ]; then
+          patch -p0 < ../cx23885-3.10.patch
+          _patch
+        fi
+      fi
     fi
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
+
+    # saa716x patch
+    if [ "x$drivers_opt" = "xyes" ];then
+      mkdir drivers/media/pci/saa716x
+      cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
+      if [ "$V4L_VERSION" = "10" ]; then
+        patch -p0 < ../Kconfig-3.10.patch
+        _patch
+      elif [ "$V4L_VERSION" = "18" ]; then
+        patch -p0 < ../Kconfig-3.18.patch
+        _patch
+      else
+        patch -p0 < ../Kconfig-4.2.patch
+        _patch
+      fi
+      if [ "x$debug_opt" = "xyes" ]; then
+        echo "
 saa716x added, Kconfig patch for saa716x applied.
 "
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
+        confirmyes
+        if [ "$?" != "0" ]; then
+          env_clean
+          exit 0
+        fi
       fi
-    fi
-    if [ "$V4L_VERSION" = "10" ]; then
-      patch -p0 < ../Makefile-3.10.patch
+      if [ "$V4L_VERSION" = "10" ]; then
+        patch -p0 < ../Makefile-3.10.patch
+        _patch
+      elif [ "$V4L_VERSION" = "18" ]; then
+        patch -p0 < ../Makefile.patch
+        _patch
+      else
+        patch -p0 < ../Makefile-4.2.patch
       _patch
-    elif [ "$V4L_VERSION" = "18" ]; then
-      patch -p0 < ../Makefile.patch
-      _patch
-    else
-      patch -p0 < ../Makefile-4.2.patch
-      _patch
-    fi
-    if [ "x$debug_opt" = "xyes" ]; then
-    echo "
+      fi
+      if [ "x$debug_opt" = "xyes" ]; then
+      echo "
 Makefile patch for saa716x applied.
 "
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
+        confirmyes
+        if [ "$?" != "0" ]; then
+          env_clean
+          exit 0
+        fi
       fi
     fi
-  fi
-  if [ "x$v4l_opt" = "xyes" ]; then
-    patch -p0 < ../cx23885-gapped-clock.patch
-    _patch
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
+    if [ "x$v4l_opt" = "xyes" ]; then
+      patch -p0 < ../cx23885-gapped-clock.patch
+      _patch
+      if [ "x$debug_opt" = "xyes" ]; then
+        echo "
 cx23885 gapped-clock patch applied.
 "
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
+        confirmyes
+        if [ "$?" != "0" ]; then
+          env_clean
+          exit 0
+        fi
       fi
     fi
-  fi
 
-  # silabs si2168 DVB-C/T patch
-  if [ "x$dvb_opt" = "xdvbc" ]; then
-    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
-  elif [ "x$dvb_opt" = "xdvbt" ]; then
-    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
-  elif [ "x$dvb_opt" = "xdvbt2" ]; then
-    sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT2, SYS_DVBT, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
-  fi
-  if [ "x$dvb_opt" = "xdvbc" -o "x$dvb_opt" = "xdvbt" -o "x$dvb_opt" = "xdvbt2" ]; then
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
+    # silabs si2168 DVB-C/T patch
+    if [ "x$dvb_opt" = "xdvbc" ]; then
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    elif [ "x$dvb_opt" = "xdvbt" ]; then
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    elif [ "x$dvb_opt" = "xdvbt2" ]; then
+      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT2, SYS_DVBT, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
+    fi
+    if [ "x$dvb_opt" = "xdvbc" -o "x$dvb_opt" = "xdvbt" -o "x$dvb_opt" = "xdvbt2" ]; then
+      if [ "x$debug_opt" = "xyes" ]; then
+        echo "
 Primary DVB system for si2168 is set to $dvb_opt 
 "
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
+        confirmyes
+        if [ "$?" != "0" ]; then
+          env_clean
+          exit 0
+        fi
       fi
     fi
-  fi
 
-  # commit patches
-  git add -A
-  if [ "x$tvh_opt" = "xno" ]; then
-    git commit -a -m 'Add drivers, patch dvb-core.'
-  else
-    git commit -a -m 'Add drivers.'
-  fi
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
+    # commit patches
+    git add -A
+    if [ "x$tvh_opt" = "xno" ]; then
+      git commit -a -m 'Add drivers, patch dvb-core.'
+    else
+      git commit -a -m 'Add drivers.'
+    fi
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
 Patches are committed to media_tree.
 "
-    confirmyes
-    if [ "$?" != "0" ]; then
-      env_clean
-      exit 0
-    fi
-  fi
-
-  cd ../media_build
-
-  # make install patch
-  if [ "x$v4l_opt" = "xyes" ]; then
-    patch -p0 < ../v4l-make-install.patch
-    _patch
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
-make install patch applied to media_build repo.
-"
       confirmyes
       if [ "$?" != "0" ]; then
         env_clean
         exit 0
+      fi
+    fi
+
+    cd ../media_build
+
+    # make install patch
+    if [ "x$v4l_opt" = "xyes" ]; then
+      patch -p0 < ../v4l-make-install.patch
+      _patch
+      if [ "x$debug_opt" = "xyes" ]; then
+        echo "
+make install patch applied to media_build repo.
+"
+        confirmyes
+        if [ "$?" != "0" ]; then
+          env_clean
+          exit 0
+        fi
+      fi
+    else
+      git checkout 3.$V4L_VERSION
+    fi
+
+    # commit patch
+    if [ "x$v4l_opt" = "xyes" ]; then
+      git commit -a -m 'Install drivers in /lib/modules/`uname -r`/updates/media'
+      if [ "x$debug_opt" = "xyes" ]; then
+        echo "
+Patches are committed to media_build.
+"
+        confirmyes
+        if [ "$?" != "0" ]; then
+          env_clean
+          exit 0
+        fi
       fi
     fi
   else
-    git checkout 3.$V4L_VERSION
-  fi
-
-  # commit patch
-  if [ "x$v4l_opt" = "xyes" ]; then
-    git commit -a -m 'Install drivers in /lib/modules/`uname -r`/updates/media'
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
-Patches are committed to media_build.
-"
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
-      fi
+    cd media_build_experimental
+    make download
+    make untar
+    if ! cat linux/drivers/media/Kconfig | grep "BROKEN" > /dev/null 2>&1; then
+      patch -p0 < ../endriss_01.patch
+      _patch
     fi
+    mkdir linux/drivers/media/pci/dvbloopback
+    cp -f ../dvbloopback/* linux/drivers/media/pci/dvbloopback/
+    patch -p0 < ../dvbloopback.patch
+    _patch
   fi
 fi
 
@@ -1480,7 +1509,9 @@ fi
 
 # v4l
 if ! [ "x$v4l_opt" = "xno" ]; then
-  make dir DIR=../media_tree
+  if ! [ "x$v4l_opt" = "xendriss" ];then
+    make dir DIR=../media_tree
+  fi
   make distclean
   make allyesconfig
   sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" v4l/.config
