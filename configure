@@ -711,7 +711,18 @@ Aborting...
         exit 1
       fi
     fi
-  fi  
+  fi
+  if [ "$FIRST_DIGIT" -gt "3" ]; then
+    if ! cat drivers/media/Kconfig | grep "BROKEN" > /dev/null 2>&1; then
+      echo "
+Mauro may have decided that \"MEDIA_CONTROLLER_DVB\" is not broken anymore.
+Review the situation and act.
+Aborting...
+"
+      env_clean
+      exit 0
+    fi
+  fi
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Source is downloaded.
@@ -734,6 +745,25 @@ Going to clone the v4l buildsystem of choise.
   if [ "x$v4l_opt" = "xyes" ];then
     git clone git://linuxtv.org/media_build.git || die "Error(s) while fetching v4l build system"
     git clone --depth=1 git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
+    if ! cat media_tree/drivers/media/Kconfig | grep "BROKEN" > /dev/null 2>&1; then
+      echo "
+Mauro may have decided that \"MEDIA_CONTROLLER_DVB\" is not broken anymore.
+Review the situation and act.
+Aborting...
+"
+      env_clean
+      exit 0
+    fi
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
+Source is downloaded.
+"
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
+      fi
+    fi
   else
     git clone git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
     git clone --depth=1 -b $v4l_opt git://github.com/bas-t/linux-stable.git media_tree || die "Error(s) while fetching v4l source tree"
@@ -765,6 +795,17 @@ Going to download the kernel source.
     fi
     tar -xJf linux-$vanilla_opt.tar.xz
     cd linux-$vanilla_opt
+    if [ "$FIRST_DIGIT" -eq "4" ] && [ "$SECOND_DIGIT" -gt "0" ]; then
+      if ! cat drivers/media/Kconfig | grep "BROKEN" > /dev/null 2>&1; then
+        echo "
+Mauro may have decided that \"MEDIA_CONTROLLER_DVB\" is not broken anymore.
+Review the situation and act.
+Aborting...
+"
+        env_clean
+        exit 0
+      fi
+    fi
     make clean && make mrproper
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
@@ -1443,7 +1484,7 @@ if ! [ "x$v4l_opt" = "xno" ]; then
   make distclean
   make allyesconfig
   sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" v4l/.config
-  sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" v4l/.config
+  #sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" v4l/.config
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 v4l source configured.
@@ -1475,9 +1516,9 @@ Going to configure your $vanilla_opt vanilla kernel.
   if ! [ "$ADAPTERS" = "$adapters_opt" ]; then
     sed -i "s/CONFIG_DVB_MAX_ADAPTERS=$ADAPTERS/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" .config
   fi
-  if cat .config | grep "CONFIG_MEDIA_CONTROLLER_DVB=y" > /dev/null 2>&1; then
-    sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" .config
-  fi
+  #if cat .config | grep "CONFIG_MEDIA_CONTROLLER_DVB=y" > /dev/null 2>&1; then
+    #sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" .config
+  #fi
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Kernel configured.
