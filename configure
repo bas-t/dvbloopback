@@ -147,6 +147,9 @@ show_help(){
   echo " --ffdecsawrapper=<opt> [yes] no: don't offer to compile ffdecsawrapper binary,"
   echo "                        even if you don't have it."
   echo "                        "
+  echo " --ffdecsaconf=<opt>    If you know what you are doing, you can pass any flag to"
+  echo "                        ./configure of FFdecsawrapper you like."
+  echo "                        "
   exit 0
 }
 
@@ -164,6 +167,7 @@ dvb_opt="dvbc"
 tvh_opt="no"
 ffdecsawrapper_opt="yes"
 usercopy_opt="0"
+ffdecsaconf_opt=""
 
 for opt do
   optval="${opt#*=}"
@@ -197,6 +201,8 @@ for opt do
   --ffdecsawrapper=*) ffdecsawrapper_opt="$optval"
   ;;
   --usercopy=*) usercopy_opt="$optval"
+  ;;
+  --ffdecsaconf=*) ffdecsaconf_opt="$optval"
   ;;
   *)
   die_unknown $opt
@@ -654,7 +660,7 @@ fi
 if [ "x$ffdecsawrapper_opt" = "xyes" ]; then
   if [ "x$tvh_opt" = "xno" ]; then
     git clone -b stable https://github.com/bas-t/descrambler.git && cd descrambler
-    ./configure
+    ./configure $ffdecsaconf_opt
     if [ "$?" != "0" ]; then
       echo -en "
 Error(s) encountered while compiling ffdecsawrapper.
