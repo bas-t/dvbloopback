@@ -1696,9 +1696,29 @@ fi
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
   if [ "x$headers_opt" = "xyes" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
+Going to install your stock kernel and headers.
+"
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
+      fi
+    fi
     dpkg -i *.deb
     apt-get -f install -y
   else
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
+Going to install your stock kernel.
+"
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
+      fi
+    fi
     dpkg -i linux-image-*
   fi
   if [ "$OS" = "Debian" ]; then
@@ -1770,12 +1790,33 @@ fi
 
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+Going to install your $vanilla_opt vanilla kernel.
+"
+    confirmyes
+    if [ "$?" != "0" ]; then
+      env_clean
+      exit 0
+    fi
+  fi
+
   dpkg -i linux-image-* && sleep 2
 
   if ! [ "x$next_opt" = "xno" ]; then
     headers_opt="no"
   fi
   if [ "x$headers_opt" = "xyes" ]; then
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
+Going to link and install your $vanilla_opt kernel headers.
+"
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
+      fi
+    fi
     if echo $vanilla_opt | grep "rc" > /dev/null 2>&1; then
       BUILDLINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/-rc/.0-rc/')build"
       SOURCELINK="/lib/modules/$(ls -d1 */ | grep "linux" | sed 's/linux-//' | sed 's/-rc/.0-rc/')source"
