@@ -1770,12 +1770,8 @@ fi
 
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
-  if [ "x$headers_opt" = "xyes" ]; then
-    dpkg -i linux-image-* && sleep 2
-    dpkg -i linux-headers-*
-  else
-    dpkg -i linux-image-*
-  fi
+  dpkg -i linux-image-* && sleep 2
+
   if ! [ "x$next_opt" = "xno" ]; then
     headers_opt="no"
   fi
@@ -1797,6 +1793,7 @@ if [ "x$vanilla_opt" != "x" ]; then
     rm -f $SOURCELINK
     ln -s $HEADERSDIR $SOURCELINK
     ln -s $HEADERSDIR $BUILDLINK
+    dpkg -i linux-headers-*
   fi
   if [ "$?" = "0" ]; then
     if [ "x$headers_opt" = "xyes" ]; then
