@@ -1449,7 +1449,7 @@ Kernel configured.
     fakeroot debian/rules updateconfigs
     UBUNTUKERNEL=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
     _ABINAME=$(cat debian/changelog | head -1 | grep -o '[[:digit:]]\+' | head -4 | awk 'NR==4')
-    _ABINAME_SUB=$(ls debian.master/abi | cut -d'.' -f 4)
+    _ABINAME_SUB=$(ls debian.master/abi | head -1 | cut -d'.' -f 4)
     export _ABINAME
     if [ "$abi_opt" = "900" ]; then
       RUNNING=$(uname -r | grep "90[0-9]-generic")
