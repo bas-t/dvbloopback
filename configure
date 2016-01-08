@@ -415,13 +415,13 @@ Aborting...
     fi
     if [ "x$drivers_opt" = "xyes" ]; then
       if [ "$MAJOR" -eq "3" ]; then
-        if ! [ "$MINOR" -eq "10" ]; then
+        if ! [ "$MINOR" -eq "10" -o "$MINOR" -eq "18" ]; then
           echo -en "
 You are trying to compile TBS 6281/6285 and DVBSky T982 drivers directly
 
 into a $vanilla_opt vanilla kernel, using the --drivers=yes flag.
 
-I only backported the DVBSky T982 driver to 3.10.x vanilla kernel
+I only backported the DVBSky T982 driver to 3.10.x and 3.18.x vanilla kernel
 
 series and Debian Jessie's stock kernel (3.16.x).
 
@@ -941,6 +941,9 @@ dvb-core is patched, dvbloopback added.
       if [ "$SECOND_DIGIT" -eq "10" ];then
         patch -p0 < ../Kconfig-3.10.patch
         _patch
+      elif [ "$SECOND_DIGIT" -eq "18" ];then
+        patch -p0 < ../Kconfig-3.18.patch
+        _patch
       else
         patch -p0 < ../Kconfig.patch
         _patch
@@ -999,7 +1002,10 @@ Makefile is patched for saa716x.
   # cx23885 patch
   if [ "x$drivers_opt" = "xyes" ];then
     if [ "$FIRST_DIGIT" -lt "4" ]; then
-      if [ "$SECOND_DIGIT" = "16" ]; then
+      if [ "$SECOND_DIGIT" = "18" ]; then
+        patch -p0 < ../cx23885-3.18.patch
+        _patch
+      elif [ "$SECOND_DIGIT" = "16" ]; then
         patch -p0 < ../cx23885-3.16.patch
         _patch
       elif [ "$SECOND_DIGIT" = "10" ]; then
