@@ -9,7 +9,7 @@ config DVB_SAA716X_BUDGET
 	tristate "SAA7160/1/2 based Budget PCIe cards (DVB only)"
 	depends on SAA716X_CORE && DVB_CORE
 	select DVB_SI2168 if MEDIA_SUBDRV_AUTOSELECT
-	select DVB_SI2157 if MEDIA_SUBDRV_AUTOSELECT
+	select MEDIA_TUNER_SI2157 if MEDIA_SUBDRV_AUTOSELECT
 	default m
 	help
 	  Support for the SAA7160/1/2 based Budget PCIe DVB cards
