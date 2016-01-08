@@ -3,19 +3,15 @@ config SAA716X_CORE
 	depends on PCI && I2C
 	default m
 	help
-	  Support for PCI cards based on the SAA7160/1/2 PCI Express bridge.
-
-	  Say Y if you own such a device and want to use it.
+	  Support for PCI Express cards based on the SAA7160/1/2 PCI Express bridge.
 
 config DVB_SAA716X_BUDGET
 	tristate "SAA7160/1/2 based Budget PCIe cards (DVB only)"
 	depends on SAA716X_CORE && DVB_CORE
+	select DVB_SI2168 if MEDIA_SUBDRV_AUTOSELECT
+	select DVB_SI2157 if MEDIA_SUBDRV_AUTOSELECT
 	default m
 	help
 	  Support for the SAA7160/1/2 based Budget PCIe DVB cards
-	  Currently supported devices are:
-
-	  * TurboSight 6281/6285
-
-	  Say Y if you own such a device and want to use it.
-
+	  Currently supported:
+	  * TurboSight 6281 and 6285 adapters.
