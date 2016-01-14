@@ -1451,7 +1451,6 @@ Kernel configured.
     sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian.*/config/config.common.ubuntu
     sed -i "/CONFIG_DVB_LNBP22=m/a CONFIG_DVB_LOOPBACK_ADAPTER=m" debian.*/config/config.common.ubuntu
     if [ "x$drivers_opt" = "xyes" ]; then
-      sed -i "/CONFIG_S2IO=m/a CONFIG_SAA716X_SUPPORT=y" debian.*/config/config.common.ubuntu
       sed -i "/CONFIG_SAA716X_SUPPORT=y/a CONFIG_SAA716X_BUDGET=m" debian.*/config/config.common.ubuntu
       sed -i "/CONFIG_DVB_S921=m/a CONFIG_DVB_SAA716X_CORE=m" debian.*/config/config.common.ubuntu
     fi
