@@ -1886,7 +1886,7 @@ and \"options dvb_core dvb_powerdown_on_sleep=0\"
 in /etc/modprobe.d/tbs_opensource.conf?
 
 "
-    confirmyes "Yes, please do."
+    confirmyes "Yes, please do. [Y/n]"
     if [ "$?" = "0" ]; then
       echo "options saa716x_budget int_type=1
 options dvb_core dvb_powerdown_on_sleep=0" > /etc/modprobe.d/tbs_opensource.conf
