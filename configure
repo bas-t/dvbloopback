@@ -766,15 +766,6 @@ Going to clone the v4l buildsystem of choise.
   if [ "x$v4l_opt" = "xyes" ];then
     git clone git://linuxtv.org/media_build.git || die "Error(s) while fetching v4l build system"
     git clone --depth=1 git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
-    if ! cat media_tree/drivers/media/Kconfig | grep "BROKEN" > /dev/null 2>&1; then
-      echo "
-Mauro may have decided that \"MEDIA_CONTROLLER_DVB\" is not broken anymore.
-Review the situation and act.
-Aborting...
-"
-      env_clean
-      exit 0
-    fi
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
 Source is downloaded.
@@ -1531,7 +1522,7 @@ if ! [ "x$v4l_opt" = "xno" ]; then
   make distclean
   make allyesconfig
   sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" v4l/.config
-  #sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" v4l/.config
+  sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" v4l/.config
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 v4l source configured.
