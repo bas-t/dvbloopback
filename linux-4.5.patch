@@ -1,5 +1,5 @@
---- dvbloopback/dvb_loopback.c
-+++ dvbloopback/dvb_loopback.c
+--- drivers/media/pci/dvbloopback/dvb_loopback.c
++++ drivers/media/pci/dvbloopback/dvb_loopback.c
 @@ -997,7 +997,7 @@ static int create_lb_dev(struct dvblb *dvblb, int dev_idx, int type)
  
  // create loopback device (will be frontend0)
