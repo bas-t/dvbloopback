@@ -1,0 +1,20 @@
+--- drivers/media/pci/Kconfig	2015-08-30 20:34:09.000000000 +0200
++++ drivers/media/pci/Kconfig	2015-09-05 09:14:29.615317905 +0200
+@@ -31,6 +31,7 @@
+ source "drivers/media/pci/cx25821/Kconfig"
+ source "drivers/media/pci/cx88/Kconfig"
+ source "drivers/media/pci/bt8xx/Kconfig"
++source "drivers/media/pci/saa716x/Kconfig"
+ source "drivers/media/pci/saa7134/Kconfig"
+ source "drivers/media/pci/saa7164/Kconfig"
+ source "drivers/media/pci/cobalt/Kconfig"
+--- drivers/media/Kconfig
++++ drivers/media/Kconfig
+@@ -97,6 +97,7 @@ config MEDIA_CONTROLLER
+ config MEDIA_CONTROLLER_DVB
+ 	bool "Enable Media controller for DVB (EXPERIMENTAL)"
+ 	depends on MEDIA_CONTROLLER
++	depends on BROKEN
+ 	---help---
+ 	  Enable the media controller API support for DVB.
+ 
