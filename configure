@@ -872,17 +872,6 @@ if [ "x$v4l_opt" = "xno" ]; then
   FIRST_DIGIT=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
   SECOND_DIGIT=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
 
-  # linux-4.5 patch
-  if [ "$FIRST_DIGIT" -eq "4" ]; then
-    if [ "$SECOND_DIGIT" -gt "4" ]; then
-      patch -p0 < ../linux-4.5.patch
-      _patch
-    fi
-  elif [ "$FIRST_DIGIT" -gt "4" ]; then
-    patch -p0 < ../linux-4.5.patch
-    _patch
-  fi  
-
   # dvbloopback patch
   if [ "x$tvh_opt" = "xno" ]; then
     mkdir drivers/media/pci/dvbloopback
@@ -911,6 +900,17 @@ dvb-core is patched, dvbloopback added.
         exit 0
       fi
     fi
+  fi
+
+  # linux-4.5 patch
+  if [ "$FIRST_DIGIT" -eq "4" ]; then
+    if [ "$SECOND_DIGIT" -gt "4" ]; then
+      patch -p0 < ../linux-4.5.patch
+      _patch
+    fi
+  elif [ "$FIRST_DIGIT" -gt "4" ]; then
+    patch -p0 < ../linux-4.5.patch
+    _patch
   fi
 
   # saa716x patch
@@ -1105,16 +1105,7 @@ fi
 # v4l
 if ! [ "x$v4l_opt" = "xno" ]; then
   if ! [ "x$v4l_opt" = "xendriss" ];then
-    # linux-4.5 patch
-    if [ "$FIRST_DIGIT" -eq "4" ]; then
-      if [ "$SECOND_DIGIT" -gt "4" ]; then
-        patch -p0 < ../linux-4.5.patch
-        _patch
-      fi
-    elif [ "$FIRST_DIGIT" -gt "4" ]; then
-      patch -p0 < ../linux-4.5.patch
-      _patch
-    fi 
+ 
     # dvbloopback patch
     if [ "x$tvh_opt" = "xno" ]; then
       mkdir drivers/media/pci/dvbloopback
@@ -1148,6 +1139,17 @@ dvb-core is patched.
           exit 0
         fi
       fi
+    fi
+
+    # linux-4.5 patch
+    if [ "$FIRST_DIGIT" -eq "4" ]; then
+      if [ "$SECOND_DIGIT" -gt "4" ]; then
+        patch -p0 < ../linux-4.5.patch
+        _patch
+      fi
+    elif [ "$FIRST_DIGIT" -gt "4" ]; then
+      patch -p0 < ../linux-4.5.patch
+      _patch
     fi
 
     # DVBSky T982 support
