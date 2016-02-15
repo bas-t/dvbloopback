@@ -1142,15 +1142,8 @@ dvb-core is patched.
     fi
 
     # linux-4.5 patch
-    if [ "$FIRST_DIGIT" -eq "4" ]; then
-      if [ "$SECOND_DIGIT" -gt "4" ]; then
-        patch -p0 < ../linux-4.5.patch
-        _patch
-      fi
-    elif [ "$FIRST_DIGIT" -gt "4" ]; then
-      patch -p0 < ../linux-4.5.patch
-      _patch
-    fi
+    patch -p0 < ../linux-4.5.patch
+    _patch
 
     # DVBSky T982 support
     if [ "x$drivers_opt" = "xyes" ]; then
