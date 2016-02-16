@@ -1,3 +1,5 @@
+--- drivers/media/Kconfig
++++ drivers/media/Kconfig
 @@ -97,6 +97,7 @@ config MEDIA_CONTROLLER
  config MEDIA_CONTROLLER_DVB
  	bool "Enable Media controller for DVB (EXPERIMENTAL)"
