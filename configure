@@ -1155,35 +1155,21 @@ dvb-core is patched.
 
     # DVBSky T982 support
     if [ "x$drivers_opt" = "xyes" ]; then
-      if ! [ "x$v4l_opt" = "xyes" ]; then
-        cp -f ../drivers/media/tuners/* drivers/media/tuners/
-        cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
-        if [ "x$debug_opt" = "xyes" ]; then
-          echo "
-si2168 and si2157 added/updated.
-"
-          confirmyes
-          if [ "$?" != "0" ]; then
-            env_clean
-            exit 0
-          fi
-        fi
-        if [ "$V4L_VERSION" = "18" -o "$V4L_VERSION" = "180" ]; then
-          patch -p0 < ../cx23885-3.18.patch
-          _patch
-        elif [ "$V4L_VERSION" = "10" ]; then
-          patch -p0 < ../cx23885-3.10.patch
-          _patch
-        fi
-        if [ "x$debug_opt" = "xyes" ]; then
-          echo "
+      if [ "$V4L_VERSION" = "18" -o "$V4L_VERSION" = "180" ]; then
+        patch -p0 < ../cx23885-3.18.patch
+        _patch
+      elif [ "$V4L_VERSION" = "10" ]; then
+        patch -p0 < ../cx23885-3.10.patch
+        _patch
+      fi
+      if [ "x$debug_opt" = "xyes" ]; then
+        echo "
 cx23885 patch applied.
 "
-          confirmyes
-          if [ "$?" != "0" ]; then
-            env_clean
-            exit 0
-          fi
+        confirmyes
+        if [ "$?" != "0" ]; then
+          env_clean
+          exit 0
         fi
       fi
     fi
