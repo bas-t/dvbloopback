@@ -1088,24 +1088,6 @@ Primary DVB system for si2168 is set to $dvb_opt
         fi
       fi
     fi
-    # vb2 patch
-    if [ "$FIRST_DIGIT" -eq "3" -a "$SECOND_DIGIT" -lt "19" ]; then
-      patch -p0 < ../vb2-1.patch
-      _patch
-    elif [ "$FIRST_DIGIT" -eq "4" -a "$SECOND_DIGIT" -lt "4" ]; then
-      patch -p0 < ../vb2.patch
-      _patch
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
-vb2 patch applied. 
-"
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
-      fi
-    fi
   fi
 fi
 
