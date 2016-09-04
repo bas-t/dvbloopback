@@ -25,8 +25,3 @@ Alternative use:
 If you like it, you could use my personal configure script.
 Note that it is tested with Debian only, Ubuntu might work too.
 Do: ./configure --help to review the options
-
-Notice, EOL:
-
-I've been moving to a Tvheadend/Kodi setup. Such a setup lacks the need of 'dvbloopback + descrambler',
-resulting in a dev stop for the dvbloopback and descrambler repo's.
