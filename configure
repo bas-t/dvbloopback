@@ -1422,6 +1422,10 @@ Not going to install any more of those, aborting...
     sed -i "s/-$_ABINAME/-$abi_opt/g" debian/rules.gen
     fakeroot debian/rules debian/control-real
     sed -i "s/DEBUG='True'/DEBUG='FALSE'/g" debian/rules.gen
+    if cat .config | grep "debian/certs/benh@debian.org.cert.pem" > /dev/null 2>&1; then
+      sed -i "s/debian\/certs\/benh@debian.org.cert.pem/certs\/signing_key.pem/" .config
+      sed -i "s/CONFIG_MODULE_SIG_KEY=\"\"/CONFIG_MODULE_SIG_KEY=\"certs\/signing_key.pem\"/" .config
+    fi
     if [ "$CONFIG" = "amd64" ]; then
       fakeroot make -f debian/rules.gen setup_amd64_none_amd64
       sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" debian/build/build_amd64_none_amd64/.config
@@ -1560,6 +1564,10 @@ Going to configure your $vanilla_opt vanilla kernel.
   #if cat .config | grep "CONFIG_MEDIA_CONTROLLER_DVB=y" > /dev/null 2>&1; then
     #sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" .config
   #fi
+  if cat .config | grep "debian/certs/benh@debian.org.cert.pem" > /dev/null 2>&1; then
+    sed -i "s/debian\/certs\/benh@debian.org.cert.pem/certs\/signing_key.pem/" .config
+    sed -i "s/CONFIG_MODULE_SIG_KEY=\"\"/CONFIG_MODULE_SIG_KEY=\"certs\/signing_key.pem\"/" .config
+  fi
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Kernel configured.
