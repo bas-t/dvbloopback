@@ -904,15 +904,15 @@ dvb-core is patched, dvbloopback added.
     fi
   fi
 
-  # linux-4.5 patch
+  # 4.5-linux patch
   if [ "x$tvh_opt" = "xno" ]; then
     if [ "$FIRST_DIGIT" -eq "4" ]; then
       if [ "$SECOND_DIGIT" -gt "4" ]; then
-        patch -p0 < ../linux-4.5.patch
+        patch -p0 < ../4.5-linux.patch
         _patch
       fi
     elif [ "$FIRST_DIGIT" -gt "4" ]; then
-      patch -p0 < ../linux-4.5.patch
+      patch -p0 < ../4.5-linux.patch
       _patch
     fi
   fi
@@ -1127,10 +1127,10 @@ dvb-core is patched.
       fi
     fi
 
-    # linux-4.5 patch
+    # 4.5-linux patch
     if [ "x$tvh_opt" = "xno" ]; then
       if [ "x$v4l_opt" = "xyes" ]; then
-        patch -p0 < ../linux-4.5.patch
+        patch -p0 < ../4.5-linux.patch
         _patch
       fi
     fi
