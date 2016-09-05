@@ -93,6 +93,30 @@ If you hit 'n', 'make oldconfig' starts.
     esac
 }
 
+ubuntukernelconfig(){
+echo -en "
+Choise: use supplied config file or
+do 'make oldconfig'. Do you want to
+use supplied kernel config?
+
+If you hit 'n', 'make oldconfig' starts.
+
+"
+    # call with a prompt string or use a default
+    read -r -p "${1:-Yes, use it. [Y/n]} " response
+    case $response in
+        [yY][eE][sS]|[yY]) 
+            cp -f ../kernelconfig/amd64/ubuntu/$MAJOR.$MINOR/config ./.config
+            ;;
+        [nN][oO]|[nN])
+            make oldconfig
+            ;;
+        *)
+            cp -f ../kernelconfig/amd64/ubuntu/$MAJOR.$MINOR/config ./.config
+            ;;
+    esac
+}
+
 show_help(){
   echo " Usage: ./configure --opt1=<opt> --opt2=<opt>"
   echo "                        "
@@ -1551,6 +1575,12 @@ Going to configure your $vanilla_opt vanilla kernel.
   if [ "$OS" = "Debian" ] && [ "$CONFIG" = "amd64" ]; then
     if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
       kernelconfig
+    else
+      make oldconfig
+    fi
+  elif [ "$OS" = "Ubuntu" ] && [ "$CONFIG" = "amd64" ]; then
+    if [ -f ../kernelconfig/amd64/ubuntu/$MAJOR.$MINOR/config ]; then
+      ubuntukernelconfig
     else
       make oldconfig
     fi
