@@ -1452,7 +1452,7 @@ Kernel configured.
       sed -i "/CONFIG_DVB_S921=m/a CONFIG_DVB_SAA716X_CORE=m" debian.*/config/config.common.ubuntu
       sed -i "/CONFIG_DVB_SAA716X_CORE=m/a CONFIG_SAA716X_BUDGET=m" debian.*/config/config.common.ubuntu
     fi
-    fakeroot debian/rules updateconfigs
+    #fakeroot debian/rules updateconfigs
     UBUNTUKERNEL=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
     _ABINAME=$(cat debian/changelog | head -1 | grep -o '[[:digit:]]\+' | head -4 | awk 'NR==4')
     _ABINAME_SUB=$(ls debian.master/abi | head -1 | cut -d'.' -f 4)
