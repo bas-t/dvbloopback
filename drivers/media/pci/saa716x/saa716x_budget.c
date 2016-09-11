@@ -102,7 +102,7 @@ static int saa716x_budget_pci_probe(struct pci_dev *pdev, const struct pci_devic
 	}
 
 	saa716x_gpio_init(saa716x);
-#if 0
+
 	err = saa716x_dump_eeprom(saa716x);
 	if (err) {
 		dprintk(SAA716x_ERROR, 1, "SAA716x EEPROM dump failed");
@@ -112,7 +112,7 @@ static int saa716x_budget_pci_probe(struct pci_dev *pdev, const struct pci_devic
 	if (err) {
 		dprintk(SAA716x_ERROR, 1, "SAA716x EEPROM read failed");
 	}
-
+#if 0
 	/* set default port mapping */
 	SAA716x_EPWR(GREG, GREG_VI_CTRL, 0x04080FA9);
 	/* enable FGPI3 and FGPI1 for TS input from Port 2 and 6 */
@@ -327,6 +327,9 @@ static int saa716x_tbs6281_frontend_attach(struct saa716x_adapter *adapter, int 
 	}
 	adapter->i2c_client_demod = client;
 
+	if (saa716x_tbs_mac(dev, count, adapter->dvb_adapter.proposed_mac) < 0)
+		goto err;
+
 	/* attach tuner */
 	memset(&si2157_config, 0, sizeof(si2157_config));
 	si2157_config.fe = adapter->fe;
@@ -422,6 +425,9 @@ static int saa716x_tbs6285_frontend_attach(struct saa716x_adapter *adapter, int 
 		goto err;
 	}
 	adapter->i2c_client_demod = client;
+
+	if (saa716x_tbs_mac(dev, count, adapter->dvb_adapter.proposed_mac) < 0)
+		goto err;
 
 	/* attach tuner */
 	memset(&si2157_config, 0, sizeof(si2157_config));
