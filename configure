@@ -685,35 +685,58 @@ fi
 
 if [ "x$ffdecsawrapper_opt" = "xyes" ]; then
   if [ "x$tvh_opt" = "xno" ]; then
-    git clone https://github.com/bas-t/descrambler.git && cd descrambler
-    ./configure $ffdecsaconf_opt
-    if [ "$?" != "0" ]; then
-      echo -en "
+    FFDECSA_EXTRA=""
+    if [ -f /usr/bin/ffdecsawrapper ]; then
+      echo "
+/usr/bin/ffdecsawrapper exists.
+
+Do you want to recompile it?
+
+"
+      confirmno "Recompile ffdecsawrapper binary [N/y]"
+      if ! [ "$?" -eq 0 ]; then
+        FFDECSA_EXTRA="1"
+        echo "
+Nothing to do. Aborting...
+"
+      else
+        FFDECSA_EXTRA="--replace=yes"
+        echo "
+Going to replace /usr/bin/ffdecsawrapper
+"
+      fi    
+    fi
+    if ! [ "$FFDECSA_EXTRA" = "1" ]; then
+      git clone https://github.com/bas-t/descrambler.git && cd descrambler
+      ./configure $ffdecsaconf_opt $FFDECSA_EXTRA
+      if [ "$?" != "0" ]; then
+        echo -en "
 Error(s) encountered while compiling ffdecsawrapper.
 
 Continue anyway?
 "
-      confirmyes
-      if [ "$?" != "0" ]; then
-        cd $DIR
-        env_clean
-        exit 0
+        confirmyes
+        if [ "$?" != "0" ]; then
+          cd $DIR
+          env_clean
+          exit 0
+        fi
       fi
-    fi
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
+      if [ "x$debug_opt" = "xyes" ]; then
+        echo "
 You have either chosen not to (re)compile ffdecsawrapper,
 
 or ffdecsawrapper is (re)compiled and installed.
 "
-      confirmyes
-      if [ "$?" != "0" ]; then
-        cd $DIR
-        env_clean
-        exit 0
+        confirmyes
+        if [ "$?" != "0" ]; then
+          cd $DIR
+          env_clean
+          exit 0
+        fi
       fi
+      cd $DIR
     fi
-    cd $DIR
   fi
 fi
 
