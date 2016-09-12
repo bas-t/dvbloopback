@@ -484,15 +484,6 @@ fi
 
 # Get build-deps, Debian only.
 if [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
-  if [ "x$v4l_opt" = "xendriss" ]; then
-    if ! dpkg-query -l mercurial | grep "ii" > /dev/null 2>&1; then
-      echo "
-Missing dependency mercurial, marking for installation.
-
-"
-      apt-get install mercurial -y || die "Error installing dependency mercurial"
-    fi
-  fi
   if ! dpkg-query -l build-essential | grep "ii" > /dev/null 2>&1; then
     echo "
 Missing dependency build-essential, marking for installation.
@@ -653,22 +644,6 @@ Aborting...
     env_clean
     exit 1
   fi
-  if ! [ "x$v4l_opt" = "xno" ]; then
-    if ! dpkg-query -l linux-headers-`uname -r` | grep "ii" > /dev/null 2>&1; then
-      if ! [ -d /lib/modules/`uname -r`/build/drivers ]; then
-        apt-get install linux-headers-`uname -r`
-      fi
-    fi
-    if ! [ "$?" -eq "0" ]; then
-      echo "
-Error(s) while installing kernel headers, or no kernel source available.
-
-Aborting...
-"
-      env_clean
-      exit 1
-    fi
-  fi
 fi
 
 #
@@ -676,59 +651,57 @@ fi
 #
 
 if [ "x$ffdecsawrapper_opt" = "xyes" ]; then
-  if [ "x$tvh_opt" = "xno" ]; then
-    FFDECSA_EXTRA=""
-    if [ -f /usr/bin/ffdecsawrapper ]; then
-      echo "
+  FFDECSA_EXTRA=""
+  if [ -f /usr/bin/ffdecsawrapper ]; then
+    echo "
 /usr/bin/ffdecsawrapper exists.
 
 Do you want to recompile it?
 
 "
-      confirmno "Recompile ffdecsawrapper binary [N/y]"
-      if ! [ "$?" -eq 0 ]; then
-        FFDECSA_EXTRA="1"
-        echo "
+    confirmno "Recompile ffdecsawrapper binary [N/y]"
+    if ! [ "$?" -eq 0 ]; then
+      FFDECSA_EXTRA="1"
+      echo "
 Nothing to do. Aborting...
 "
-      else
-        FFDECSA_EXTRA="--replace=yes"
-        echo "
+    else
+      FFDECSA_EXTRA="--replace=yes"
+      echo "
 Going to replace /usr/bin/ffdecsawrapper
 "
-      fi    
-    fi
-    if ! [ "$FFDECSA_EXTRA" = "1" ]; then
-      git clone -b $ffbranch_opt https://github.com/bas-t/descrambler.git && cd descrambler
-      ./configure $ffdecsaconf_opt $FFDECSA_EXTRA
-      if [ "$?" != "0" ]; then
-        echo -en "
+    fi    
+  fi
+  if ! [ "$FFDECSA_EXTRA" = "1" ]; then
+    git clone -b $ffbranch_opt https://github.com/bas-t/descrambler.git && cd descrambler
+    ./configure $ffdecsaconf_opt $FFDECSA_EXTRA
+    if [ "$?" != "0" ]; then
+      echo -en "
 Error(s) encountered while compiling ffdecsawrapper.
 
 Continue anyway?
 "
-        confirmyes
-        if [ "$?" != "0" ]; then
-          cd $DIR
-          env_clean
-          exit 0
-        fi
+      confirmyes
+      if [ "$?" != "0" ]; then
+        cd $DIR
+        env_clean
+        exit 0
       fi
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
+    fi
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
 You have either chosen not to (re)compile ffdecsawrapper,
 
 or ffdecsawrapper is (re)compiled and installed.
 "
-        confirmyes
-        if [ "$?" != "0" ]; then
-          cd $DIR
-          env_clean
-          exit 0
-        fi
+      confirmyes
+      if [ "$?" != "0" ]; then
+        cd $DIR
+        env_clean
+        exit 0
       fi
-      cd $DIR
     fi
+    cd $DIR
   fi
 fi
 
@@ -783,47 +756,6 @@ Source is downloaded.
       env_clean
       exit 0
     fi
-  fi
-fi
-
-# v4l
-if [ "x$v4l_opt" != "xno" ]; then
-  echo "
-Going to clone the v4l buildsystem of choise.
-"
-  sleep 3
-
-  if [ "x$v4l_opt" = "xyes" ];then
-    git clone git://linuxtv.org/media_build.git || die "Error(s) while fetching v4l build system"
-    git clone --depth=1 git://linuxtv.org/media_tree.git || die "Error(s) while fetching v4l source tree"
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
-Source is downloaded.
-"
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
-      fi
-    fi
-  elif [ "x$v4l_opt" = "xendriss" ];then
-    hg clone http://linuxtv.org/hg/~endriss/media_build_experimental
-  else
-    git clone git://github.com/bas-t/media_build.git || die "Error(s) while fetching v4l build system"
-    git clone --depth=1 -b $v4l_opt git://github.com/bas-t/linux-stable.git media_tree || die "Error(s) while fetching v4l source tree"
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
-Source is downloaded.
-"
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
-      fi
-    fi
-  fi
-  if ! [ "x$v4l_opt" = "xendriss" ];then
-    cd media_tree
   fi
 fi
 
@@ -914,46 +846,42 @@ if [ "x$v4l_opt" = "xno" ]; then
   SECOND_DIGIT=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
 
   # dvbloopback patch
-  if [ "x$tvh_opt" = "xno" ]; then
-    mkdir drivers/media/pci/dvbloopback
-    cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
-    patch -p1 < ../dvbloopback.patch
-    _patch
-    if [ "$FIRST_DIGIT" -lt "4" ]; then
-      if [ "$SECOND_DIGIT" -lt "13" ]; then
-        patch -p0 < ../3.7-dvb-core.patch
-        _patch
-      else
-        patch -p0 < ../3.13-dvb-core.patch
-        _patch
-      fi
+  mkdir drivers/media/pci/dvbloopback
+  cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
+  patch -p1 < ../dvbloopback.patch
+  _patch
+  if [ "$FIRST_DIGIT" -lt "4" ]; then
+    if [ "$SECOND_DIGIT" -lt "13" ]; then
+      patch -p0 < ../3.7-dvb-core.patch
+      _patch
     else
       patch -p0 < ../3.13-dvb-core.patch
       _patch
     fi
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
+  else
+    patch -p0 < ../3.13-dvb-core.patch
+    _patch
+  fi
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
 dvb-core is patched, dvbloopback added.
 "
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
-      fi
+    confirmyes
+    if [ "$?" != "0" ]; then
+      env_clean
+      exit 0
     fi
   fi
 
   # 4.5-linux patch
-  if [ "x$tvh_opt" = "xno" ]; then
-    if [ "$FIRST_DIGIT" -eq "4" ]; then
-      if [ "$SECOND_DIGIT" -gt "4" ]; then
-        patch -p0 < ../4.5-linux.patch
-        _patch
-      fi
-    elif [ "$FIRST_DIGIT" -gt "4" ]; then
+  if [ "$FIRST_DIGIT" -eq "4" ]; then
+    if [ "$SECOND_DIGIT" -gt "4" ]; then
       patch -p0 < ../4.5-linux.patch
       _patch
     fi
+  elif [ "$FIRST_DIGIT" -gt "4" ]; then
+    patch -p0 < ../4.5-linux.patch
+    _patch
   fi
 
   # saa716x patch
@@ -1118,232 +1046,6 @@ Primary DVB system for si2168 is set to $dvb_opt
         fi
       fi
     fi
-  fi
-fi
-
-# v4l
-if ! [ "x$v4l_opt" = "xno" ]; then
-  if ! [ "x$v4l_opt" = "xendriss" ];then
- 
-    # dvbloopback patch
-    if [ "x$tvh_opt" = "xno" ]; then
-      mkdir drivers/media/pci/dvbloopback
-      cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
-      patch -p1 < ../dvbloopback.patch
-      _patch
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
-dvbloopback module added to source tree.
-"
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
-      fi
-      if ! [ "$V4L_VERSION" = "10" ]; then
-        patch -p0 < ../3.13-dvb-core.patch
-        _patch
-      else
-        patch -p0 < ../3.7-dvb-core.patch
-        _patch
-      fi
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
-dvb-core is patched.
-"
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
-      fi
-    fi
-
-    # 4.5-linux patch
-    if [ "x$tvh_opt" = "xno" ]; then
-      if [ "x$v4l_opt" = "xyes" ]; then
-        patch -p0 < ../4.5-linux.patch
-        _patch
-      fi
-    fi
-
-    # DVBSky T982 support
-    if [ "x$drivers_opt" = "xyes" ]; then
-      if [ "$V4L_VERSION" = "18" -o "$V4L_VERSION" = "180" ]; then
-        patch -p0 < ../cx23885-3.18.patch
-        _patch
-      elif [ "$V4L_VERSION" = "10" ]; then
-        patch -p0 < ../cx23885-3.10.patch
-        _patch
-      fi
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
-cx23885 patch applied.
-"
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
-      fi
-    fi
-
-    # saa716x patch
-    if [ "x$drivers_opt" = "xyes" ];then
-      mkdir drivers/media/pci/saa716x
-      cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
-      if [ "$V4L_VERSION" = "10" ]; then
-        patch -p0 < ../Kconfig-3.10.patch
-        _patch
-      elif [ "$V4L_VERSION" = "18" -o "$V4L_VERSION" = "180" ]; then
-        patch -p0 < ../Kconfig-3.18.patch
-        _patch
-      else
-        patch -p0 < ../Kconfig-4.5.patch
-        _patch
-      fi
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
-saa716x added, Kconfig patch for saa716x applied.
-"
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
-      fi
-      if [ "$V4L_VERSION" = "10" ]; then
-        patch -p0 < ../Makefile-3.10.patch
-        _patch
-      elif [ "$V4L_VERSION" = "18" -o "$V4L_VERSION" = "180" ]; then
-        patch -p0 < ../Makefile.patch
-        _patch
-      else
-        patch -p0 < ../Makefile-4.2.patch
-      _patch
-      fi
-      if [ "x$debug_opt" = "xyes" ]; then
-      echo "
-Makefile patch for saa716x applied.
-"
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
-      fi
-    else
-      if [ "$FIRST_DIGIT" -eq "4" ]; then
-        if [ "$SECOND_DIGIT" -gt "4" ]; then
-          patch -p0 < ../mediacontroller.patch
-          _patch
-        fi
-      elif [ "$FIRST_DIGIT" -gt "4" ]; then
-        patch -p0 < ../mediacontroller.patch
-        _patch
-      fi
-    fi
-    if [ "x$v4l_opt" = "xyes" ]; then
-      patch -p0 < ../cx23885-gapped-clock.patch
-      _patch
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
-cx23885 gapped-clock patch applied.
-"
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
-      fi
-    fi
-
-    # silabs si2168 DVB-C/T patch
-    if [ "x$dvb_opt" = "xdvbc" ]; then
-      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
-    elif [ "x$dvb_opt" = "xdvbt" ]; then
-      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
-    elif [ "x$dvb_opt" = "xdvbt2" ]; then
-      sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBT2, SYS_DVBT, SYS_DVBC_ANNEX_A/' drivers/media/dvb-frontends/si2168.c
-    fi
-    if [ "x$dvb_opt" = "xdvbc" -o "x$dvb_opt" = "xdvbt" -o "x$dvb_opt" = "xdvbt2" ]; then
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
-Primary DVB system for si2168 is set to $dvb_opt 
-"
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
-      fi
-    fi
-
-    # commit patches
-    git add -A
-    if [ "x$tvh_opt" = "xno" ]; then
-      git commit -a -m 'Add drivers, patch dvb-core.'
-    else
-      git commit -a -m 'Add drivers.'
-    fi
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
-Patches are committed to media_tree.
-"
-      confirmyes
-      if [ "$?" != "0" ]; then
-        env_clean
-        exit 0
-      fi
-    fi
-
-    cd ../media_build
-
-    # make install patch
-    if [ "x$v4l_opt" = "xyes" ]; then
-      patch -p0 < ../v4l-make-install.patch
-      _patch
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
-make install patch applied to media_build repo.
-"
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
-      fi
-    else
-      git checkout 3.$V4L_VERSION
-    fi
-
-    # commit patch
-    if [ "x$v4l_opt" = "xyes" ]; then
-      git commit -a -m 'Install drivers in /lib/modules/`uname -r`/updates/media'
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
-Patches are committed to media_build.
-"
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
-      fi
-    fi
-  else
-    cd media_build_experimental
-    make download
-    make untar
-    if ! cat linux/drivers/media/Kconfig | grep "BROKEN" > /dev/null 2>&1; then
-      patch -p0 < ../endriss_01.patch
-      _patch
-    fi
-    mkdir linux/drivers/media/pci/dvbloopback
-    cp -f ../dvbloopback/* linux/drivers/media/pci/dvbloopback/
-    patch -p0 < ../dvbloopback.patch
-    _patch
   fi
 fi
 
@@ -1558,27 +1260,6 @@ Kernel configured.
   fi
 fi
 
-# v4l
-if ! [ "x$v4l_opt" = "xno" ]; then
-  if ! [ "x$v4l_opt" = "xendriss" ];then
-    make dir DIR=../media_tree
-  fi
-  make distclean
-  make allyesconfig
-  sed -i "s/CONFIG_DVB_MAX_ADAPTERS=8/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" v4l/.config
-  sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" v4l/.config
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
-v4l source configured.
-"
-    confirmyes
-    if [ "$?" != "0" ]; then
-      env_clean
-      exit 0
-    fi
-  fi
-fi
-
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
   echo -en "
@@ -1674,34 +1355,6 @@ Aborting...
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Kernel compiled.
-"
-    confirmyes
-    if [ "$?" != "0" ]; then
-      env_clean
-      exit 0
-    fi
-  fi
-fi
-
-# v4l
-if ! [ "x$v4l_opt" = "xno" ]; then
-  make
-  if ! [ "$?" -eq "0" ]; then
-    echo "
-Error(s) while compiling the v4l source.
-This happens quite often, it is a common upstream problem.
-
-Try again tomorrow, or in a couple of days,
-the error(s) will probably be fixed upstream by then.
-
-Aborting...
-"
-    env_clean
-    exit 1
-  fi
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
-v4l source compiled.
 "
     confirmyes
     if [ "$?" != "0" ]; then
@@ -1821,26 +1474,6 @@ All done, you should reboot NOW!
 
 "
   fi
-fi
-
-# v4l
-if ! [ "x$v4l_opt" = "xno" ]; then
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
-Going to install v4l modules.
-"
-    confirmyes
-    if [ "$?" != "0" ]; then
-      env_clean
-      exit 0
-    fi
-  fi
-  if [ -d /lib/modules/`uname -r`/updates/media ]; then
-    rm -rf /lib/modules/`uname -r`/updates/media
-    depmod -a
-  fi
-  make install
-  cd ..
 fi
 
 # Vanilla
