@@ -173,7 +173,6 @@ show_help(){
 stock_opt="yes"
 vanilla_opt=""
 headers_opt="no"
-v4l_opt="no"
 next_opt="no"
 adapters_opt="16"
 update_opt="yes"
@@ -181,9 +180,7 @@ abi_opt="900"
 debug_opt="no"
 drivers_opt="yes"
 dvb_opt="dvbc"
-tvh_opt="no"
 ffdecsawrapper_opt="yes"
-usercopy_opt="0"
 ffdecsaconf_opt=""
 ffbranch_opt="master"
 
@@ -213,8 +210,6 @@ for opt do
   --dvb=*) dvb_opt="$optval"
   ;;
   --ffdecsawrapper=*) ffdecsawrapper_opt="$optval"
-  ;;
-  --usercopy=*) usercopy_opt="$optval"
   ;;
   --ffdecsaconf=*) ffdecsaconf_opt="$optval"
   ;;
@@ -375,66 +370,26 @@ else
 fi
 
 # Check for a supported kernelversion
-if ! [ "x$v4l_opt" = "xendriss" ]; then
-  if ! [ "x$v4l_opt" = "xno" ]; then
-    if ! [ "x$v4l_opt" = "xyes" ]; then
-      V4L_VERSION=$(echo $v4l_opt | grep -o '[[:digit:]]\+' | awk 'NR==2')
-    fi
-    FIRST_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | head -n1)
-    SECOND_DIGIT=$(echo `uname -r` | grep -o '[[:digit:]]\+' | awk 'NR==2')
-    if ! [ "x$v4l_opt" = "xyes" ]; then
-      if [ "$FIRST_DIGIT" -lt "4" ]; then
-        if ! [ "x$v4l_opt" = "x3.180" ]; then
-          echo "
-Minimum supported kernel series is 4.1.x
-
-Aborting...
-"
-          exit 1
-        fi
-      elif [ "$FIRST_DIGIT" -lt "5" ] && [ "$SECOND_DIGIT" -lt "1" ]; then
-        echo "
-Minimum supported kernel series is 4.1.x
-
-Aborting...
-"
-        exit 1
-      fi
-    else
-      if [ "$FIRST_DIGIT" -lt "4" ]; then
-        if [ "$SECOND_DIGIT" -lt "10" ]; then
-          echo "
-Your running kernel is < 3.10.x
-
-Minimum supported version is 3.10.x
-
-Aborting...
-"
-          env_clean
-          exit 0
-        fi
-      fi
-    fi
-  elif ! [ "x$vanilla_opt" = "x" ]; then
-    MAJOR=$(echo "$vanilla_opt" | cut -d'.' -f1)
-    MINOR=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
-    export MAJOR
-    export MINOR
-    if [ "$MAJOR" -lt "3" ]; then
-      echo -en "
+if ! [ "x$vanilla_opt" = "x" ]; then
+  MAJOR=$(echo "$vanilla_opt" | cut -d'.' -f1)
+  MINOR=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
+  export MAJOR
+  export MINOR
+  if [ "$MAJOR" -lt "3" ]; then
+    echo -en "
 You requested a build for a $vanilla_opt kernel.
 
 Minimum supported kernelseries is 3.10.x
 
 Aborting...
 "
-      env_clean
-      exit 0
-    fi
-    if [ "x$drivers_opt" = "xyes" ]; then
-      if [ "$MAJOR" -eq "3" ]; then
-        if ! [ "$MINOR" -eq "10" -o "$MINOR" -eq "16" -o "$MINOR" -eq "18" ]; then
-          echo -en "
+    env_clean
+    exit 0
+  fi
+  if [ "x$drivers_opt" = "xyes" ]; then
+    if [ "$MAJOR" -eq "3" ]; then
+      if ! [ "$MINOR" -eq "10" -o "$MINOR" -eq "16" -o "$MINOR" -eq "18" ]; then
+        echo -en "
 You are trying to compile TBS 6281/6285 and DVBSky T982 drivers directly
 
 into a $vanilla_opt vanilla kernel, using the --drivers=yes flag.
@@ -443,23 +398,22 @@ I only backported the DVBSky T982 driver to 3.10.x, 3.16.x and 3.18.x kernels.
 
 Aborting...
 "
-          env_clean
-          exit 0
-        fi
+        env_clean
+        exit 0
       fi
-    else
-      if [ "$MAJOR" -eq "3" ]; then
-        if [ "$MINOR" -lt "10" ]; then
-          echo "
+    fi
+  else
+    if [ "$MAJOR" -eq "3" ]; then
+      if [ "$MINOR" -lt "10" ]; then
+        echo "
 Your are trying to build a $vanilla_opt kernel.
 
 Minimum supported version is 3.10.x
 
 Aborting...
 "
-          env_clean
-          exit 0
-        fi
+        env_clean
+        exit 0
       fi
     fi
   fi
@@ -807,38 +761,6 @@ fi
 #
 # Patch the source
 #
-
-# All
-if ! [ "x$usercopy_opt" = "x0" ]; then
-  patch --directory=.. -p0 < ../usercopy-import.patch
-  _patch
-  patch -p0 < ../usercopy-export.patch
-  _patch
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
-usercopy patches aplied.
-"
-    confirmyes
-    if [ "$?" != "0" ]; then
-      env_clean
-      exit 0
-    fi
-  fi
-fi
-if [ "x$usercopy_opt" = "x1" ]; then
-  patch -p0 < ../usercopy-failsafe.patch
-  _patch
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
-usercopy failsafe patch applied.
-"
-    confirmyes
-    if [ "$?" != "0" ]; then
-      env_clean
-      exit 0
-    fi
-  fi
-fi
 
 # Common (stock and vanilla kernels)
 if [ "x$v4l_opt" = "xno" ]; then
