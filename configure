@@ -133,12 +133,6 @@ show_help(){
   echo "                        "
   echo " --headers=<opt>        [no] yes: install kernel headers package(s)."
   echo "                        "
-  echo " --v4l=<opt>            [no] yes: compile current official v4l tree"
-  echo "                        against your running kernel."
-  echo "                        endriss: use Oliver Endriss' sources."
-  echo "                        Disables --stock= and --vanilla= flags."
-  echo "                        Warning: using the --v4l flag is not recommended."
-  echo "                        "
   echo " --next=<opt>           [no] 4.1 : compile linux-next."
   echo "                        This version number should be >= current RC version."
   echo "                        disables --v4l, --vanilla and --stock flags, no headers."
@@ -164,9 +158,6 @@ show_help(){
   echo "                        Only set this option if you realy know what you do."
   echo "                        "
   echo " --debug=<opt>          [no] yes: pause to review (almost) each and every step."
-  echo "                        "
-  echo " --tvh=<opt>            [no] yes: don't insert dvbloopback, tvh does not need it"
-  echo "                        Setting --tvh to yes disables --ffdecsawrapper flag"
   echo "                        "
   echo " --ffdecsawrapper=<opt> [yes] no: don't offer to compile ffdecsawrapper binary,"
   echo "                        even if you don't have it."
@@ -207,8 +198,6 @@ for opt do
   ;;
   --headers=*) headers_opt="$optval"
   ;;
-  --v4l=*) stock_opt="no"; vanilla_opt=""; v4l_opt="$optval"
-  ;;
   --next=*) stock_opt="no"; v4l_opt="no"; headers_opt="no"; next_opt="$optval"; vanilla_opt="$next_opt"
   ;;
   --adapters=*) adapters_opt="$optval"
@@ -222,8 +211,6 @@ for opt do
   --drivers=*) drivers_opt="$optval"
   ;;
   --dvb=*) dvb_opt="$optval"
-  ;;
-  --tvh=*) tvh_opt="$optval"
   ;;
   --ffdecsawrapper=*) ffdecsawrapper_opt="$optval"
   ;;
