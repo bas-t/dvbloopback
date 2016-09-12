@@ -1065,13 +1065,7 @@ Makefile is patched for saa716x.
       if [ "$SECOND_DIGIT" -lt "2" ]; then
         patch -p0 < ../cx23885-4.0.patch
         _patch
-      else
-        patch -p0 < ../cx23885-gapped-clock.patch
-        _patch
       fi
-    elif [ "$FIRST_DIGIT" -gt "4" ]; then
-      patch -p0 < ../cx23885-gapped-clock.patch
-      _patch
     fi
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
