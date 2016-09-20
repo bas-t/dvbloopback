@@ -516,7 +516,7 @@ Missing dependency kernel-wedge, marking for installation.
     if ! [ "$RELEASE" = "jessie" ]; then
       apt-get install kernel-wedge --no-install-recommends -y || die "Error installing dependency kernel-wedge"
     else
-      apt-get -t jessie-backports install kernel-wedge --no-install-recommends -y > /dev/null 2>&1
+      apt-get -t jessie-backports install kernel-wedge --no-install-recommends -y || die "Error installing dependency kernel-wedge"
     fi
   fi
   if ! dpkg-query -l libdigest-sha-perl | grep "ii" > /dev/null 2>&1; then
