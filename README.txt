@@ -35,4 +35,6 @@ Just running "./configure" without any switches (on Debian or Ubuntu 16.04 LTS) 
 your stock kernel with the dvbloopback kernel module intree, with an updated ABI num from 900 up to 909.
 It also pulls and compiles the sources needed to install the ffdecsawrapper binary.
 
-Note for Debian users: In order to recompile your stock kernel with the dvbloopback kernel intree, you have to temporary comment out the "backports" source in /etc/apt/sources.list and do apt-get update. If you neglect this, the script will recompile the kernel from "backports" and that is probably not what you want. This is due to a bug in apt-get source. That command will allways get the newest source, even if it resides in "backports". The supporting libs for this "backports" kernel however, will not get installed automagically. You'll have to install them manually with "apt-get -t jessie-backports" or similar, depending on whatever version of Debian you are running.
+Note for Debian users: In order to recompile your stock kernel with the dvbloopback kernel intree, you have to temporary comment out the "backports" source in /etc/apt/sources.list and do apt-get update. If you neglect this, the script will recompile the kernel from "backports" and that is probably not what you want. This is due to a bug/feature in apt-get source. That command will allways get the newest source, even if it resides in "backports".
+
+However, if you don't mind running a backports kernel, make sure you have both lines beginning with "deb" and "deb-src" enabled for your backports repo.
