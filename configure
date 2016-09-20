@@ -517,6 +517,10 @@ Missing dependency kernel-wedge, marking for installation.
     if [ "$OS" = "Debian" ]; then
       apt-get -t $RELEASE-backports install kernel-wedge --no-install-recommends -y > /dev/null 2>&1
     fi
+  else
+    if [ "$OS" = "Debian" ]; then
+      apt-get -t $RELEASE-backports install kernel-wedge --no-install-recommends -y > /dev/null 2>&1
+    fi
   fi
   if ! dpkg-query -l libdigest-sha-perl | grep "ii" > /dev/null 2>&1; then
     echo "
