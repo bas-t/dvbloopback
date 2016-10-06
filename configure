@@ -1,7 +1,7 @@
 #!/bin/bash
 
 env_clean(){
-for i in DIR MAJOR MINOR OS RELEASE FIRST_DIGIT SECOND_DIGIT CONCURRENCY_LEVEL FFDECSA_EXTRA FFFAIL
+for i in DIR MAJOR MINOR OS RELEASE FIRST_DIGIT SECOND_DIGIT CONCURRENCY_LEVEL FFDECSA_EXTRA FFFAIL CX23885
 do
 if ! [ -z ${i+x} ]; then
   unset $i
@@ -902,13 +902,28 @@ if [ "x$drivers_opt" = "xyes" ];then
     fi
   fi
   if [ "x$debug_opt" = "xyes" ]; then
-    echo "
+    if [ "$FIRST_DIGIT" -lt "4" ]; then
+      if [ "$SECOND_DIGIT" = "18" ]; then
+        CX23885="1"
+      elif [ "$SECOND_DIGIT" = "16" ]; then
+        CX23885="1"
+      elif [ "$SECOND_DIGIT" = "10" ]; then
+        CX23885="1"
+      fi
+    elif [ "$FIRST_DIGIT" -eq "4" ]; then
+      if [ "$SECOND_DIGIT" -lt "2" ]; then
+        CX23885="1"
+      fi
+    fi
+    if [ "$CX23885" = "1" ]; then   
+      echo "
 cx23885 patch applied.
 "
-    confirmyes
-    if [ "$?" != "0" ]; then
-      env_clean
-      exit 0
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
+      fi
     fi
   fi
 fi
