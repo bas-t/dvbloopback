@@ -1,7 +1,7 @@
 #!/bin/bash
 
 env_clean(){
-for i in DIR MAJOR MINOR OS RELEASE FIRST_DIGIT SECOND_DIGIT CONCURRENCY_LEVEL
+for i in DIR MAJOR MINOR OS RELEASE FIRST_DIGIT SECOND_DIGIT CONCURRENCY_LEVEL FFDECSA_EXTRA FFFAIL
 do
 if ! [ -z ${i+x} ]; then
   unset $i
@@ -627,8 +627,9 @@ Going to replace /usr/bin/ffdecsawrapper
     git clone -b $ffbranch_opt https://github.com/bas-t/descrambler.git && cd descrambler
     ./configure $ffdecsaconf_opt $FFDECSA_EXTRA
     if [ "$?" != "0" ]; then
+      FFFAIL="1"
       echo -en "
-Error(s) encountered while compiling ffdecsawrapper.
+Error(s) encountered while (re)compiling ffdecsawrapper binary.
 
 Continue anyway?
 "
@@ -640,16 +641,16 @@ Continue anyway?
       fi
     fi
     if [ "x$debug_opt" = "xyes" ]; then
-      echo "
-You have either chosen not to (re)compile ffdecsawrapper,
-
-or ffdecsawrapper is (re)compiled and installed.
+      if ! [ "$FFFAIL" = "1" ]; then
+        echo "
+ffdecsawrapper binary is (re)compiled and installed.
 "
-      confirmyes
-      if [ "$?" != "0" ]; then
-        cd $DIR
-        env_clean
-        exit 0
+        confirmyes
+        if [ "$?" != "0" ]; then
+          cd $DIR
+          env_clean
+          exit 0
+        fi
       fi
     fi
     cd $DIR
