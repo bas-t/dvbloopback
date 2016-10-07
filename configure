@@ -167,6 +167,8 @@ show_help(){
   echo "                        "
   echo " --ffbranch=<opt>       [master] you can opt for stable or oldstable."
   echo "                        "
+  echo " --firmware=<opt>       [yes] no: don't install the included firmware files."
+  echo "                        "
   exit 0
 }
 
@@ -183,6 +185,7 @@ dvb_opt="dvbc"
 ffdecsawrapper_opt="yes"
 ffdecsaconf_opt=""
 ffbranch_opt="master"
+firmware_opt="yes"
 
 for opt do
   optval="${opt#*=}"
@@ -214,6 +217,8 @@ for opt do
   --ffdecsaconf=*) ffdecsaconf_opt="$optval"
   ;;
   --ffbranch=*) ffbranch_opt="$optval"
+  ;;
+  --firmware=*) firmware_opt="$optval"
   ;;
   *)
   die_unknown $opt
@@ -1472,11 +1477,11 @@ Your $vanilla_opt vanilla kernel is installed.
   fi
 fi
 
-if [ "x$drivers_opt" = "xyes" ]; then
+if [ "x$firmware_opt" = "xyes" ]; then
   # Install the firmware
   if ! [ -f /lib/firmware/dvb-tuner-si2158-a20-01.fw ] > /dev/null 2>&1; then
     echo "
-Do you want to install firmware into /lib/firmware?
+Do you want to install included firmware into /lib/firmware?
 
 "
     confirmyes "Yes, please do. [Y/n]"
