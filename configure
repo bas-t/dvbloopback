@@ -526,6 +526,9 @@ Missing dependency kernel-wedge, marking for installation.
     apt-get install kernel-wedge --no-install-recommends -y || die "Error installing dependency kernel-wedge"
     if [ "$OS" = "Debian" ]; then
       apt-get -t $RELEASE-backports install kernel-wedge --no-install-recommends -y > /dev/null 2>&1
+      apt-get -t $RELEASE-backports install linux-base --no-install-recommends -y > /dev/null 2>&1
+      apt-get -t $RELEASE-backports install irqbalance --no-install-recommends -y > /dev/null 2>&1
+      apt-get -t $RELEASE-backports install firmware-linux-free --no-install-recommends -y > /dev/null 2>&1
     fi
   else
     if [ "$OS" = "Debian" ]; then
