@@ -169,6 +169,8 @@ show_help(){
   echo "                        "
   echo " --firmware=<opt>       [yes] no: don't install the included firmware files."
   echo "                        "
+  echo " --vanilla+=<opt>       [] small: use localmodconfig for vanilla kernels."
+  echo "                        "
   exit 0
 }
 
@@ -186,6 +188,7 @@ ffdecsawrapper_opt="yes"
 ffdecsaconf_opt=""
 ffbranch_opt="master"
 firmware_opt="yes"
+config_opt=""
 
 for opt do
   optval="${opt#*=}"
@@ -219,6 +222,8 @@ for opt do
   --ffbranch=*) ffbranch_opt="$optval"
   ;;
   --firmware=*) firmware_opt="$optval"
+  ;;
+  --vanilla+=*) config_opt="$optval"
   ;;
   *)
   die_unknown $opt
@@ -1205,16 +1210,24 @@ Going to configure your $vanilla_opt vanilla kernel.
 
 "
   if [ "$OS" = "Debian" ] && [ "$CONFIG" = "amd64" ]; then
-    if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
-      kernelconfig
+    if ! [ "x$config_opt" = "small" ]; then
+      if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
+        kernelconfig
+      else
+        make oldconfig
+      fi
     else
-      make oldconfig
+      make localmodconfig
     fi
   elif [ "$OS" = "Ubuntu" ] && [ "$CONFIG" = "amd64" ]; then
-    if [ -f ../kernelconfig/amd64/ubuntu/$MAJOR.$MINOR/config ]; then
-      ubuntukernelconfig
+    if ! [ "x$config_opt" = "small" ]; then
+      if [ -f ../kernelconfig/amd64/ubuntu/$MAJOR.$MINOR/config ]; then
+        ubuntukernelconfig
+      else
+        make oldconfig
+      fi
     else
-      make oldconfig
+      make localmodconfig
     fi
   else
     make oldconfig
