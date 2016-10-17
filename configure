@@ -1213,7 +1213,7 @@ Going to configure your $vanilla_opt vanilla kernel.
 
 "
   if [ "$OS" = "Debian" ] && [ "$CONFIG" = "amd64" ]; then
-    if ! [ "x$config_opt" = "small" ]; then
+    if [ "$config_opt" = "" ]; then
       if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
         kernelconfig
       else
@@ -1223,7 +1223,7 @@ Going to configure your $vanilla_opt vanilla kernel.
       make localmodconfig
     fi
   elif [ "$OS" = "Ubuntu" ] && [ "$CONFIG" = "amd64" ]; then
-    if ! [ "x$config_opt" = "small" ]; then
+    if [ "$config_opt" = "" ]; then
       if [ -f ../kernelconfig/amd64/ubuntu/$MAJOR.$MINOR/config ]; then
         ubuntukernelconfig
       else
