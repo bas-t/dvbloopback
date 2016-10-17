@@ -171,6 +171,8 @@ show_help(){
   echo "                        "
   echo " --vanilla+=<opt>       [] small: use localmodconfig for vanilla kernels."
   echo "                        "
+  echo " --genpix=<opt>         [no] yes: add 2g modulation capability to genpix drivers"
+  echo "                        "
   exit 0
 }
 
@@ -189,6 +191,7 @@ ffdecsaconf_opt=""
 ffbranch_opt="master"
 firmware_opt="yes"
 config_opt=""
+genpix_opt="no"
 
 for opt do
   optval="${opt#*=}"
@@ -224,6 +227,8 @@ for opt do
   --firmware=*) firmware_opt="$optval"
   ;;
   --vanilla+=*) config_opt="$optval"
+  ;;
+  --genpix=*) genpix_opt="$optval"
   ;;
   *)
   die_unknown $opt
@@ -986,6 +991,21 @@ if [ "x$dvb_opt" = "xdvbc" -o "x$dvb_opt" = "xdvbt" -o "x$dvb_opt" = "xdvbt2" ];
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Primary DVB system for si2168 is set to $dvb_opt 
+"
+    confirmyes
+    if [ "$?" != "0" ]; then
+      env_clean
+      exit 0
+    fi
+  fi
+fi
+
+# Genpix Skywalker patch
+if [ "x$genpix_opt" = "xyes" ]; then
+  sed -i "s/FE_CAN_INVERSION_AUTO/FE_CAN_2G_MODULATION | FE_CAN_INVERSION_AUTO/" drivers/media/usb/dvb-usb/gp8psk-fe.c
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+Genpix Skywalker driver is patched.
 "
     confirmyes
     if [ "$?" != "0" ]; then
