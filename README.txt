@@ -37,4 +37,4 @@ It also pulls and compiles the sources needed to install the ffdecsawrapper bina
 
 Note for Debian users: In order to recompile your stock kernel with the dvbloopback kernel intree, you have to temporary comment out the "backports" source in /etc/apt/sources.list and do apt-get update. If you neglect this, the script will recompile the kernel from "backports" and that is probably not what you want. This is due to a bug/feature in apt-get source. That command will allways get the newest source, even if it resides in "backports".
 
-However, if you don't mind running a backports kernel, make sure you have both lines beginning with "deb" and "deb-src" enabled for your backports repo.
+However, if you don't mind running a backports kernel, make sure you have both lines beginning with "deb" and "deb-src" enabled for your backports repo. By doing so, you'll risk trashing your system seriously though. You have been warned!
