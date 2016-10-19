@@ -373,7 +373,7 @@ fi
 if [ -f /usr/bin/lsb_release ]; then
   OS=$( lsb_release -si )
   RELEASE=$( lsb_release -sc )
-  if ! [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
+  if ! [ "$OS" = "Debian" -o "$OS" = "Ubuntu" -o "$OS" = "Devuan" ]; then
     if ! [ -f "/etc/arch-release" ] > /dev/null  2>&1; then
       drivers_opt="no"
     fi
@@ -435,7 +435,7 @@ Aborting...
 fi
 
 # Check for proper use of --stock= flag
-if ! [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
+if ! [ "$OS" = "Debian" -o "$OS" = "Ubuntu" -o "$OS" = "Devuan" ]; then
   if [ "x$stock_opt" = "xyes" ]; then
     echo "
 
@@ -452,7 +452,7 @@ v4l tree or a vanilla kernel. Aborting....
 fi
 
 # Get build-deps, Debian only.
-if [ "$OS" = "Debian" -o "$OS" = "Ubuntu" ]; then
+if [ "$OS" = "Debian" -o "$OS" = "Ubuntu" -o "$OS" = "Devuan" ]; then
   if ! dpkg-query -l build-essential | grep "ii" > /dev/null 2>&1; then
     echo "
 Missing dependency build-essential, marking for installation.
@@ -529,14 +529,14 @@ Missing dependency kernel-wedge, marking for installation.
 
 "
     apt-get install kernel-wedge --no-install-recommends -y || die "Error installing dependency kernel-wedge"
-    if [ "$OS" = "Debian" ]; then
+    if [ "$OS" = "Debian" -o "$OS" = "Devuan" ]; then
       apt-get -t $RELEASE-backports install kernel-wedge --no-install-recommends -y > /dev/null 2>&1
       apt-get -t $RELEASE-backports install linux-base --no-install-recommends -y > /dev/null 2>&1
       apt-get -t $RELEASE-backports install irqbalance --no-install-recommends -y > /dev/null 2>&1
       apt-get -t $RELEASE-backports install firmware-linux-free --no-install-recommends -y > /dev/null 2>&1
     fi
   else
-    if [ "$OS" = "Debian" ]; then
+    if [ "$OS" = "Debian" -o "$OS" = "Devuan" ]; then
       apt-get -t $RELEASE-backports install kernel-wedge --no-install-recommends -y > /dev/null 2>&1
     fi
   fi
@@ -1028,7 +1028,7 @@ fi
 
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
-  if [ "$OS" = "Debian" ]; then
+  if [ "$OS" = "Debian" -o "$OS" = "Devuan" ]; then
     if [ "$abi_opt" = "900" ]; then
       DEBIANKERNEL=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
       if [ "$CONFIG" = "amd64" ]; then
@@ -1232,7 +1232,7 @@ if [ "x$vanilla_opt" != "x" ]; then
 Going to configure your $vanilla_opt vanilla kernel.
 
 "
-  if [ "$OS" = "Debian" ] && [ "$CONFIG" = "amd64" ]; then
+  if [ "$OS" = "Debian" -o "$OS" = "Devuan" ] && [ "$CONFIG" = "amd64" ]; then
     if [ "$config_opt" = "" ]; then
       if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
         kernelconfig
@@ -1284,7 +1284,7 @@ fi
 
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
-  if [ "$OS" = "Debian" ]; then
+  if [ "$OS" = "Debian" -o "$OS" = "Devuan" ]; then
     if [ "$CONFIG" = "amd64" ]; then
       fakeroot make -f debian/rules.gen binary-arch_amd64_none_real
       if [ "x$debug_opt" = "xyes" ]; then
@@ -1403,7 +1403,7 @@ Going to install your stock kernel.
     fi
     dpkg -i linux-image-*
   fi
-  if [ "$OS" = "Debian" ]; then
+  if [ "$OS" = "Debian" -o "$OS" = "Devuan" ]; then
     if [ "$CONFIG" = "amd64" ]; then
       echo "
 
