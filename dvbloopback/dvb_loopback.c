@@ -127,6 +127,7 @@ static int dvblb_usercopy(struct file *file,
 	void    *mbuf = NULL;
 	void    *parg = NULL;
 	int     err  = -EINVAL;
+	int	msize = 0;
 	struct  dtv_properties *tvps = NULL;
 	struct  dtv_property *tvp = NULL;
 
@@ -142,14 +143,27 @@ static int dvblb_usercopy(struct file *file,
 	case _IOC_READ: /* some v4l ioctls are marked wrong ... */
 	case _IOC_WRITE:
 	case (_IOC_WRITE | _IOC_READ):
-		if (_IOC_SIZE(cmd) <= sizeof(sbuf)) {
-			parg = sbuf;
-		} else {
-			/* too big to allocate from stack */
-			mbuf = kmalloc(_IOC_SIZE(cmd),GFP_KERNEL);
-			if (NULL == mbuf)
-				return -ENOMEM;
-			parg = mbuf;
+
+		/*
+		 * Since most part of the code assume that "parg" is a contious pice of
+		 * memory when FE_SET_PROPERTY / FE_GET_PROPERTY is used
+		 * It doesn't work with tvps->props attached as a pointer
+		 * it will be over written and recalculated as an offset to parg (tvps)
+		 * This is not a nice fix but it works  /H.Schillstrom
+		 */
+		msize = _IOC_SIZE(cmd);
+
+		if ((cmd == FE_SET_PROPERTY) || (cmd == FE_GET_PROPERTY)) {
+			tvps = (struct dtv_properties __user *)arg;
+			msize += tvps->num * sizeof(struct dtv_property);
+		}
+		if (msize < sizeof(sbuf))
+		    parg = sbuf;
+		else {
+		    mbuf = kmalloc(msize,  GFP_KERNEL);
+		    if (NULL == mbuf)
+			return -ENOMEM;
+		    parg = mbuf;
 		}
 
 		err = -EFAULT;
@@ -157,13 +171,9 @@ static int dvblb_usercopy(struct file *file,
 			goto out;
 		if ((cmd == FE_SET_PROPERTY) || (cmd == FE_GET_PROPERTY)) {
 		    tvps = (struct dtv_properties __user *)arg;
-		    tvp = (struct dtv_property *) kmalloc(tvps->num *
-			sizeof(struct dtv_property), GFP_KERNEL);
-		    if (!tvp){
-			err = -ENOMEM;
-			goto out;
-		    }
-		    if (copy_from_user(tvp, tvps->props, 
+		    tvp = (struct dtv_property *) (parg + _IOC_SIZE(cmd));
+
+		    if (copy_from_user(tvp, tvps->props,
 			(tvps->num) * sizeof(struct dtv_property))) {
 			err = -EFAULT;
 			goto out;
@@ -187,14 +197,14 @@ static int dvblb_usercopy(struct file *file,
 	{
 	case _IOC_READ:
 	case (_IOC_WRITE | _IOC_READ):
-		if ((cmd == FE_GET_PROPERTY) || (cmd == FE_SET_PROPERTY)) 
+		if ((cmd == FE_GET_PROPERTY) || (cmd == FE_SET_PROPERTY))
 		{
 		    tvps = (struct dtv_properties __user *)arg;
 		    tvp = tvps->props;
 		    tvps = (struct dtv_properties __user *)parg;
-		    if (copy_to_user(tvp, tvps->props, tvps->num * 
+		    if (copy_to_user(tvp, tvps->props, tvps->num *
 			    sizeof(struct dtv_property))) {
- 			err = -EFAULT;
+			err = -EFAULT;
 			goto out;
 		    }
 		    tvps->props = tvp;
