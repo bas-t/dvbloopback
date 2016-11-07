@@ -1359,16 +1359,6 @@ Aborting...
     exit 1
   fi
   cd ..
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
-Kernel compiled.
-"
-    confirmyes
-    if [ "$?" != "0" ]; then
-      env_clean
-      exit 0
-    fi
-  fi
 fi
 
 #
