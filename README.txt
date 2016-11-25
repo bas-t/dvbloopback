@@ -17,6 +17,8 @@ to drivers/media/pci/Makefile
 Patch drivers/media/dvb-core/dvbdev.c the usual way,
 example patches are in this repo.
 
+NB: if you are going to build a kernel v4.5.x or up, you need to patch the dvbloopback module with 4.5-linux.patch (it's in the repo).
+
 Having done this, proceed with make oldconfig, make allyesconfig or something like that.
 
 
