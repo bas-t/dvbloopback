@@ -284,7 +284,7 @@ static void demux_worker(unsigned long data)
 	} while (write_index != fgpi_entry->read_index);
 }
 
-#define SAA716x_MODEL_TBS6281		"TurboSight TBS 6281"
+#define SAA716x_MODEL_TBS6281		"TurboSight TBS 6281 "
 #define SAA716x_DEV_TBS6281		"DVB-T/T2/C"
 
 static int saa716x_tbs6281_frontend_attach(struct saa716x_adapter *adapter, int count)
@@ -350,6 +350,9 @@ static int saa716x_tbs6281_frontend_attach(struct saa716x_adapter *adapter, int 
 	}
 	adapter->i2c_client_tuner = client;
 
+	strlcpy(adapter->fe->ops.info.name,dev->config->model_name,52);
+	strlcat(adapter->fe->ops.info.name,dev->config->dev_type,52);
+
 	dev_dbg(&dev->pdev->dev, "%s frontend %d attached\n",
 		dev->config->model_name, count);
 
@@ -384,7 +387,7 @@ static struct saa716x_config saa716x_tbs6281_config = {
 };
 
 
-#define SAA716x_MODEL_TBS6285		"TurboSight TBS 6285"
+#define SAA716x_MODEL_TBS6285		"TurboSight TBS 6285 "
 #define SAA716x_DEV_TBS6285		"DVB-T/T2/C"
 
 static int saa716x_tbs6285_frontend_attach(struct saa716x_adapter *adapter, int count)
@@ -445,6 +448,9 @@ static int saa716x_tbs6285_frontend_attach(struct saa716x_adapter *adapter, int 
 		goto err;
 	}
 	adapter->i2c_client_tuner = client;
+
+	strlcpy(adapter->fe->ops.info.name,dev->config->model_name,52);
+	strlcat(adapter->fe->ops.info.name,dev->config->dev_type,52);
 
 	dev_dbg(&dev->pdev->dev, "%s frontend %d attached\n",
 		dev->config->model_name, count);
