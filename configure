@@ -965,25 +965,6 @@ si2168 and si2157 added/updated.
     if [ "$SECOND_DIGIT" -lt "5" ]; then
       cp -f ../drivers/media/tuners/* drivers/media/tuners/
       cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
-      patch -p1 < ../silabs1.patch
-      _patch
-      patch -p1 < ../silabs2.patch
-      _patch
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
-si2168 and si2157 added/updated.
-"
-        confirmyes
-        if [ "$?" != "0" ]; then
-          env_clean
-          exit 0
-        fi
-      fi
-    elif [ "$SECOND_DIGIT" -gt "4" ]; then
-      patch -p1 < ../silabs1.patch
-      _patch
-      patch -p1 < ../silabs2.patch
-      _patch
       if [ "x$debug_opt" = "xyes" ]; then
         echo "
 si2168 and si2157 added/updated.
