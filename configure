@@ -812,12 +812,15 @@ fi
 
 # 4.5-linux patch
 if [ "$FIRST_DIGIT" -eq "4" ]; then
-  if [ "$SECOND_DIGIT" -gt "4" ]; then
+  if [ "$SECOND_DIGIT" -gt "4" -a "$SECOND_DIGIT" -lt "10" ]; then
     patch -p0 < ../4.5-linux.patch
+    _patch
+  else
+    patch -p0 < ../4.10-linux.patch
     _patch
   fi
 elif [ "$FIRST_DIGIT" -gt "4" ]; then
-  patch -p0 < ../4.5-linux.patch
+  patch -p0 < ../4.10-linux.patch
   _patch
 fi
 
