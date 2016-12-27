@@ -1348,7 +1348,11 @@ if [ "x$vanilla_opt" != "x" ]; then
     export CONCURRENCY_LEVEL=2
   fi
   if [ "x$next_opt" = "xno" ]; then
-    make-kpkg --rootcmd fakeroot --initrd kernel_image kernel_headers
+    if [ "x$headers_opt" = "xyes" ]; then
+      make-kpkg --rootcmd fakeroot --initrd kernel_image kernel_headers
+    else
+      make-kpkg --rootcmd fakeroot --initrd kernel_image
+    fi
   else
     make-kpkg --rootcmd fakeroot --initrd kernel_image
   fi
