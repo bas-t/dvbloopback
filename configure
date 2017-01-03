@@ -169,7 +169,7 @@ show_help(){
   echo "                        "
   echo " --firmware=<opt>       [yes] no: don't install the included firmware files."
   echo "                        "
-  echo " --vanilla+=<opt>       [] small: use localmodconfig for vanilla kernels."
+  echo " --config=<opt>         [big] small: use localmodconfig for tiny vanilla kernels."
   echo "                        "
   echo " --genpix=<opt>         [no] yes: add 2g modulation capability to genpix drivers"
   echo "                        "
@@ -190,7 +190,7 @@ ffdecsawrapper_opt="yes"
 ffdecsaconf_opt=""
 ffbranch_opt="master"
 firmware_opt="yes"
-config_opt=""
+config_opt="big"
 genpix_opt="no"
 
 for opt do
@@ -226,7 +226,7 @@ for opt do
   ;;
   --firmware=*) firmware_opt="$optval"
   ;;
-  --vanilla+=*) config_opt="$optval"
+  --config=*) config_opt="$optval"
   ;;
   --genpix=*) genpix_opt="$optval"
   ;;
@@ -1249,23 +1249,23 @@ Going to configure your $vanilla_opt vanilla kernel.
 
 "
   if [ "$OS" = "Debian" -o "$OS" = "Devuan" ] && [ "$CONFIG" = "amd64" ]; then
-    if [ "$config_opt" = "" ]; then
+    if [ "$config_opt" = "big" ]; then
       if [ -f ../kernelconfig/amd64/$MAJOR.$MINOR/config ]; then
         kernelconfig
       else
         make oldconfig
       fi
-    else
+    elif [ "$config_opt" = "small" ]; then
       make localmodconfig
     fi
   elif [ "$OS" = "Ubuntu" ] && [ "$CONFIG" = "amd64" ]; then
-    if [ "$config_opt" = "" ]; then
+    if [ "$config_opt" = "big" ]; then
       if [ -f ../kernelconfig/amd64/ubuntu/$MAJOR.$MINOR/config ]; then
         ubuntukernelconfig
       else
         make oldconfig
       fi
-    else
+    elif [ "$config_opt" = "small" ]; then
       make localmodconfig
     fi
   else
@@ -1475,9 +1475,6 @@ Going to install your $vanilla_opt vanilla kernel.
 
   dpkg -i linux-image-* && sleep 2
 
-  if ! [ "x$next_opt" = "xno" ]; then
-    headers_opt="no"
-  fi
   if [ "x$headers_opt" = "xyes" ]; then
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
