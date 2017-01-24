@@ -1316,18 +1316,18 @@ fi
 if [ "x$stock_opt" = "xyes" ]; then
   if [ "$OS" = "Debian" -o "$OS" = "Devuan" ]; then
     if [ "$CONFIG" = "amd64" ]; then
-      fakeroot make -f debian/rules.gen binary-arch_amd64_none_real
+      fakeroot make -f debian/rules.gen binary-arch_amd64_none_real 2>&1 | tee ../buildlog_amd64_none_real
       if [ "x$debug_opt" = "xyes" ]; then
-        fakeroot make -f debian/rules.gen binary-arch_amd64_none_amd64
+        fakeroot make -f debian/rules.gen binary-arch_amd64_none_amd64 2>&1 | tee ../buildlog_amd64_none_amd64
       else
-        fakeroot make -j2 -f debian/rules.gen binary-arch_amd64_none_amd64
+        fakeroot make -j2 -f debian/rules.gen binary-arch_amd64_none_amd64 2>&1 | tee ../buildlog_amd64_none_amd64
       fi
     else
-      fakeroot make -f debian/rules.gen binary-arch_i386_none_real
+      fakeroot make -f debian/rules.gen binary-arch_i386_none_real 2>&1 | tee ../buildlog_i386_none_real
       if [ "x$debug_opt" = "xyes" ]; then
-        fakeroot make -f debian/rules.gen binary-arch_i386_none_686-pae
+        fakeroot make -f debian/rules.gen binary-arch_i386_none_686-pae 2>&1 | tee ../buildlog_i386_none_686-pae
       else
-        fakeroot make -j2 -f debian/rules.gen binary-arch_i386_none_686-pae
+        fakeroot make -j2 -f debian/rules.gen binary-arch_i386_none_686-pae 2>&1 | tee ../buildlog_i386_none_686-pae
       fi
     fi
     if ! [ "$?" -eq "0" ]; then
@@ -1342,7 +1342,7 @@ Aborting...
     cd ..
     rm -f xen*
   elif [ "$OS" = "Ubuntu" ]; then
-    AUTOBUILD=1 NOEXTRAS=1 skipabi=true fakeroot debian/rules binary-headers binary-generic
+    AUTOBUILD=1 NOEXTRAS=1 skipabi=true fakeroot debian/rules binary-headers binary-generic 2>&1 | tee ../buildlog_ubuntu_generic
     if ! [ "$?" -eq "0" ]; then
       echo "
 Error(s) while compiling the kernel
@@ -1376,12 +1376,12 @@ if [ "x$vanilla_opt" != "x" ]; then
   fi
   if [ "x$next_opt" = "xno" ]; then
     if [ "x$headers_opt" = "xyes" ]; then
-      make-kpkg --rootcmd fakeroot --initrd kernel_image kernel_headers
+      make-kpkg --rootcmd fakeroot --initrd kernel_image kernel_headers 2>&1 | tee ../buildlog_vanilla_$vanilla_opt
     else
-      make-kpkg --rootcmd fakeroot --initrd kernel_image
+      make-kpkg --rootcmd fakeroot --initrd kernel_image 2>&1 | tee ../buildlog_vanilla_$vanilla_opt
     fi
   else
-    make-kpkg --rootcmd fakeroot --initrd kernel_image
+    make-kpkg --rootcmd fakeroot --initrd kernel_image 2>&1 | tee ../buildlog_vanilla_$vanilla_opt
   fi
   if ! [ "$?" -eq "0" ]; then
     echo "
