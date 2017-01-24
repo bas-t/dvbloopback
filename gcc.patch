@@ -1,6 +1,6 @@
 --- Makefile	2017-01-24 17:37:53.560095000 +0100
-+++ Makefile	2017-01-24 17:39:49.372100499 +0100
-@@ -407,7 +407,7 @@
++++ Makefile	2017-01-24 18:15:54.716184814 +0100
+@@ -407,11 +407,11 @@
  		   -fno-strict-aliasing -fno-common \
  		   -Werror-implicit-function-declaration \
  		   -Wno-format-security \
@@ -9,3 +9,8 @@
  
  KBUILD_AFLAGS_KERNEL :=
  KBUILD_CFLAGS_KERNEL :=
+-KBUILD_AFLAGS   := -D__ASSEMBLY__
++KBUILD_AFLAGS   := -D__ASSEMBLY__ $(call cc-option,-fno-PIE)
+ KBUILD_AFLAGS_MODULE  := -DMODULE
+ KBUILD_CFLAGS_MODULE  := -DMODULE
+ KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
