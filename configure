@@ -781,6 +781,12 @@ fi
 # Common (stock and vanilla kernels)
 FIRST_DIGIT=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
 SECOND_DIGIT=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
+EXTRA_DIGIT="0"
+VERSION="$FIRST_DIGIT$SECOND_DIGIT"
+chars=`echo -n $SECOND_DIGIT  | wc -c`
+if ! [ "$chars" -eq 2 ]; then
+VERSION="$FIRST_DIGIT$EXTRA_DIGIT$SECOND_DIGIT"
+fi
 
 # dvbloopback patch
 mkdir drivers/media/pci/dvbloopback
@@ -811,12 +817,7 @@ dvb-core is patched, dvbloopback added.
 fi
 
 # 4.5-linux patch
-if [ "$FIRST_DIGIT" -eq "4" ]; then
-  if [ "$SECOND_DIGIT" -gt "4" ]; then
-    patch -p0 < ../4.5-linux.patch
-    _patch
-  fi
-elif [ "$FIRST_DIGIT" -gt "4" ]; then
+if [ "$VERSION" -gt 404 ]; then
   patch -p0 < ../4.5-linux.patch
   _patch
 fi
