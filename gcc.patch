@@ -1,0 +1,11 @@
+--- Makefile	2017-01-24 17:37:53.560095000 +0100
++++ Makefile	2017-01-24 17:39:49.372100499 +0100
+@@ -407,7 +407,7 @@
+ 		   -fno-strict-aliasing -fno-common \
+ 		   -Werror-implicit-function-declaration \
+ 		   -Wno-format-security \
+-		   -std=gnu89
++		   -std=gnu89 $(call cc-option,-fno-PIE)
+ 
+ KBUILD_AFLAGS_KERNEL :=
+ KBUILD_CFLAGS_KERNEL :=
