@@ -1032,18 +1032,12 @@ Genpix Skywalker driver is patched.
   fi
 fi
 
-# GCC-6 6.2.0-7 and up patch
-GCCMAJOR=$( g++ -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f1 )
-GCCMINOR=$( g++ -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f2 )
-if [ "$GCCMAJOR" -gt 5 -a "$GCCMINOR" -gt 1 ]; then
-  if ! cat Makefile | grep -e "-std=gnu89 $(call cc-option,-fno-PIE)" > /dev/null 2>&1; then
-    if [ "$VERSION" -eq 316 -o "$VERSION" -eq 318 -o "$VERSION" -eq 401 ]; then
-      patch -p0 < ../gcc.patch
-      _patch
-    fi
+if ! cat Makefile | grep -e "-std=gnu89 $(call cc-option,-fno-PIE)" > /dev/null 2>&1; then
+  if [ "$VERSION" -eq 316 -o "$VERSION" -eq 318 -o "$VERSION" -eq 401 ]; then
+    patch -p0 < ../gcc.patch
+    _patch
   fi
 fi
-
 
 #
 # Configure the source
