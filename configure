@@ -1032,6 +1032,26 @@ Genpix Skywalker driver is patched.
   fi
 fi
 
+# GCC-6 6.2.0-7 and up patch
+GCCMAJOR=$( g++ -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f1 )
+GCCMINOR=$( g++ -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f2 )
+if [ "$GCCMAJOR" -gt 5 -a "$GCCMINOR" -gt 1 ]; then
+  if ! cat Makefile | grep -e "-Wno-format-security -fno-PIE" > /dev/null 2>&1; then
+    sed -i 's/-Wno-format-security/-Wno-format-security -fno-PIE/' Makefile
+  fi
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+GCC patch to Makefile used.
+"
+    confirmyes
+    if [ "$?" != "0" ]; then
+      env_clean
+      exit 0
+    fi
+  fi
+fi
+
+
 #
 # Configure the source
 #
