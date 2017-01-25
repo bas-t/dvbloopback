@@ -1041,7 +1041,8 @@ Genpix Skywalker driver is patched.
   fi
 fi
 
-if ! cat Makefile | grep -e "-std=gnu89 $(call cc-option,-fno-PIE)" > /dev/null 2>&1; then
+# gcc patch
+if ! cat Makefile | grep -e "call cc-option,-fno-PIE" > /dev/null 2>&1; then
   if [ "$VERSION" -eq 316 -o "$VERSION" -eq 318 -o "$VERSION" -eq 401 ]; then
     patch -p0 < ../gcc.patch
     _patch
