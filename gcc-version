@@ -1,0 +1,33 @@
+#!/bin/bash
+
+usage() {
+echo "" 
+echo "Sets the default version of gcc, g++, etc"
+echo ""
+echo "Usage:"
+echo ""
+echo "gcc-version <VERSION>"
+echo "like: gcc-version 4.7"
+echo ""
+exit 0
+}
+
+cd /usr/bin
+
+if [ -z $1 ] ; then
+  usage;
+fi
+
+set_default() {
+if [ -e "$1-$2" ] ; then
+  echo $1-$2 is now the default
+  ln -sf $1-$2 $1
+else
+  echo $1-$2 is not installed
+fi
+}
+
+for i in gcc cpp g++ gcov gcov-tool gcc-ar gcc-nm gcc-ranlib ; do
+  set_default $i $1
+done
+
