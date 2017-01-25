@@ -1,7 +1,7 @@
 #!/bin/bash
 
 env_clean(){
-for i in DIR MAJOR MINOR OS RELEASE FIRST_DIGIT SECOND_DIGIT CONCURRENCY_LEVEL FFDECSA_EXTRA FFFAIL CX23885 VERSION GCCCHANGE
+for i in DIR MAJOR MINOR OS RELEASE FIRST_DIGIT SECOND_DIGIT EXTRA_DIGIT CONCURRENCY_LEVEL FFDECSA_EXTRA FFFAIL CX23885 VERSION GCCCHANGE CONFIG
 do
 if ! [ -z ${i+x} ]; then
   unset $i
@@ -1042,11 +1042,12 @@ Genpix Skywalker driver is patched.
 fi
 
 # gcc patch
-if ! cat Makefile | grep -e "call cc-option,-fno-PIE" > /dev/null 2>&1; then
-  if [ "$VERSION" -eq 316 ]; then
-    patch -p0 < ../gcc.patch
-    _patch
-  fi
+if [ "$VERSION" -eq 316 ]; then
+  patch -p0 < ../gcc316.patch
+  _patch
+elif [ "$VERSION" -eq 310 ]; then
+  patch -p0 < ../gcc310.patch
+  _patch
 fi
 
 #
@@ -1376,7 +1377,7 @@ fi
 if [ "x$vanilla_opt" != "x" ]; then
   GCCCHANGE="0"
   if [ "$RELEASE" = "stretch" ]; then
-    if [ "$VERSION" -eq 316 -o "$VERSION" -eq 318 -o "$VERSION" -eq 401 ]; then
+    if [ "$VERSION" -lt 410 ]; then
       ../gcc-version 5
       GCCCHANGE="1"
     fi
