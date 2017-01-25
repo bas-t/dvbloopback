@@ -171,6 +171,8 @@ show_help(){
   echo "                        "
   echo " --config=<opt>         [big] small: use localmodconfig for tiny vanilla kernels."
   echo "                        "
+  echo " --gcc=<opt>            [gcc] or set the number."
+  echo "                        "
   echo " --genpix=<opt>         [no] yes: add 2g modulation capability to genpix drivers"
   echo "                        "
   exit 0
@@ -191,6 +193,7 @@ ffdecsaconf_opt=""
 ffbranch_opt="master"
 firmware_opt="yes"
 config_opt="big"
+gcc_opt=""
 genpix_opt="no"
 
 for opt do
@@ -227,6 +230,8 @@ for opt do
   --firmware=*) firmware_opt="$optval"
   ;;
   --config=*) config_opt="$optval"
+  ;;
+  --gcc=*) gcc_opt="$optval"
   ;;
   --genpix=*) genpix_opt="$optval"
   ;;
@@ -1375,12 +1380,12 @@ fi
 
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
+  CURRENTGCC=$( gcc -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f1,2 )
+  OLDGCC="$CURRENTGCC"
   GCCCHANGE="0"
-  if [ "$RELEASE" = "stretch" ]; then
-    if [ "$VERSION" -lt 410 ]; then
-      ../gcc-version 5
-      GCCCHANGE="1"
-    fi
+  if [ "x$gcc_opt" != "x" -a "x$CURRENTGCC" != "x$gcc_opt" ]; then
+    ../gcc-version $gcc_opt
+    GCCCHANGE="1"
   fi
   make-kpkg --rootcmd fakeroot clean
   if [ "x$debug_opt" = "xno" ]; then
@@ -1402,14 +1407,14 @@ Error(s) while compiling the kernel
 Aborting...
 "
     if [ "$GCCCHANGE" -eq 1 ]; then
-      ../gcc-version 6
+      ../gcc-version $OLDGCC
     fi
     env_clean
     exit 1
   fi
   cd ..
   if [ "$GCCCHANGE" -eq 1 ]; then
-    gcc-version 6
+    gcc-version $OLDGCC
   fi
 fi
 
