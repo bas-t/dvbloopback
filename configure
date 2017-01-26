@@ -851,6 +851,16 @@ fi
 if [ "$VERSION" -gt 404 ]; then
   patch -p0 < ../4.5-linux.patch
   _patch
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+dvbloopback module is patched for kernel series 4.5.x and up.
+"
+    confirmyes
+    if [ "$?" != "0" ]; then
+      env_clean
+      exit 0
+    fi
+  fi
 fi
 
 # saa716x patch
@@ -1007,11 +1017,7 @@ fi
 
 # kernel-package patch for linux-4.10.x and up
 if [ "x$stock_opt" = "xno" ]; then
-  if [ "x$headers_opt" = "xyes" ]; then
-    if [ "$FIRST_DIGIT" -eq "4" -a "$SECOND_DIGIT" -gt "9" ]; then
-      touch REPORTING-BUGS
-    fi
-  fi
+  touch REPORTING-BUGS
 fi
 
 
@@ -1055,9 +1061,29 @@ fi
 if [ "$VERSION" -eq 316 ]; then
   patch -p0 < ../gcc316.patch
   _patch
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+Your $vanilla_opt kernel is patched for newer gcc versions.
+"
+    confirmyes
+    if [ "$?" != "0" ]; then
+      env_clean
+      exit 0
+    fi
+  fi
 elif [ "$VERSION" -eq 310 ]; then
   patch -p0 < ../gcc310.patch
   _patch
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+Your $vanilla_opt kernel is patched for newer gcc versions.
+"
+    confirmyes
+    if [ "$?" != "0" ]; then
+      env_clean
+      exit 0
+    fi
+  fi
 fi
 
 # mediacontroller patch
@@ -1070,10 +1096,30 @@ if [ "$FIRST_DIGIT" -eq 4 ]; then
       patch -p0 < ../mediacontroller4.10.patch
       _patch
     fi
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
+MEDIA_CONTROLLER_DVB is deactivated.
+"
+      confirmyes
+      if [ "$?" != "0" ]; then
+        env_clean
+        exit 0
+      fi
+    fi
   fi
 elif [ "$FIRST_DIGIT" -gt "4" ]; then
   patch -p0 < ../mediacontroller4.10.patch
   _patch
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+MEDIA_CONTROLLER_DVB is deactivated.
+"
+    confirmyes
+    if [ "$?" != "0" ]; then
+      env_clean
+      exit 0
+    fi
+  fi
 fi
 
 #
