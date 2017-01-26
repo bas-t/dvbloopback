@@ -380,7 +380,7 @@ if [ "x$gcc_opt" != "x" ]; then
     echo -en "
 \E[1;33;44m
 You have chosen to compile your vanilla kernel with
-gcc-$gcc_opt, but it dos not exist on your system.
+gcc-$gcc_opt, but it does not exist on your system.
 
 Aborting...
 \E[0m
@@ -1397,7 +1397,7 @@ fi
 
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
-  CURRENTGCC=$( readlink -f /usr/bin/gcc | cut -d'-' -f2 )
+  CURRENTGCC=$( readlink -f /usr/bin/gcc | rev | cut -d'-' -f1 | rev )
   OLDGCC="$CURRENTGCC"
   GCCCHANGE="0"
   if [ "x$gcc_opt" != "x" -a "x$CURRENTGCC" != "x$gcc_opt" ]; then
