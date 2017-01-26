@@ -248,6 +248,8 @@ export abi_opt
 
 DIR=`pwd`
 
+GCCCHANGE="0"
+
 # Check git status
 if [ "x$update_opt" = "xyes" ]; then
   rm -rf linux* > /dev/null 2>&1
@@ -926,20 +928,8 @@ Makefile is patched for saa716x.
       exit 0
     fi
   fi
-else
-  if [ "$FIRST_DIGIT" -eq "4" ]; then
-    if [ "$SECOND_DIGIT" -gt "4" -a "$SECOND_DIGIT" -lt "10" ]; then
-      patch -p0 < ../mediacontroller.patch
-      _patch
-    else
-      patch -p0 < ../mediacontroller4.10.patch
-      _patch
-    fi
-  elif [ "$FIRST_DIGIT" -gt "4" ]; then
-    patch -p0 < ../mediacontroller4.10.patch
-    _patch
-  fi
 fi
+
 
 # cx23885 patch
 if [ "x$drivers_opt" = "xyes" ];then
@@ -1072,6 +1062,22 @@ if [ "$VERSION" -eq 316 ]; then
   _patch
 elif [ "$VERSION" -eq 310 ]; then
   patch -p0 < ../gcc310.patch
+  _patch
+fi
+
+# mediacontroller patch
+if [ "$FIRST_DIGIT" -eq 4 ]; then
+  if [ "$SECOND_DIGIT" -gt 4 ]; then
+    if [ "$SECOND_DIGIT" -lt 10 ]; then
+      patch -p0 < ../mediacontroller.patch
+      _patch
+    else
+      patch -p0 < ../mediacontroller4.10.patch
+      _patch
+    fi
+  fi
+elif [ "$FIRST_DIGIT" -gt "4" ]; then
+  patch -p0 < ../mediacontroller4.10.patch
   _patch
 fi
 
@@ -1402,7 +1408,6 @@ fi
 if [ "x$vanilla_opt" != "x" ]; then
   CURRENTGCC=$( readlink -f /usr/bin/gcc | rev | cut -d'-' -f1 | rev )
   OLDGCC="$CURRENTGCC"
-  GCCCHANGE="0"
   if [ "x$gcc_opt" != "x" -a "x$CURRENTGCC" != "x$gcc_opt" ]; then
     ../gcc-version $gcc_opt
     GCCCHANGE="1"
