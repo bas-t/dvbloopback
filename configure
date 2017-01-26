@@ -1430,9 +1430,6 @@ Aborting...
     exit 1
   fi
   cd ..
-  if [ "$GCCCHANGE" -eq 1 ]; then
-    gcc-version $OLDGCC
-  fi
 fi
 
 #
@@ -1522,6 +1519,9 @@ Going to install your $vanilla_opt vanilla kernel.
 "
     confirmyes
     if [ "$?" != "0" ]; then
+      if [ "$GCCCHANGE" -eq 1 ]; then
+        ./gcc-version $OLDGCC
+      fi
       env_clean
       exit 0
     fi
@@ -1536,6 +1536,9 @@ Going to link and install your $vanilla_opt kernel headers.
 "
       confirmyes
       if [ "$?" != "0" ]; then
+        if [ "$GCCCHANGE" -eq 1 ]; then
+          ./gcc-version $OLDGCC
+        fi
         env_clean
         exit 0
       fi
@@ -1572,6 +1575,10 @@ Your $vanilla_opt vanilla kernel is installed.
 "
     fi
   fi
+fi
+
+if [ "$GCCCHANGE" -eq 1 ]; then
+  ./gcc-version $OLDGCC
 fi
 
 if [ "x$firmware_opt" = "xyes" ]; then
