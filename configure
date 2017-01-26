@@ -374,6 +374,23 @@ Aborting...
   exit 0
 fi
 
+# Make sure that a chosen non default gcc version actualy exists
+if [ "x$gcc_opt" != "x" ]; then
+  if ! [ -e /usr/bin/gcc-$gcc_opt ]; then
+    echo -en "
+\E[1;33;44m
+You have chosen to compile your vanilla kernel with
+gcc-$gcc_opt, but it dos not exist on your system.
+
+Aborting...
+\E[0m
+
+"
+    env_clean
+    exit 0
+  fi
+fi
+
 # Get info on what distro we are running
 if [ -f /usr/bin/lsb_release ]; then
   OS=$( lsb_release -si )
@@ -1380,11 +1397,7 @@ fi
 
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
-  if [ "$RELEASE" = "jessie" ]; then
-    CURRENTGCC=$( gcc -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f1,2 )
-  elif [ "$RELEASE" = "stretch" ]; then
-    CURRENTGCC=$( gcc -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f1 )
-  fi
+  CURRENTGCC=$( readlink -f /usr/bin/gcc | cut -d'-' -f2 )
   OLDGCC="$CURRENTGCC"
   GCCCHANGE="0"
   if [ "x$gcc_opt" != "x" -a "x$CURRENTGCC" != "x$gcc_opt" ]; then
