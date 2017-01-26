@@ -1380,7 +1380,11 @@ fi
 
 # Vanilla
 if [ "x$vanilla_opt" != "x" ]; then
-  CURRENTGCC=$( gcc -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f1,2 )
+  if [ "$RELEASE" = "jessie" ]; then
+    CURRENTGCC=$( gcc -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f1,2 )
+  elif [ "$RELEASE" = "stretch" ]; then
+    CURRENTGCC=$( gcc -v 2>&1 | grep -i "gcc version" | awk '{ print $3 }' | cut -d'.' -f1 )
+  fi
   OLDGCC="$CURRENTGCC"
   GCCCHANGE="0"
   if [ "x$gcc_opt" != "x" -a "x$CURRENTGCC" != "x$gcc_opt" ]; then
