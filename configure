@@ -35,6 +35,9 @@ if ! [ "$?" -eq "0" ]; then
 Could not apply the patch.
 Aborting...
 "
+  if [ "$GCCCHANGE" -eq 1 ]; then
+    ../gcc-version $OLDGCC
+  fi
   env_clean
   exit 1
 fi
