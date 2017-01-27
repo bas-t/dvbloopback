@@ -1264,7 +1264,7 @@ Kernel configured.
       sed -i "/CONFIG_DVB_S921=m/a CONFIG_DVB_SAA716X_CORE=m" debian.*/config/config.common.ubuntu
       sed -i "/CONFIG_DVB_SAA716X_CORE=m/a CONFIG_SAA716X_BUDGET=m" debian.*/config/config.common.ubuntu
     fi
-    #fakeroot debian/rules updateconfigs
+    fakeroot debian/rules updateconfigs
     UBUNTUKERNEL=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
     _ABINAME=$(cat debian/changelog | head -1 | grep -o '[[:digit:]]\+' | head -4 | awk 'NR==4')
     _ABINAME_SUB=$(ls debian.master/abi | head -1 | cut -d'.' -f 4)
@@ -1389,6 +1389,8 @@ fi
 # Compile the source
 #
 
+GCCCHANGE="0"
+
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
   if [ "$OS" = "Debian" -o "$OS" = "Devuan" ]; then
@@ -1449,7 +1451,6 @@ fi
 if [ "x$vanilla_opt" != "x" ]; then
   CURRENTGCC=$( readlink -f /usr/bin/gcc | rev | cut -d'-' -f1 | rev )
   OLDGCC="$CURRENTGCC"
-  GCCCHANGE="0"
   if [ "x$gcc_opt" != "x" -a "x$CURRENTGCC" != "x$gcc_opt" ]; then
     ../gcc-version $gcc_opt
     GCCCHANGE="1"
