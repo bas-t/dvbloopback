@@ -30,7 +30,7 @@ run ./configure --help for valid options\E[0m
 }
 
 _patch(){
-if ! [ "$?" -eq "0" ]; then
+if ! [ "$?" -eq 0 ]; then
   echo "
 Could not apply the patch.
 Aborting...
@@ -253,7 +253,7 @@ if [ "x$update_opt" = "xyes" ]; then
   git clean -xfd > /dev/null
   git reset --hard HEAD > /dev/null
   git remote update > /dev/null 2>&1
-  if ! [ "$?" -eq "0" ]; then
+  if ! [ "$?" -eq 0 ]; then
     echo -en "
 \E[1;33;44m
 ###################################
@@ -290,10 +290,9 @@ Your local clone is clean and up-to-date
 "
     if [ "x$debug_opt" = "xno" ]; then
       sleep 3
-    fi
-    if [ "x$debug_opt" = "xyes" ]; then
+    else
       confirmyes
-      if [ "$?" != "0" ]; then
+      if ! [ "$?" -eq 0 ]; then
         env_clean
         exit 0
       fi
@@ -340,7 +339,7 @@ Arrow up and enter will get you there.
       env_clean
       exit 0
     fi
-  elif [ "$GITSTATUS" -eq "2" -o "$GITSTATUS" -eq "3" ]; then
+  elif [ "$GITSTATUS" -eq 2 -o "$GITSTATUS" -eq 3 ]; then
     echo -en "
 \E[1;33;44m
 ######################################
@@ -392,6 +391,7 @@ Aborting...
 fi
 
 # Get info on what distro we are running
+apt-get install lsb-release -y > /dev/null 2>&1
 if [ -f /usr/bin/lsb_release ]; then
   OS=$( lsb_release -si )
   RELEASE=$( lsb_release -sc )
@@ -412,7 +412,7 @@ if ! [ "x$vanilla_opt" = "x" ]; then
   MINOR=$(echo "$vanilla_opt" | cut -d'.' -f2 | cut -d'-' -f1)
   export MAJOR
   export MINOR
-  if [ "$MAJOR" -lt "3" ]; then
+  if [ "$MAJOR" -lt 3 ]; then
     echo -en "
 You requested a build for a $vanilla_opt kernel.
 
@@ -424,8 +424,8 @@ Aborting...
     exit 0
   fi
   if [ "x$drivers_opt" = "xyes" ]; then
-    if [ "$MAJOR" -eq "3" ]; then
-      if ! [ "$MINOR" -eq "10" -o "$MINOR" -eq "16" -o "$MINOR" -eq "18" ]; then
+    if [ "$MAJOR" -eq 3 ]; then
+      if ! [ "$MINOR" -eq 10 -o "$MINOR" -eq 16 -o "$MINOR" -eq 18 ]; then
         echo -en "
 You are trying to compile TBS 6281/6285 and DVBSky T982 drivers directly
 
@@ -440,8 +440,8 @@ Aborting...
       fi
     fi
   else
-    if [ "$MAJOR" -eq "3" ]; then
-      if [ "$MINOR" -lt "10" ]; then
+    if [ "$MAJOR" -eq 3 ]; then
+      if [ "$MINOR" -lt 10 ]; then
         echo "
 Your are trying to build a $vanilla_opt kernel.
 
@@ -635,7 +635,7 @@ Missing dependency g++-5, marking for installation.
     fi
   fi
   apt-get build-dep --no-install-recommends linux -y
-  if ! [ "$?" -eq "0" ]; then
+  if ! [ "$?" -eq 0 ]; then
     echo "
 Error(s) while installing build dependencies
 
@@ -661,7 +661,7 @@ Do you want to recompile it?
 "
     confirmno "Recompile ffdecsawrapper binary [N/y]"
     if ! [ "$?" -eq 0 ]; then
-      FFDECSA_EXTRA="1"
+      FFDECSA_EXTRA="A"
       echo "
 Nothing to do. Aborting...
 "
@@ -672,10 +672,11 @@ Going to replace /usr/bin/ffdecsawrapper
 "
     fi    
   fi
-  if ! [ "$FFDECSA_EXTRA" = "1" ]; then
+  if ! [ "$FFDECSA_EXTRA" = "A" ]; then
+    FFFAIL="0"
     git clone -b $ffbranch_opt https://github.com/bas-t/descrambler.git && cd descrambler
     ./configure $ffdecsaconf_opt $FFDECSA_EXTRA
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       FFFAIL="1"
       echo -en "
 Error(s) encountered while (re)compiling ffdecsawrapper binary.
@@ -683,19 +684,19 @@ Error(s) encountered while (re)compiling ffdecsawrapper binary.
 Continue anyway?
 "
       confirmyes
-      if [ "$?" != "0" ]; then
+      if ! [ "$?" -eq 0 ]; then
         cd $DIR
         env_clean
         exit 0
       fi
     fi
     if [ "x$debug_opt" = "xyes" ]; then
-      if ! [ "$FFFAIL" = "1" ]; then
+      if [ "$FFFAIL" -eq 0 ]; then
         echo "
 ffdecsawrapper binary is (re)compiled and installed.
 "
         confirmyes
-        if [ "$?" != "0" ]; then
+        if ! [ "$?" -eq 0 ]; then
           cd $DIR
           env_clean
           exit 0
@@ -720,11 +721,11 @@ Going to download the kernel source.
   cd linux-*
   FIRST_DIGIT=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
   SECOND_DIGIT=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
-  if [ "$FIRST_DIGIT" -eq "3" ] && [ "$SECOND_DIGIT" -eq "13" ]; then
+  if [ "$FIRST_DIGIT" -eq 3 -a "$SECOND_DIGIT" -eq 13 ]; then
     drivers_opt="no"
   fi
-  if [ "$FIRST_DIGIT" -lt "4" ]; then
-    if ! [ "$SECOND_DIGIT" -eq "16" ]; then
+  if [ "$FIRST_DIGIT" -lt 4 ]; then
+    if ! [ "$SECOND_DIGIT" -eq 16 ]; then
       if [ "x$drivers_opt" = "xyes" ]; then
         echo "
 You requested a (re)build of a Debian/Ubuntu $FIRST_DIGIT.$SECOND_DIGIT kernel with extra drivers.
@@ -753,7 +754,7 @@ Aborting...
 Source is downloaded.
 "
     confirmyes
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       env_clean
       exit 0
     fi
@@ -780,7 +781,7 @@ Going to download the kernel source.
 Source is downloaded.
 "
       confirmyes
-      if [ "$?" != "0" ]; then
+      if ! [ "$?" -eq 0 ]; then
         env_clean
         exit 0
       fi
@@ -798,7 +799,7 @@ if ! [ "x$next_opt" = "xno" ]; then
 Source is downloaded.
 "
     confirmyes
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       env_clean
       exit 0
     fi
@@ -824,8 +825,8 @@ mkdir drivers/media/pci/dvbloopback
 cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
 patch -p1 < ../dvbloopback.patch
 _patch
-if [ "$FIRST_DIGIT" -lt "4" ]; then
-  if [ "$SECOND_DIGIT" -lt "13" ]; then
+if [ "$FIRST_DIGIT" -lt 4 ]; then
+  if [ "$SECOND_DIGIT" -lt 13 ]; then
     patch -p0 < ../3.7-dvb-core.patch
     _patch
   else
@@ -841,7 +842,7 @@ if [ "x$debug_opt" = "xyes" ]; then
 dvb-core is patched, dvbloopback added.
 "
   confirmyes
-  if [ "$?" != "0" ]; then
+  if ! [ "$?" -eq 0 ]; then
     env_clean
     exit 0
   fi
@@ -856,7 +857,7 @@ if [ "$VERSION" -gt 404 ]; then
 dvbloopback module is patched for kernel series 4.5.x and up.
 "
     confirmyes
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       env_clean
       exit 0
     fi
@@ -867,25 +868,25 @@ fi
 if [ "x$drivers_opt" = "xyes" ];then
   mkdir drivers/media/pci/saa716x
   cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
-  if [ "$FIRST_DIGIT" -lt "4" ];then
-    if [ "$SECOND_DIGIT" -eq "10" ];then
+  if [ "$FIRST_DIGIT" -lt 4 ];then
+    if [ "$SECOND_DIGIT" -eq 10 ];then
       patch -p0 < ../Kconfig-3.10.patch
       _patch
-    elif [ "$SECOND_DIGIT" -eq "18" ];then
+    elif [ "$SECOND_DIGIT" -eq 18 ];then
       patch -p0 < ../Kconfig-3.18.patch
       _patch
     else
       patch -p0 < ../Kconfig.patch
       _patch
     fi
-  elif [ "$FIRST_DIGIT" -eq "4" ]; then
-    if [ "$SECOND_DIGIT" -lt "2" ]; then
+  elif [ "$FIRST_DIGIT" -eq 4 ]; then
+    if [ "$SECOND_DIGIT" -lt 2 ]; then
       patch -p0 < ../Kconfig.patch
       _patch
-    elif [ "$SECOND_DIGIT" -lt "5" ]; then
+    elif [ "$SECOND_DIGIT" -lt 5 ]; then
       patch -p0 < ../Kconfig-4.2.patch
       _patch
-    elif [ "$SECOND_DIGIT" -lt "10" ]; then
+    elif [ "$SECOND_DIGIT" -lt 10 ]; then
       patch -p0 < ../Kconfig-4.5.patch
       _patch
     else
@@ -898,24 +899,24 @@ if [ "x$drivers_opt" = "xyes" ];then
 saa716x added, Kconfig patched for saa716x.
 "
     confirmyes
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       env_clean
       exit 0
     fi
   fi
-  if [ "$FIRST_DIGIT" -lt "4" ]; then
-    if [ "$SECOND_DIGIT" = "16" ]; then
+  if [ "$FIRST_DIGIT" -lt 4 ]; then
+    if [ "$SECOND_DIGIT" -eq 16 ]; then
       patch -p0 < ../Makefile-3.16.patch
       _patch
-    elif [ "$SECOND_DIGIT" = "10" ]; then
+    elif [ "$SECOND_DIGIT" -eq 10 ]; then
       patch -p0 < ../Makefile-3.10.patch
       _patch
     else
       patch -p0 < ../Makefile.patch
       _patch
     fi
-  elif [ "$FIRST_DIGIT" -eq "4" ]; then
-    if [ "$SECOND_DIGIT" -lt "2" ]; then
+  elif [ "$FIRST_DIGIT" -eq 4 ]; then
+    if [ "$SECOND_DIGIT" -lt 2 ]; then
       patch -p0 < ../Makefile.patch
       _patch
     else
@@ -928,7 +929,7 @@ saa716x added, Kconfig patched for saa716x.
 Makefile is patched for saa716x.
 "
     confirmyes
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       env_clean
       exit 0
     fi
@@ -938,43 +939,30 @@ fi
 
 # cx23885 patch
 if [ "x$drivers_opt" = "xyes" ];then
-  if [ "$FIRST_DIGIT" -lt "4" ]; then
-    if [ "$SECOND_DIGIT" = "18" ]; then
+  if [ "$FIRST_DIGIT" -lt 4 ]; then
+    if [ "$SECOND_DIGIT" -eq 18 ]; then
       patch -p0 < ../cx23885-3.18.patch
       _patch
-    elif [ "$SECOND_DIGIT" = "16" ]; then
+    elif [ "$SECOND_DIGIT" -eq 16 ]; then
       patch -p0 < ../cx23885-3.16.patch
       _patch
-    elif [ "$SECOND_DIGIT" = "10" ]; then
+    elif [ "$SECOND_DIGIT" -eq 10 ]; then
       patch -p0 < ../cx23885-3.10.patch
       _patch
     fi
-  elif [ "$FIRST_DIGIT" -eq "4" ]; then
-    if [ "$SECOND_DIGIT" -lt "2" ]; then
+  elif [ "$FIRST_DIGIT" -eq 4 ]; then
+    if [ "$SECOND_DIGIT" -lt 2 ]; then
       patch -p0 < ../cx23885-4.0.patch
       _patch
     fi
   fi
   if [ "x$debug_opt" = "xyes" ]; then
-    if [ "$FIRST_DIGIT" -lt "4" ]; then
-      if [ "$SECOND_DIGIT" = "18" ]; then
-        CX23885="1"
-      elif [ "$SECOND_DIGIT" = "16" ]; then
-        CX23885="1"
-      elif [ "$SECOND_DIGIT" = "10" ]; then
-        CX23885="1"
-      fi
-    elif [ "$FIRST_DIGIT" -eq "4" ]; then
-      if [ "$SECOND_DIGIT" -lt "2" ]; then
-        CX23885="1"
-      fi
-    fi
-    if [ "$CX23885" = "1" ]; then   
+    if [ "$VERSION" -eq 310 -o "$VERSION" -eq 316 -o "$VERSION" -eq 318 -o "$VERSION" -eq 400 -o "$VERSION" -eq 401 ]; then
       echo "
 cx23885 patch applied.
 "
       confirmyes
-      if [ "$?" != "0" ]; then
+      if ! [ "$?" -eq 0 ]; then
         env_clean
         exit 0
       fi
@@ -984,7 +972,7 @@ fi
 
 # silabs si2157 and si2168 patch
 if [ "x$drivers_opt" = "xyes" ];then
-  if [ "$FIRST_DIGIT" -lt "4" ]; then
+  if [ "$FIRST_DIGIT" -lt 4 ]; then
     cp -f ../drivers/media/tuners/* drivers/media/tuners/
     cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
     if [ "x$debug_opt" = "xyes" ]; then
@@ -992,13 +980,13 @@ if [ "x$drivers_opt" = "xyes" ];then
 si2168 and si2157 added/updated.
 "
       confirmyes
-      if [ "$?" != "0" ]; then
+      if ! [ "$?" -eq 0 ]; then
         env_clean
         exit 0
       fi
     fi
-  elif [ "$FIRST_DIGIT" -eq "4" ]; then
-    if [ "$SECOND_DIGIT" -lt "5" ]; then
+  elif [ "$FIRST_DIGIT" -eq 4 ]; then
+    if [ "$SECOND_DIGIT" -lt 5 ]; then
       cp -f ../drivers/media/tuners/* drivers/media/tuners/
       cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
       if [ "x$debug_opt" = "xyes" ]; then
@@ -1006,7 +994,7 @@ si2168 and si2157 added/updated.
 si2168 and si2157 added/updated.
 "
         confirmyes
-        if [ "$?" != "0" ]; then
+        if ! [ "$?" -eq 0 ]; then
           env_clean
           exit 0
         fi
@@ -1016,10 +1004,7 @@ si2168 and si2157 added/updated.
 fi
 
 # kernel-package patch for linux-4.10.x and up
-if [ "x$stock_opt" = "xno" ]; then
-  touch REPORTING-BUGS
-fi
-
+touch REPORTING-BUGS
 
 # silabs si2168 DVB-C/T patch
 if [ "x$dvb_opt" = "xdvbc" ]; then
@@ -1035,7 +1020,7 @@ if [ "x$dvb_opt" = "xdvbc" -o "x$dvb_opt" = "xdvbt" -o "x$dvb_opt" = "xdvbt2" ];
 Primary DVB system for si2168 is set to $dvb_opt 
 "
     confirmyes
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       env_clean
       exit 0
     fi
@@ -1050,7 +1035,7 @@ if [ "x$genpix_opt" = "xyes" ]; then
 Genpix Skywalker driver is patched.
 "
     confirmyes
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       env_clean
       exit 0
     fi
@@ -1066,7 +1051,7 @@ if [ "$VERSION" -eq 316 ]; then
 Your $vanilla_opt kernel is patched for newer gcc versions.
 "
     confirmyes
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       env_clean
       exit 0
     fi
@@ -1079,7 +1064,7 @@ elif [ "$VERSION" -eq 310 ]; then
 Your $vanilla_opt kernel is patched for newer gcc versions.
 "
     confirmyes
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       env_clean
       exit 0
     fi
@@ -1101,13 +1086,13 @@ if [ "$FIRST_DIGIT" -eq 4 ]; then
 MEDIA_CONTROLLER_DVB is deactivated.
 "
       confirmyes
-      if [ "$?" != "0" ]; then
+      if ! [ "$?" -eq 0 ]; then
         env_clean
         exit 0
       fi
     fi
   fi
-elif [ "$FIRST_DIGIT" -gt "4" ]; then
+elif [ "$FIRST_DIGIT" -gt 4 ]; then
   patch -p0 < ../mediacontroller4.10.patch
   _patch
   if [ "x$debug_opt" = "xyes" ]; then
@@ -1115,7 +1100,7 @@ elif [ "$FIRST_DIGIT" -gt "4" ]; then
 MEDIA_CONTROLLER_DVB is deactivated.
 "
     confirmyes
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       env_clean
       exit 0
     fi
@@ -1250,7 +1235,7 @@ Not going to install any more of those, aborting...
 Kernel configured.
 "
       confirmyes
-      if [ "$?" != "0" ]; then
+      if ! [ "$?" -eq 0 ]; then
         env_clean
         exit 0
       fi
@@ -1325,7 +1310,7 @@ Not going to install any more of those, aborting...
 Kernel configured.
 "
       confirmyes
-      if [ "$?" != "0" ]; then
+      if ! [ "$?" -eq 0 ]; then
         env_clean
         exit 0
       fi
@@ -1378,7 +1363,7 @@ Going to configure your $vanilla_opt vanilla kernel.
 Kernel configured.
 "
     confirmyes
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       env_clean
       exit 0
     fi
@@ -1409,7 +1394,7 @@ if [ "x$stock_opt" = "xyes" ]; then
         fakeroot make -j2 -f debian/rules.gen binary-arch_i386_none_686-pae 2>&1 | tee ../buildlog_i386_none_686-pae
       fi
     fi
-    if ! [ "$?" -eq "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       echo "
 Error(s) while compiling the kernel
 
@@ -1422,7 +1407,7 @@ Aborting...
     rm -f xen*
   elif [ "$OS" = "Ubuntu" ]; then
     AUTOBUILD=1 NOEXTRAS=1 skipabi=true fakeroot debian/rules binary-headers binary-generic 2>&1 | tee ../buildlog_ubuntu_generic
-    if ! [ "$?" -eq "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       echo "
 Error(s) while compiling the kernel
 
@@ -1440,7 +1425,7 @@ Aborting...
 Kernel compiled.
 "
     confirmyes
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       env_clean
       exit 0
     fi
@@ -1468,7 +1453,7 @@ if [ "x$vanilla_opt" != "x" ]; then
   else
     make-kpkg --rootcmd fakeroot --initrd kernel_image 2>&1 | tee ../buildlog_vanilla_$vanilla_opt
   fi
-  if ! [ "$?" -eq "0" ]; then
+  if ! [ "$?" -eq 0 ]; then
     echo "
 Error(s) while compiling the kernel
 
@@ -1495,7 +1480,7 @@ if [ "x$stock_opt" = "xyes" ]; then
 Going to install your stock kernel and headers.
 "
       confirmyes
-      if [ "$?" != "0" ]; then
+      if ! [ "$?" -eq 0 ]; then
         env_clean
         exit 0
       fi
@@ -1508,7 +1493,7 @@ Going to install your stock kernel and headers.
 Going to install your stock kernel.
 "
       confirmyes
-      if [ "$?" != "0" ]; then
+      if ! [ "$?" -eq 0 ]; then
         env_clean
         exit 0
       fi
@@ -1569,7 +1554,7 @@ if [ "x$vanilla_opt" != "x" ]; then
 Going to install your $vanilla_opt vanilla kernel.
 "
     confirmyes
-    if [ "$?" != "0" ]; then
+    if ! [ "$?" -eq 0 ]; then
       if [ "$GCCCHANGE" -eq 1 ]; then
         ./gcc-version $OLDGCC
       fi
@@ -1586,7 +1571,7 @@ Going to install your $vanilla_opt vanilla kernel.
 Going to link and install your $vanilla_opt kernel headers.
 "
       confirmyes
-      if [ "$?" != "0" ]; then
+      if ! [ "$?" -eq 0 ]; then
         if [ "$GCCCHANGE" -eq 1 ]; then
           ./gcc-version $OLDGCC
         fi
@@ -1613,7 +1598,7 @@ Going to link and install your $vanilla_opt kernel headers.
     ln -s $HEADERSDIR $BUILDLINK
     dpkg -i linux-headers-*
   fi
-  if [ "$?" = "0" ]; then
+  if [ "$?" -eq 0 ]; then
     if [ "x$headers_opt" = "xyes" ]; then
       echo -en "
 Your $vanilla_opt vanilla kernel and headers are installed.
@@ -1640,7 +1625,7 @@ Do you want to install included firmware into /lib/firmware?
 
 "
     confirmyes "Yes, please do. [Y/n]"
-    if [ "$?" = "0" ]; then   
+    if [ "$?" -eq 0 ]; then   
       if [ ! -d /lib/firmware ]; then
         mkdir /lib/firmware
       fi
@@ -1658,7 +1643,7 @@ in /etc/modprobe.d/tbs_opensource.conf?
 
 "
     confirmyes "Yes, please do. [Y/n]"
-    if [ "$?" = "0" ]; then
+    if [ "$?" -eq 0 ]; then
       echo "options saa716x_budget int_type=1
 options dvb_core dvb_powerdown_on_sleep=0" > /etc/modprobe.d/tbs_opensource.conf
     fi
