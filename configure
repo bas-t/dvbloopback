@@ -1455,7 +1455,7 @@ if [ "x$vanilla_opt" != "x" ]; then
   else
     make-kpkg --rootcmd fakeroot --initrd kernel_image 2>&1 | tee ../buildlog_vanilla_$vanilla_opt
   fi
-  if ! [ "$?" -eq 0 ]; then
+  if ! [ -f ../linux-*.deb ]; then
     echo "
 Error(s) while compiling the kernel
 
