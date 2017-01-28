@@ -1396,7 +1396,7 @@ if [ "x$stock_opt" = "xyes" ]; then
         fakeroot make -j2 -f debian/rules.gen binary-arch_i386_none_686-pae 2>&1 | tee ../buildlog_i386_none_686-pae
       fi
     fi
-    if ! [ "$?" -eq 0 ]; then
+    if ! [ -f ../linux-*.deb ]; then
       echo "
 Error(s) while compiling the kernel
 
@@ -1409,7 +1409,7 @@ Aborting...
     rm -f xen*
   elif [ "$OS" = "Ubuntu" ]; then
     AUTOBUILD=1 NOEXTRAS=1 skipabi=true fakeroot debian/rules binary-headers binary-generic 2>&1 | tee ../buildlog_ubuntu_generic
-    if ! [ "$?" -eq 0 ]; then
+    if ! [ -f ../linux-*.deb ]; then
       echo "
 Error(s) while compiling the kernel
 
