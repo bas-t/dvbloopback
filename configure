@@ -1046,6 +1046,8 @@ fi
 if [ "$VERSION" -eq 316 ]; then
   patch -p0 < ../gcc316.patch
   _patch
+  patch -p0 < ../mod_devicetable.patch
+  _patch
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Your $vanilla_opt kernel is patched for newer gcc versions.
