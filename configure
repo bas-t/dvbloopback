@@ -1396,7 +1396,7 @@ if [ "x$stock_opt" = "xyes" ]; then
         fakeroot make -j2 -f debian/rules.gen binary-arch_i386_none_686-pae 2>&1 | tee ../buildlog_i386_none_686-pae
       fi
     fi
-    if ! [ -f ../linux-*.deb ]; then
+    if ! [ -f ../linux-image-*.deb ]; then
       echo "
 Error(s) while compiling the kernel
 
@@ -1405,11 +1405,22 @@ Aborting...
       env_clean
       exit 1
     fi
+    if [ "x$headers_opt" = "xyes" ]; then
+      if ! [ -f ../linux-headers-*.deb ]; then
+        echo "
+Error(s) while creating the kernel headers package(s)
+
+Aborting...
+"
+        env_clean
+        exit 1
+      fi
+    fi
     cd ..
     rm -f xen*
   elif [ "$OS" = "Ubuntu" ]; then
     AUTOBUILD=1 NOEXTRAS=1 skipabi=true fakeroot debian/rules binary-headers binary-generic 2>&1 | tee ../buildlog_ubuntu_generic
-    if ! [ -f ../linux-*.deb ]; then
+    if ! [ -f ../linux-image-*.deb ]; then
       echo "
 Error(s) while compiling the kernel
 
@@ -1417,6 +1428,17 @@ Aborting...
 "
       env_clean
       exit 1
+    fi
+    if [ "x$headers_opt" = "xyes" ]; then
+      if ! [ -f ../linux-headers-*.deb ]; then
+        echo "
+Error(s) while creating the kernel headers package(s)
+
+Aborting...
+"
+        env_clean
+        exit 1
+      fi
     fi
     cd ..
     rm -f linux-tools*
@@ -1455,7 +1477,7 @@ if [ "x$vanilla_opt" != "x" ]; then
   else
     make-kpkg --rootcmd fakeroot --initrd kernel_image 2>&1 | tee ../buildlog_vanilla_$vanilla_opt
   fi
-  if ! [ -f ../linux-*.deb ]; then
+  if ! [ -f ../linux-image-*.deb ]; then
     echo "
 Error(s) while compiling the kernel
 
@@ -1466,6 +1488,20 @@ Aborting...
     fi
     env_clean
     exit 1
+  fi
+  if [ "x$headers_opt" = "xyes" ]; then
+    if ! [ -f ../linux-headers-*.deb ]; then
+      echo "
+Error(s) while creating the kernel headers package(s)
+
+Aborting...
+"
+      if [ "$GCCCHANGE" -eq 1 ]; then
+        ../gcc-version $OLDGCC
+      fi
+      env_clean
+      exit 1
+    fi
   fi
   cd ..
 fi
