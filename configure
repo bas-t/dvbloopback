@@ -1043,7 +1043,20 @@ Genpix Skywalker driver is patched.
 fi
 
 # gcc patch
-if [ "$VERSION" -eq 316 ]; then
+if [ "$VERSION" -eq 318 ]; then
+  patch -p0 < ../mod_devicetable.patch
+  _patch
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+Your $vanilla_opt kernel is patched for newer gcc versions.
+"
+    confirmyes
+    if ! [ "$?" -eq 0 ]; then
+      env_clean
+      exit 0
+    fi
+  fi
+elif [ "$VERSION" -eq 316 ]; then
   patch -p0 < ../gcc316.patch
   _patch
   patch -p0 < ../mod_devicetable.patch
