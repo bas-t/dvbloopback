@@ -1376,8 +1376,6 @@ fi
 # Compile the source
 #
 
-GCCCHANGE="0"
-
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
   if [ "$OS" = "Debian" -o "$OS" = "Devuan" ]; then
@@ -1460,6 +1458,7 @@ fi
 if [ "x$vanilla_opt" != "x" ]; then
   CURRENTGCC=$( readlink -f /usr/bin/gcc | rev | cut -d'-' -f1 | rev )
   OLDGCC="$CURRENTGCC"
+  GCCCHANGE="0"
   if [ "x$gcc_opt" != "x" -a "x$CURRENTGCC" != "x$gcc_opt" ]; then
     ../gcc-version $gcc_opt
     GCCCHANGE="1"
@@ -1504,6 +1503,9 @@ Aborting...
     fi
   fi
   cd ..
+  if [ "$GCCCHANGE" -eq 1 ]; then
+    ./gcc-version $OLDGCC
+  fi
 fi
 
 #
@@ -1649,10 +1651,6 @@ Your $vanilla_opt vanilla kernel is installed.
 "
     fi
   fi
-fi
-
-if [ "$GCCCHANGE" -eq 1 ]; then
-  ./gcc-version $OLDGCC
 fi
 
 if [ "x$firmware_opt" = "xyes" ]; then
