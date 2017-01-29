@@ -1400,7 +1400,8 @@ Aborting...
       exit 1
     fi
     if [ "x$headers_opt" = "xyes" ]; then
-      if ! [ -f ../linux-headers-*.deb ]; then
+      file=($DIR/linux-headers-*.deb)
+      if ! [ -f "$file" ]; then
         echo "
 Error(s) while creating the kernel headers package(s)
 
