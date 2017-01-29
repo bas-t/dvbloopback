@@ -1389,7 +1389,8 @@ if [ "x$stock_opt" = "xyes" ]; then
         fakeroot make -j2 -f debian/rules.gen binary-arch_i386_none_686-pae 2>&1 | tee ../buildlog_i386_none_686-pae
       fi
     fi
-    if ! [ -f ../linux-image-*.deb ]; then
+    file=($DIR/linux-image-*.deb)
+    if ! [ -f "$file" ]; then
       echo "
 Error(s) while compiling the kernel
 
@@ -1413,7 +1414,8 @@ Aborting...
     rm -f xen*
   elif [ "$OS" = "Ubuntu" ]; then
     AUTOBUILD=1 NOEXTRAS=1 skipabi=true fakeroot debian/rules binary-headers binary-generic 2>&1 | tee ../buildlog_ubuntu_generic
-    if ! [ -f ../linux-image-*.deb ]; then
+    file=($DIR/linux-image-*.deb)
+    if ! [ -f "$file" ]; then
       echo "
 Error(s) while compiling the kernel
 
@@ -1423,7 +1425,8 @@ Aborting...
       exit 1
     fi
     if [ "x$headers_opt" = "xyes" ]; then
-      if ! [ -f ../linux-headers-*.deb ]; then
+      file=($DIR/linux-headers-*.deb)
+      if ! [ -f "$file" ]; then
         echo "
 Error(s) while creating the kernel headers package(s)
 
@@ -1471,7 +1474,8 @@ if [ "x$vanilla_opt" != "x" ]; then
   else
     make-kpkg --rootcmd fakeroot --initrd kernel_image 2>&1 | tee ../buildlog_vanilla_$vanilla_opt
   fi
-  if ! [ -f ../linux-image-*.deb ]; then
+  file=($DIR/linux-image-*.deb)
+  if ! [ -f "$file" ]; then
     echo "
 Error(s) while compiling the kernel
 
@@ -1484,7 +1488,8 @@ Aborting...
     exit 1
   fi
   if [ "x$headers_opt" = "xyes" ]; then
-    if ! [ -f ../linux-headers-*.deb ]; then
+    file=($DIR/linux-headers-*.deb)
+    if ! [ -f "$file" ]; then
       echo "
 Error(s) while creating the kernel headers package(s)
 
