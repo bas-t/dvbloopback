@@ -425,13 +425,13 @@ Aborting...
   fi
   if [ "x$drivers_opt" = "xyes" ]; then
     if [ "$MAJOR" -eq 3 ]; then
-      if ! [ "$MINOR" -eq 10 -o "$MINOR" -eq 16 -o "$MINOR" -eq 18 ]; then
+      if ! [ "$MINOR" -eq 10 -o "$MINOR" -eq 16 ]; then
         echo -en "
 You are trying to compile TBS 6281/6285 and DVBSky T982 drivers directly
 
 into a $vanilla_opt vanilla kernel, using the --drivers=yes flag.
 
-I only backported the DVBSky T982 driver to 3.10.x, 3.16.x and 3.18.x kernels.
+I only backported the DVBSky T982 driver to 3.10.x and 3.16.x kernels.
 
 Aborting...
 "
@@ -872,9 +872,6 @@ if [ "x$drivers_opt" = "xyes" ];then
     if [ "$SECOND_DIGIT" -eq 10 ];then
       patch -p0 < ../Kconfig-3.10.patch
       _patch
-    elif [ "$SECOND_DIGIT" -eq 18 ];then
-      patch -p0 < ../Kconfig-3.18.patch
-      _patch
     else
       patch -p0 < ../Kconfig.patch
       _patch
@@ -940,10 +937,7 @@ fi
 # cx23885 patch
 if [ "x$drivers_opt" = "xyes" ];then
   if [ "$FIRST_DIGIT" -lt 4 ]; then
-    if [ "$SECOND_DIGIT" -eq 18 ]; then
-      patch -p0 < ../cx23885-3.18.patch
-      _patch
-    elif [ "$SECOND_DIGIT" -eq 16 ]; then
+    if [ "$SECOND_DIGIT" -eq 16 ]; then
       patch -p0 < ../cx23885-3.16.patch
       _patch
     elif [ "$SECOND_DIGIT" -eq 10 ]; then
@@ -957,7 +951,7 @@ if [ "x$drivers_opt" = "xyes" ];then
     fi
   fi
   if [ "x$debug_opt" = "xyes" ]; then
-    if [ "$VERSION" -eq 310 -o "$VERSION" -eq 316 -o "$VERSION" -eq 318 -o "$VERSION" -eq 400 -o "$VERSION" -eq 401 ]; then
+    if [ "$VERSION" -eq 310 -o "$VERSION" -eq 316 -o "$VERSION" -eq 400 -o "$VERSION" -eq 401 ]; then
       echo "
 cx23885 patch applied.
 "
@@ -1043,10 +1037,7 @@ Genpix Skywalker driver is patched.
 fi
 
 # gcc patch
-if [ "$VERSION" -eq 318 ]; then
-  patch -p0 < ../mod_devicetable.patch
-  _patch
-elif [ "$VERSION" -eq 316 ]; then
+if [ "$VERSION" -eq 316 ]; then
   patch -p0 < ../gcc316.patch
   _patch
   patch -p0 < ../mod_devicetable.patch
@@ -1055,7 +1046,7 @@ elif [ "$VERSION" -eq 310 ]; then
   patch -p0 < ../gcc310.patch
   _patch
 fi
-if [ "$VERSION" -eq 310 -o "$VERSION" -eq 316 -o "$VERSION" -eq 318 ]; then
+if [ "$VERSION" -eq 310 -o "$VERSION" -eq 316 ]; then
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Your $vanilla_opt kernel is patched for newer gcc versions.
