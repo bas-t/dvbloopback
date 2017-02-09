@@ -1,12 +1,7 @@
-config SAA716X_CORE
-	tristate "SAA7160/1/2 PCI Express bridge based devices"
-	depends on PCI && I2C
-	default m
-
-config DVB_SAA716X_BUDGET
+config VIDEO_SAA716X
 	tristate "SAA7160/1/2 based Budget PCIe cards (DVB only)"
-	depends on SAA716X_CORE && DVB_CORE
+	depends on DVB_CORE && PCI && I2C
 	select I2C_MUX
-	select DVB_SI2168
-	select MEDIA_TUNER_SI2157
+	select DVB_SI2168 if MEDIA_SUBDRV_AUTOSELECT
+	select MEDIA_TUNER_SI2157 if MEDIA_SUBDRV_AUTOSELECT
 	default m
