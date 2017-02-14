@@ -237,6 +237,7 @@ for opt do
   --genpix=*) genpix_opt="$optval"
   ;;
   --driversonly) dvbloopback_opt="no"; ffdecsawrapper_opt="no"; adapters_opt="8"
+  ;;
   *)
   die_unknown $opt
   ;;
