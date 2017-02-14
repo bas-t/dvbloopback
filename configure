@@ -851,20 +851,21 @@ dvb-core is patched, dvbloopback added.
       exit 0
     fi
   fi
-fi
 
-# 4.5-linux patch
-if [ "$VERSION" -gt 404 ]; then
-  patch -p0 < ../4.5-linux.patch
-  _patch
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
+
+  # 4.5-linux patch
+  if [ "$VERSION" -gt 404 ]; then
+    patch -p0 < ../4.5-linux.patch
+    _patch
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
 dvbloopback module is patched for kernel series 4.5.x and up.
 "
-    confirmyes
-    if ! [ "$?" -eq 0 ]; then
-      env_clean
-      exit 0
+      confirmyes
+      if ! [ "$?" -eq 0 ]; then
+        env_clean
+        exit 0
+      fi
     fi
   fi
 fi
