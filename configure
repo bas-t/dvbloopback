@@ -195,6 +195,7 @@ firmware_opt="yes"
 config_opt="big"
 gcc_opt=""
 genpix_opt="no"
+dvbloopback_opt="yes"
 
 for opt do
   optval="${opt#*=}"
@@ -235,6 +236,7 @@ for opt do
   ;;
   --genpix=*) genpix_opt="$optval"
   ;;
+  --driversonly) dvbloopback_opt="no"; ffdecsawrapper_opt="no"; adapters_opt="8"
   *)
   die_unknown $opt
   ;;
@@ -821,30 +823,32 @@ VERSION="$FIRST_DIGIT$EXTRA_DIGIT$SECOND_DIGIT"
 fi
 
 # dvbloopback patch
-mkdir drivers/media/pci/dvbloopback
-cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
-patch -p1 < ../dvbloopback.patch
-_patch
-if [ "$FIRST_DIGIT" -lt 4 ]; then
-  if [ "$SECOND_DIGIT" -lt 13 ]; then
-    patch -p0 < ../3.7-dvb-core.patch
-    _patch
+if [ "x$dvbloopback_opt" = "xyes" ]; then
+  mkdir drivers/media/pci/dvbloopback
+  cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
+  patch -p1 < ../dvbloopback.patch
+  _patch
+  if [ "$FIRST_DIGIT" -lt 4 ]; then
+    if [ "$SECOND_DIGIT" -lt 13 ]; then
+      patch -p0 < ../3.7-dvb-core.patch
+      _patch
+    else
+      patch -p0 < ../3.13-dvb-core.patch
+      _patch
+    fi
   else
     patch -p0 < ../3.13-dvb-core.patch
     _patch
   fi
-else
-  patch -p0 < ../3.13-dvb-core.patch
-  _patch
-fi
-if [ "x$debug_opt" = "xyes" ]; then
-  echo "
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
 dvb-core is patched, dvbloopback added.
 "
-  confirmyes
-  if ! [ "$?" -eq 0 ]; then
-    env_clean
-    exit 0
+    confirmyes
+    if ! [ "$?" -eq 0 ]; then
+      env_clean
+      exit 0
+    fi
   fi
 fi
 
