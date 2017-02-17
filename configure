@@ -1370,6 +1370,7 @@ fi
 # Debian
 if [ "x$stock_opt" = "xyes" ]; then
   if [ "$OS" = "Debian" -o "$OS" = "Devuan" ]; then
+    fakeroot make -f debian/rules.gen build-indep
     if [ "$CONFIG" = "amd64" ]; then
       fakeroot make -f debian/rules.gen binary-arch_amd64_none_real 2>&1 | tee ../buildlog_amd64_none_real
       if [ "x$debug_opt" = "xyes" ]; then
