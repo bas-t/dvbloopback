@@ -1366,7 +1366,7 @@ fi
 if [ "x$stock_opt" = "xyes" ]; then
   if [ "$OS" = "Debian" -o "$OS" = "Devuan" ]; then
     if [ "$CONFIG" = "amd64" ]; then
-      if cat debian/rules.gen | grep "binary-arch_amd64_none_real::" > /dev/null 2>&1; then
+      if [ "$VERSION" -lt 409 ]; then
         fakeroot make -f debian/rules.gen binary-arch_amd64_none_real 2>&1 | tee ../buildlog_amd64_none_real
       else
         fakeroot make -f debian/rules.gen binary-indep_none_real 2>&1 | tee ../buildlog_binary-indep_none_real
@@ -1377,7 +1377,7 @@ if [ "x$stock_opt" = "xyes" ]; then
         fakeroot make -j2 -f debian/rules.gen binary-arch_amd64_none_amd64 2>&1 | tee ../buildlog_amd64_none_amd64
       fi
     else
-      if cat debian/rules.gen | grep "binary-arch_i386_none_real::" > /dev/null 2>&1; then
+      if [ "$VERSION" -lt 409 ]; then
         fakeroot make -f debian/rules.gen binary-arch_i386_none_real 2>&1 | tee ../buildlog_i386_none_real
       else
         fakeroot make -f debian/rules.gen binary-indep_none_real 2>&1 | tee ../buildlog_binary-indep_none_real
