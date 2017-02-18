@@ -823,6 +823,7 @@ if ! [ "$chars" -eq 2 ]; then
 VERSION="$FIRST_DIGIT$EXTRA_DIGIT$SECOND_DIGIT"
 fi
 
+# Common (stock and vanilla kernels)
 # dvbloopback patch
 if [ "x$dvbloopback_opt" = "xyes" ]; then
   mkdir drivers/media/pci/dvbloopback
@@ -865,6 +866,7 @@ dvbloopback module is patched for kernel series 4.5.x and up.
   fi
 fi
 
+# Common (stock and vanilla kernels)
 # saa716x patch
 if [ "x$drivers_opt" = "xyes" ];then
   mkdir drivers/media/pci/saa716x
@@ -934,7 +936,7 @@ Makefile is patched for saa716x.
   fi
 fi
 
-
+# Common (stock and vanilla kernels)
 # cx23885 patch
 if [ "x$drivers_opt" = "xyes" ];then
   if [ "$VERSION" -eq 316 ]; then
@@ -961,6 +963,7 @@ cx23885 patch applied.
   fi
 fi
 
+# Common (stock and vanilla kernels)
 # silabs si2157 and si2168 patch
 if [ "x$drivers_opt" = "xyes" ];then
   if [ "$FIRST_DIGIT" -lt 4 ]; then
@@ -994,9 +997,11 @@ si2168 and si2157 added/updated.
   fi
 fi
 
+# Common (stock and vanilla kernels)
 # kernel-package patch for linux-4.10.x and up
 touch REPORTING-BUGS
 
+# Common (stock and vanilla kernels)
 # silabs si2168 DVB-C/T patch
 if [ "x$dvb_opt" = "xdvbc" ]; then
   sed -i 's/SYS_DVBT, SYS_DVBT2, SYS_DVBC_ANNEX_A/SYS_DVBC_ANNEX_A, SYS_DVBT, SYS_DVBT2/' drivers/media/dvb-frontends/si2168.c
@@ -1018,6 +1023,7 @@ Primary DVB system for si2168 is set to $dvb_opt
   fi
 fi
 
+# Common (stock and vanilla kernels)
 # Genpix Skywalker patch
 if [ "x$genpix_opt" = "xyes" ]; then
   sed -i "s/FE_CAN_INVERSION_AUTO/FE_CAN_2G_MODULATION | FE_CAN_INVERSION_AUTO/" drivers/media/usb/dvb-usb/gp8psk-fe.c
@@ -1033,6 +1039,7 @@ Genpix Skywalker driver is patched.
   fi
 fi
 
+# Common (stock and vanilla kernels)
 # gcc patch
 if [ "$VERSION" -eq 316 ]; then
   patch -p0 < ../gcc316.patch
@@ -1056,6 +1063,7 @@ Your $vanilla_opt kernel is patched for newer gcc versions.
   fi
 fi
 
+# Common (stock and vanilla kernels)
 # mediacontroller patch
 if [ "$FIRST_DIGIT" -eq 4 ]; then
   if [ "$SECOND_DIGIT" -gt 4 ]; then
