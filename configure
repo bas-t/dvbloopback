@@ -937,19 +937,15 @@ fi
 
 # cx23885 patch
 if [ "x$drivers_opt" = "xyes" ];then
-  if [ "$FIRST_DIGIT" -lt 4 ]; then
-    if [ "$SECOND_DIGIT" -eq 16 ]; then
-      patch -p0 < ../cx23885-3.16.patch
-      _patch
-    elif [ "$SECOND_DIGIT" -eq 10 ]; then
-      patch -p0 < ../cx23885-3.10.patch
-      _patch
-    fi
-  elif [ "$FIRST_DIGIT" -eq 4 ]; then
-    if [ "$SECOND_DIGIT" -lt 2 ]; then
-      patch -p0 < ../cx23885-4.0.patch
-      _patch
-    fi
+  if [ "$VERSION" -eq 316 ]; then
+    patch -p0 < ../cx23885-3.16.patch
+    _patch
+  elif [ "$VERSION" -eq 310 ]; then
+    patch -p0 < ../cx23885-3.10.patch
+    _patch
+  elif [ "$VERSION" -eq 400 -o "$VERSION" -eq 401 ]; then
+    patch -p0 < ../cx23885-4.0.patch
+    _patch
   fi
   if [ "x$debug_opt" = "xyes" ]; then
     if [ "$VERSION" -eq 310 -o "$VERSION" -eq 316 -o "$VERSION" -eq 400 -o "$VERSION" -eq 401 ]; then
