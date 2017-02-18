@@ -466,7 +466,7 @@ if ! [ "$OS" = "Debian" -o "$OS" = "Ubuntu" -o "$OS" = "Devuan" ]; then
 
 Compiling a distro's stock kernel is supported
 
-in Debian and Ubuntu only. You can compile the
+in Debian, Devuan and Ubuntu only. You can compile the
 
 v4l tree or a vanilla kernel. Aborting....
 
@@ -476,7 +476,7 @@ v4l tree or a vanilla kernel. Aborting....
   fi
 fi
 
-# Get build-deps, Debian only.
+# Get build-deps, Debian, Devuan and Ubuntu only.
 if [ "$OS" = "Debian" -o "$OS" = "Ubuntu" -o "$OS" = "Devuan" ]; then
   if ! dpkg-query -l build-essential | grep "ii" > /dev/null 2>&1; then
     echo "
@@ -829,14 +829,9 @@ if [ "x$dvbloopback_opt" = "xyes" ]; then
   cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
   patch -p1 < ../dvbloopback.patch
   _patch
-  if [ "$FIRST_DIGIT" -lt 4 ]; then
-    if [ "$SECOND_DIGIT" -lt 13 ]; then
-      patch -p0 < ../3.7-dvb-core.patch
-      _patch
-    else
-      patch -p0 < ../3.13-dvb-core.patch
-      _patch
-    fi
+  if [ "$VERSION" -lt 313 ]; then
+    patch -p0 < ../3.7-dvb-core.patch
+    _patch
   else
     patch -p0 < ../3.13-dvb-core.patch
     _patch
@@ -986,7 +981,7 @@ si2168 and si2157 added/updated.
       fi
     fi
   elif [ "$FIRST_DIGIT" -eq 4 ]; then
-    if [ "$SECOND_DIGIT" -lt 5 ]; then
+    if [ "$SECOND_DIGIT" -lt 4 ]; then
       cp -f ../drivers/media/tuners/* drivers/media/tuners/
       cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
       if [ "x$debug_opt" = "xyes" ]; then
