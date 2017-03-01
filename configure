@@ -678,7 +678,7 @@ Going to replace /usr/bin/ffdecsawrapper
   if ! [ "$FFDECSA_EXTRA" = "A" ]; then
     FFFAIL="0"
     git clone -b $ffbranch_opt https://github.com/bas-t/descrambler.git && cd descrambler
-    ./configure $ffdecsaconf_opt $FFDECSA_EXTRA
+    ./configure $ffdecsaconf_opt $FFDECSA_EXTRA 2>&1 | tee ../buildlog_ffdecsawrapper
     if ! [ "$?" -eq 0 ]; then
       FFFAIL="1"
       echo -en "
