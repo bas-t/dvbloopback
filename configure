@@ -628,14 +628,12 @@ Missing dependency patchutils, marking for installation.
 "
     apt-get install patchutils --no-install-recommends -y || die "Error installing dependency patchutils"
   fi
-  if [ "$RELEASE" = "stretch" ]; then
-    if ! dpkg-query -l g++-6 | grep "ii" > /dev/null 2>&1; then
-      echo "
-Missing dependency g++-5, marking for installation.
+  if ! dpkg-query -l g++ | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency g++, marking for installation.
 
 "
-      apt-get install g++-6 --no-install-recommends -y || die "Error installing dependency g++-6"
-    fi
+    apt-get install g++ --no-install-recommends -y || die "Error installing dependency g++"
   fi
   apt-get build-dep --no-install-recommends linux -y
   if ! [ "$?" -eq 0 ]; then
