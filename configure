@@ -823,7 +823,7 @@ fi
 
 if [ "x$stock_opt" = "xno" -a "x$drivers_opt" = "xyes" -a "$VERSION" -lt 400 ]; then
   echo "
-You are about to compile a 3.x kernel with TBS 6281/6285
+You are about to compile a 3.$SECOND_DIGIT.x kernel with TBS 6281/6285
 
 and DVBSKY T982 support. I backported those drivers only for
 
