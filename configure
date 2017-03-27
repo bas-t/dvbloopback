@@ -821,6 +821,24 @@ if ! [ "$chars" -eq 2 ]; then
 VERSION="$FIRST_DIGIT$EXTRA_DIGIT$SECOND_DIGIT"
 fi
 
+if [ "x$stock_opt" = "xno" -a "x$drivers_opt" = "xyes" -a "$VERSION" -lt 400 ]; then
+  echo "
+You are about to compile a 3.x kernel with TBS 6281/6285
+
+and DVBSKY T982 support. I backported those drivers only for
+
+3.10.x and 3.16.x kernels. All others will likely fail.
+
+If you don't need those drivers, use the --drivers=no flag.
+
+"
+  confirmyes
+  if ! [ "$?" -eq 0 ]; then
+    env_clean
+    exit 0
+  fi
+fi
+
 # Common (stock and vanilla kernels)
 # dvbloopback patch
 if [ "x$dvbloopback_opt" = "xyes" ]; then
