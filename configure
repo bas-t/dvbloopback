@@ -1063,16 +1063,15 @@ fi
 
 # Common (stock and vanilla kernels)
 # mediacontroller patch
-if [ "$FIRST_DIGIT" -eq 4 ]; then
-  if [ "$SECOND_DIGIT" -gt 4 ]; then
-    if [ "$SECOND_DIGIT" -lt 10 ]; then
-      patch -p0 < ../mediacontroller.patch
-      _patch
-    else
-      patch -p0 < ../mediacontroller4.10.patch
-      _patch
-    fi
-    if [ "x$debug_opt" = "xyes" ]; then
+if [ "$VERSION" -gt 404 -a "$VERSION" -lt 410 ]; then
+  patch -p0 < ../mediacontroller.patch
+  _patch
+else
+  patch -p0 < ../mediacontroller4.10.patch
+  _patch
+fi
+if [ "$VERSION" -gt 404 ]; then
+  if [ "x$debug_opt" = "xyes" ]; then
       echo "
 MEDIA_CONTROLLER_DVB is deactivated.
 "
@@ -1081,19 +1080,6 @@ MEDIA_CONTROLLER_DVB is deactivated.
         env_clean
         exit 0
       fi
-    fi
-  fi
-elif [ "$FIRST_DIGIT" -gt 4 ]; then
-  patch -p0 < ../mediacontroller4.10.patch
-  _patch
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
-MEDIA_CONTROLLER_DVB is deactivated.
-"
-    confirmyes
-    if ! [ "$?" -eq 0 ]; then
-      env_clean
-      exit 0
     fi
   fi
 fi
