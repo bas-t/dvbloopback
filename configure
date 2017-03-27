@@ -869,28 +869,24 @@ fi
 if [ "x$drivers_opt" = "xyes" ];then
   mkdir drivers/media/pci/saa716x
   cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
-  if [ "$FIRST_DIGIT" -lt 4 ];then
-    if [ "$SECOND_DIGIT" -eq 10 ];then
-      patch -p0 < ../Kconfig-3.10.patch
-      _patch
-    else
-      patch -p0 < ../Kconfig.patch
-      _patch
-    fi
-  elif [ "$FIRST_DIGIT" -eq 4 ]; then
-    if [ "$SECOND_DIGIT" -lt 2 ]; then
-      patch -p0 < ../Kconfig.patch
-      _patch
-    elif [ "$SECOND_DIGIT" -lt 5 ]; then
-      patch -p0 < ../Kconfig-4.2.patch
-      _patch
-    elif [ "$SECOND_DIGIT" -lt 10 ]; then
-      patch -p0 < ../Kconfig-4.5.patch
-      _patch
-    else
-      patch -p0 < ../Kconfig-4.10.patch
-      _patch
-    fi
+  if [ "$VERSION" -eq 310 ];then
+    patch -p0 < ../Kconfig-3.10.patch
+    _patch
+  elif [ "$VERSION" -lt 400 ];then
+    patch -p0 < ../Kconfig.patch
+    _patch
+  elif [ "$VERSION" -lt 402 ]; then
+    patch -p0 < ../Kconfig.patch
+    _patch
+  elif [ "$VERSION" -lt 405 ]; then
+    patch -p0 < ../Kconfig-4.2.patch
+    _patch
+  elif [ "$VERSION" -lt 410 ]; then
+    patch -p0 < ../Kconfig-4.5.patch
+    _patch
+  else
+    patch -p0 < ../Kconfig-4.10.patch
+    _patch
   fi
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
@@ -902,25 +898,21 @@ saa716x added, Kconfig patched for saa716x.
       exit 0
     fi
   fi
-  if [ "$FIRST_DIGIT" -lt 4 ]; then
-    if [ "$SECOND_DIGIT" -eq 16 ]; then
-      patch -p0 < ../Makefile-3.16.patch
-      _patch
-    elif [ "$SECOND_DIGIT" -eq 10 ]; then
-      patch -p0 < ../Makefile-3.10.patch
-      _patch
-    else
-      patch -p0 < ../Makefile.patch
-      _patch
-    fi
-  elif [ "$FIRST_DIGIT" -eq 4 ]; then
-    if [ "$SECOND_DIGIT" -lt 2 ]; then
-      patch -p0 < ../Makefile.patch
-      _patch
-    else
-      patch -p0 < ../Makefile-4.2.patch
-      _patch
-    fi
+  if [ "$VERSION" -eq 316 ]; then
+    patch -p0 < ../Makefile-3.16.patch
+    _patch
+  elif [ "$VERSION" -eq 310 ]; then
+    patch -p0 < ../Makefile-3.10.patch
+    _patch
+  elif [ "$VERSION" -lt 400 ]; then
+    patch -p0 < ../Makefile.patch
+    _patch
+  elif [ "$VERSION" -lt 402 ]; then
+    patch -p0 < ../Makefile.patch
+    _patch
+  else
+    patch -p0 < ../Makefile-4.2.patch
+    _patch
   fi
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
@@ -964,7 +956,7 @@ fi
 # Common (stock and vanilla kernels)
 # silabs si2157 and si2168 patch
 if [ "x$drivers_opt" = "xyes" ];then
-  if [ "$FIRST_DIGIT" -lt 4 ]; then
+  if [ "$VERSION" -lt 400 ]; then
     cp -f ../drivers/media/tuners/* drivers/media/tuners/
     cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
     if [ "x$debug_opt" = "xyes" ]; then
@@ -977,19 +969,17 @@ si2168 and si2157 added/updated.
         exit 0
       fi
     fi
-  elif [ "$FIRST_DIGIT" -eq 4 ]; then
-    if [ "$SECOND_DIGIT" -lt 4 ]; then
-      cp -f ../drivers/media/tuners/* drivers/media/tuners/
-      cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
-      if [ "x$debug_opt" = "xyes" ]; then
-        echo "
+  elif [ "$VERSION" -lt 404 ]; then
+    cp -f ../drivers/media/tuners/* drivers/media/tuners/
+    cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
 si2168 and si2157 added/updated.
 "
-        confirmyes
-        if ! [ "$?" -eq 0 ]; then
-          env_clean
-          exit 0
-        fi
+      confirmyes
+      if ! [ "$?" -eq 0 ]; then
+        env_clean
+        exit 0
       fi
     fi
   fi
