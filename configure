@@ -974,20 +974,7 @@ fi
 # Common (stock and vanilla kernels)
 # silabs si2157 and si2168 patch
 if [ "x$drivers_opt" = "xyes" ];then
-  if [ "$VERSION" -lt 400 ]; then
-    cp -f ../drivers/media/tuners/* drivers/media/tuners/
-    cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
-si2168 and si2157 added/updated.
-"
-      confirmyes
-      if ! [ "$?" -eq 0 ]; then
-        env_clean
-        exit 0
-      fi
-    fi
-  elif [ "$VERSION" -lt 404 ]; then
+  if [ "$VERSION" -lt 404 ]; then
     cp -f ../drivers/media/tuners/* drivers/media/tuners/
     cp -f ../drivers/media/dvb-frontends/* drivers/media/dvb-frontends/
     if [ "x$debug_opt" = "xyes" ]; then
@@ -1074,7 +1061,7 @@ fi
 if [ "$VERSION" -gt 404 -a "$VERSION" -lt 410 ]; then
   patch -p0 < ../mediacontroller.patch
   _patch
-else
+elif [ "$VERSION" -gt 409 ]; then
   patch -p0 < ../mediacontroller4.10.patch
   _patch
 fi
