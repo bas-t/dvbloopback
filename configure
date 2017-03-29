@@ -1067,14 +1067,13 @@ elif [ "$VERSION" -gt 409 ]; then
 fi
 if [ "$VERSION" -gt 404 ]; then
   if [ "x$debug_opt" = "xyes" ]; then
-      echo "
+    echo "
 MEDIA_CONTROLLER_DVB is deactivated.
 "
-      confirmyes
-      if ! [ "$?" -eq 0 ]; then
-        env_clean
-        exit 0
-      fi
+    confirmyes
+    if ! [ "$?" -eq 0 ]; then
+      env_clean
+      exit 0
     fi
   fi
 fi
