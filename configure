@@ -1082,6 +1082,17 @@ MEDIA_CONTROLLER_DVB is deactivated.
   fi
 fi
 
+# Common (stock and vanilla kernels)
+# Temporary msi patch
+if [ "$VERSION" -gt 411 ]; then
+  if [ "x$drivers_opt" = "xyes" ];then
+    patch -p0 < ../msi1.patch
+    _patch
+    patch -p0 < ../msi2.patch
+    _patch
+  fi
+fi
+
 #
 # Configure the source
 #
