@@ -1039,8 +1039,10 @@ fi
 # Common (stock and vanilla kernels)
 # gcc patch
 if [ "$VERSION" -eq 316 ]; then
-  patch -p0 < ../gcc316.patch
-  _patch
+  if ! [ "$OS" = "Devuan" ]; then
+    patch -p0 < ../gcc316.patch
+    _patch
+  fi
   patch -p0 < ../mod_devicetable.patch
   _patch
 elif [ "$VERSION" -eq 310 ]; then
