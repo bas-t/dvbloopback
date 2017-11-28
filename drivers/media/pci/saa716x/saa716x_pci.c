@@ -1,5 +1,3 @@
-#include <asm/io.h>
-#include <asm/page.h>
 #include <linux/kmod.h>
 #include <linux/vmalloc.h>
 #include <linux/init.h>
@@ -16,11 +14,6 @@
 
 #define DRIVER_NAME				"SAA716x Core"
 
-static inline irqreturn_t saa716x_msi_handler(int irq, void *dev_id)
-{
-	return IRQ_HANDLED;
-}
-
 static int saa716x_enable_msi(struct saa716x_dev *saa716x)
 {
 	struct pci_dev *pdev = saa716x->pdev;
@@ -35,35 +28,16 @@ static int saa716x_enable_msi(struct saa716x_dev *saa716x)
 	return err;
 }
 
-static int saa716x_enable_msix(struct saa716x_dev *saa716x)
-{
-	struct pci_dev *pdev = saa716x->pdev;
-	int i, ret = 0;
-
-	for (i = 0; i < SAA716x_MSI_MAX_VECTORS; i++)
-		saa716x->msix_entries[i].entry = i;
-
-	ret = pci_enable_msix_exact(pdev, saa716x->msix_entries, SAA716x_MSI_MAX_VECTORS);
-	if (ret < 0)
-		dprintk(SAA716x_ERROR, 1, "MSI-X request failed <%d>", ret);
-	if (ret > 0)
-		dprintk(SAA716x_ERROR, 1, "Request exceeds available IRQ's <%d>", ret);
-
-	return ret;
-}
-
 static int saa716x_request_irq(struct saa716x_dev *saa716x)
 {
 	struct pci_dev *pdev = saa716x->pdev;
 	struct saa716x_config *config = saa716x->config;
-	int i, ret = 0;
+	int ret = 0;
 
-	if (saa716x->int_type == MODE_MSI) {
+	if (saa716x->int_type == MODE_MSI || saa716x->int_type == MODE_MSI_X) {
 		dprintk(SAA716x_DEBUG, 1, "Using MSI mode");
+		saa716x->int_type = MODE_MSI;
 		ret = saa716x_enable_msi(saa716x);
-	} else if (saa716x->int_type == MODE_MSI_X) {
-		dprintk(SAA716x_DEBUG, 1, "Using MSI-X mode");
-		ret = saa716x_enable_msix(saa716x);
 	}
 
 	if (ret) {
@@ -81,28 +55,7 @@ static int saa716x_request_irq(struct saa716x_dev *saa716x)
 		if (ret) {
 			pci_disable_msi(pdev);
 			dprintk(SAA716x_ERROR, 1, "MSI registration failed");
-		}
-	}
-
-	if (saa716x->int_type == MODE_MSI_X) {
-		for (i = 0; i < SAA716x_MSI_MAX_VECTORS; i++) {
-			ret = request_irq(saa716x->msix_entries[i].vector,
-					  saa716x->saa716x_msix_handler[i].handler,
-					  IRQF_SHARED,
-					  saa716x->saa716x_msix_handler[i].desc,
-					  saa716x);
-
-			dprintk(SAA716x_ERROR, 1, "%s @ 0x%p", saa716x->saa716x_msix_handler[i].desc, saa716x->saa716x_msix_handler[i].handler);
-			if (ret) {
-				dprintk(SAA716x_ERROR, 1, "%s MSI-X-%d registration failed <%d>", saa716x->saa716x_msix_handler[i].desc, i, ret);
-				break;
-			}
-		}
-
-		/* free already allocated vectors in error case */
-		while (ret && i > 0) {
-			--i;
-			free_irq(saa716x->msix_entries[i].vector, saa716x);
+			ret = -EIO;
 		}
 	}
 
@@ -112,8 +65,10 @@ static int saa716x_request_irq(struct saa716x_dev *saa716x)
 				  IRQF_SHARED,
 				  DRIVER_NAME,
 				  saa716x);
-		if (ret < 0)
+		if (ret < 0) {
 			dprintk(SAA716x_ERROR, 1, "SAA716x IRQ registration failed <%d>", ret);
+			ret = -ENODEV;
+		}
 	}
 
 	return ret;
@@ -122,22 +77,11 @@ static int saa716x_request_irq(struct saa716x_dev *saa716x)
 static void saa716x_free_irq(struct saa716x_dev *saa716x)
 {
 	struct pci_dev *pdev = saa716x->pdev;
-	int i, vector;
 
-	if (saa716x->int_type == MODE_MSI_X) {
+	free_irq(pdev->irq, saa716x);
+	if (saa716x->int_type == MODE_MSI)
+		pci_disable_msi(pdev);
 
-		for (i = 0; i < SAA716x_MSI_MAX_VECTORS; i++) {
-			vector = saa716x->msix_entries[i].vector;
-			free_irq(vector, saa716x);
-		}
-
-		pci_disable_msix(pdev);
-
-	} else {
-		free_irq(pdev->irq, saa716x);
-		if (saa716x->int_type == MODE_MSI)
-			pci_disable_msi(pdev);
-	}
 }
 
 int saa716x_pci_init(struct saa716x_dev *saa716x)
@@ -185,9 +129,14 @@ int saa716x_pci_init(struct saa716x_dev *saa716x)
 		ret = -ENODEV;
 		goto fail1;
 	}
-	saa716x->mmio = ioremap(pci_resource_start(pdev, 0),
-				pci_resource_len(pdev, 0));
 
+	if (pci_resource_len(pdev, 0) < 0x30000) {
+		dprintk(SAA716x_ERROR, 1, "wrong BAR0 length");
+		ret = -ENODEV;
+		goto fail2;
+	}
+
+	saa716x->mmio = ioremap_nocache(pci_resource_start(pdev, 0), 0x30000);
 	if (!saa716x->mmio) {
 		dprintk(SAA716x_ERROR, 1, "Mem 0 remap failed");
 		ret = -ENODEV;
@@ -209,24 +158,20 @@ int saa716x_pci_init(struct saa716x_dev *saa716x)
 
 	saa716x->revision	= revision;
 
-	dprintk(SAA716x_ERROR, 0, "    SAA%02x Rev %d [%04x:%04x], ",
+	dprintk(SAA716x_ERROR, 0, "    SAA%02x Rev %d [%04x:%04x], irq: %d, mmio: 0x%p",
 		saa716x->pdev->device,
 		revision,
 		saa716x->pdev->subsystem_vendor,
-		saa716x->pdev->subsystem_device);
-
-	dprintk(SAA716x_ERROR, 0,
-		"irq: %d,\n    mmio: 0x%p\n",
+		saa716x->pdev->subsystem_device,
 		saa716x->pdev->irq,
 		saa716x->mmio);
 
-	dprintk(SAA716x_ERROR, 0, "    SAA%02x %sBit, MSI %s, MSI-X=%d msgs",
+	dprintk(SAA716x_ERROR, 0, "    SAA%02x %sBit, MSI %s, %d/%d MSI vectors",
 		saa716x->pdev->device,
 		(((msi_cap >> 23) & 0x01) == 1 ? "64":"32"),
 		(((msi_cap >> 16) & 0x01) == 1 ? "Enabled" : "Disabled"),
+		(1 << ((msi_cap >> 20) & 0x07)),
 		(1 << ((msi_cap >> 17) & 0x07)));
-
-	dprintk(SAA716x_ERROR, 0, "\n");
 
 	pci_set_drvdata(pdev, saa716x);
 

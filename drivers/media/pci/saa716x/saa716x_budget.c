@@ -489,7 +489,7 @@ static struct saa716x_config saa716x_tbs6285_config = {
 	},
 };
 
-static struct pci_device_id saa716x_budget_pci_table[] = {
+static const struct pci_device_id saa716x_budget_pci_table[] = {
 	MAKE_ENTRY(TURBOSIGHT_TBS6281, TBS6281,   SAA7160, &saa716x_tbs6281_config),
 	MAKE_ENTRY(TURBOSIGHT_TBS6285, TBS6285,   SAA7160, &saa716x_tbs6285_config),
 	{ }
