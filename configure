@@ -857,10 +857,6 @@ if [ "x$dvbloopback_opt" = "xyes" ]; then
     patch -p0 < ../3.13-dvb-core.patch
     _patch
   fi
-  if [ "$VERSION" -gt 404 ]; then
-    patch -p1 < ../dvbloopback-4.5.patch
-    _patch
-  fi
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 dvb-core is patched, dvbloopback added.
