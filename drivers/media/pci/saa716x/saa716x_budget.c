@@ -491,7 +491,7 @@ static struct saa716x_config saa716x_tbs6285_config = {
 	},
 };
 
-#define SAA716x_MODEL_TBS6985 "TurboSight TBS 6985 "
+#define SAA716x_MODEL_TBS6985 "TurboSight TBS 6985"
 #define SAA716x_DEV_TBS6985   "DVB-S/S2"
 
 static void tbs6985_reset_fe(struct dvb_frontend *fe, int reset_pin)
@@ -644,13 +644,7 @@ static int saa716x_tbs6985_frontend_attach(struct saa716x_adapter *adapter, int 
 		goto err;
 	}
 
-	if (!saa716x_tbs_read_mac(dev,count,mac)) {
-		memcpy(adapter->dvb_adapter.proposed_mac, mac, 6);
-		dev_notice(&dev->pdev->dev, "%s MAC=%pM\n", dev->config->model_name, adapter->dvb_adapter.proposed_mac);
-	}
-
-	strlcpy(adapter->fe->ops.info.name,dev->config->model_name,52);
-	strlcat(adapter->fe->ops.info.name,dev->config->dev_type,52);
+	strlcpy(adapter->fe->ops.info.name,"TurboSight TBS 6985 DVB-S/S2 ",52);
 
 	return 0;
 err:
