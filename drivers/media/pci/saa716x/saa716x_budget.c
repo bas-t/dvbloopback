@@ -644,8 +644,6 @@ static int saa716x_tbs6985_frontend_attach(struct saa716x_adapter *adapter, int 
 		goto err;
 	}
 
-	strlcpy(adapter->fe->ops.info.name,"TurboSight TBS 6985 DVB-S/S2 ",52);
-
 	return 0;
 err:
 	dev_err(&dev->pdev->dev, "%s frontend %d attach failed\n",
