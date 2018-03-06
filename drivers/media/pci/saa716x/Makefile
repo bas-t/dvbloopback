@@ -16,4 +16,4 @@ saa716x_core-objs	:= saa716x_pci.o	\
 
 obj-$(CONFIG_VIDEO_SAA716X)  += saa716x_core.o saa716x_budget.o
 
-EXTRA_CFLAGS = -Idrivers/media/dvb-core/ -Idrivers/media/dvb-frontends/ -Idrivers/media/tuners/
+EXTRA_CFLAGS = -Idrivers/media/dvb-core/ -Idrivers/media/dvb-frontends/ -Idrivers/media/tuners/ -Iinclude/media/
