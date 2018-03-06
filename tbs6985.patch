@@ -1,0 +1,52 @@
+--- drivers/media/tuners/Kconfig	2018-03-03 10:23:29.000000000 +0100
++++ drivers/media/tuners/Kconfig	2018-03-06 15:56:27.222472011 +0100
+@@ -42,6 +42,13 @@
+ 	help
+ 	  A DVB-T silicon tuner module. Say Y when you want to support this tuner.
+ 
++config MEDIA_TUNER_AV201X
++	tristate "Airoha Technology AV201x silicon tuner"
++	depends on MEDIA_SUPPORT && I2C
++	default m if !MEDIA_SUBDRV_AUTOSELECT
++	help
++	  Airoha Technology AV201x silicon tuner driver.
++
+ config MEDIA_TUNER_TDA18271
+ 	tristate "NXP TDA18271 silicon tuner"
+ 	depends on MEDIA_SUPPORT && I2C
+--- drivers/media/tuners/Makefile	2018-03-03 10:23:29.000000000 +0100
++++ drivers/media/tuners/Makefile	2018-03-06 15:58:05.115244632 +0100
+@@ -14,6 +14,7 @@
+ obj-$(CONFIG_MEDIA_TUNER_TEA5761) += tea5761.o
+ obj-$(CONFIG_MEDIA_TUNER_TDA9887) += tda9887.o
+ obj-$(CONFIG_MEDIA_TUNER_TDA827X) += tda827x.o
++obj-$(CONFIG_MEDIA_TUNER_AV201X) += av201x.o
+ obj-$(CONFIG_MEDIA_TUNER_TDA18271) += tda18271.o
+ obj-$(CONFIG_MEDIA_TUNER_XC5000) += xc5000.o
+ obj-$(CONFIG_MEDIA_TUNER_XC4000) += xc4000.o
+--- drivers/media/dvb-frontends/Kconfig	2018-03-03 10:23:29.000000000 +0100
++++ drivers/media/dvb-frontends/Kconfig	2018-03-06 16:04:50.202431008 +0100
+@@ -35,6 +35,13 @@
+ 	help
+ 	  A Silicon tuner that supports DVB-S and DVB-S2 modes
+ 
++config DVB_TAS2101
++	tristate "Tmax TAS2101 based"
++	depends on DVB_CORE && I2C
++	default m if !MEDIA_SUBDRV_AUTOSELECT
++	help
++	  Say Y when you want to support this frontend.
++
+ config DVB_M88DS3103
+ 	tristate "Montage Technology M88DS3103"
+ 	depends on DVB_CORE && I2C && I2C_MUX
+--- drivers/media/dvb-frontends/Makefile	2018-03-03 10:23:29.000000000 +0100
++++ drivers/media/dvb-frontends/Makefile	2018-03-06 16:05:45.126861379 +0100
+@@ -25,6 +25,7 @@
+ obj-$(CONFIG_DVB_S5H1432) += s5h1432.o
+ obj-$(CONFIG_DVB_CX24110) += cx24110.o
+ obj-$(CONFIG_DVB_TDA8083) += tda8083.o
++obj-$(CONFIG_DVB_TAS2101) += tas2101.o
+ obj-$(CONFIG_DVB_L64781) += l64781.o
+ obj-$(CONFIG_DVB_DIB3000MB) += dib3000mb.o
+ obj-$(CONFIG_DVB_DIB3000MC) += dib3000mc.o dibx000_common.o

@@ -1044,7 +1044,7 @@ if [ "x$drivers_opt" = "xyes" ];then
     cp -f ../drivers/media/tbs6985/dvb-frontends/* drivers/media/dvb-frontends/
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
-tuner and demod drivers are added/updated.
+TBS6985 tuner and demod drivers are added/updated.
 "
       confirmyes
       if ! [ "$?" -eq 0 ]; then
@@ -1052,6 +1052,8 @@ tuner and demod drivers are added/updated.
         exit 0
       fi
     fi
+    patch -p0 < ../tbs6985.patch
+    _patch
   fi
 fi
 
