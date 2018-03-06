@@ -25,7 +25,7 @@
 #include <linux/init.h>
 #include <linux/i2c-mux.h>
 
-#include <media/dvb_frontend.h>
+#include "dvb_frontend.h"
 
 #include "tas2101.h"
 #include "tas2101_priv.h"
