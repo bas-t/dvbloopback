@@ -40,11 +40,6 @@ struct tas2101_config {
 	void (*reset_demod)(struct dvb_frontend *fe);
 	/* lnb power */
 	void (*lnb_power)(struct dvb_frontend *fe, int onoff);
-
-	//spi flash op
-	void (*write_properties) (struct i2c_adapter *i2c,u8 reg, u32 buf);  
-	void (*read_properties) (struct i2c_adapter *i2c,u8 reg, u32 *buf);
-
 	void (*mcuWrite_properties) (struct i2c_adapter *i2c,u32 bassaddr,u8 reg, u32 buf);  
 	void (*mcuRead_properties) (struct i2c_adapter *i2c,u32 bassaddr,u8 reg, u32 *buf);	
 	void (*i2cRead_properties) (struct i2c_adapter *i2c,u8 chip_addr,u8 reg, u8 num, u8 *buf);
