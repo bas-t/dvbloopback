@@ -23,7 +23,6 @@
 
 struct tas2101_priv {
 	struct i2c_mux_core *muxc;
-
 	/* master i2c adapter */
 	struct i2c_adapter *i2c;
 	/* muxed i2c adapter for the demod */

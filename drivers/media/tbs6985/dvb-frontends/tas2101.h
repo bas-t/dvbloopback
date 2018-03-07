@@ -40,10 +40,7 @@ struct tas2101_config {
 	void (*reset_demod)(struct dvb_frontend *fe);
 	/* lnb power */
 	void (*lnb_power)(struct dvb_frontend *fe, int onoff);
-	void (*mcuWrite_properties) (struct i2c_adapter *i2c,u32 bassaddr,u8 reg, u32 buf);  
-	void (*mcuRead_properties) (struct i2c_adapter *i2c,u32 bassaddr,u8 reg, u32 *buf);	
-	void (*i2cRead_properties) (struct i2c_adapter *i2c,u8 chip_addr,u8 reg, u8 num, u8 *buf);
-	void (*i2cwrite_properties) (struct i2c_adapter *i2c,u8 chip_addr,u8 reg, u8 num, u8 *buf);
+
 	/* frontend gpio/tuner init */
 	u8 init[7];
 	u8 init2;
@@ -51,7 +48,7 @@ struct tas2101_config {
 
 
 
-#if IS_REACHABLE(CONFIG_DVB_TAS2101)
+#if IS_ENABLED(CONFIG_DVB_TAS2101)
 extern struct dvb_frontend *tas2101_attach(
 	const struct tas2101_config *cfg,
 	struct i2c_adapter *i2c);

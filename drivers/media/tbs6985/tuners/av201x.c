@@ -41,6 +41,7 @@ static int av201x_wrm(struct av201x_priv *priv, u8 *buf, int len)
 	}
 	return 0;
 }
+
 /* write one register */
 static int av201x_wr(struct av201x_priv *priv, u8 addr, u8 data)
 {
@@ -109,15 +110,14 @@ static int av201x_wrtable(struct av201x_priv *priv,
 	return 0;
 }
 
-static int av201x_release(struct dvb_frontend *fe)
+static void av201x_release(struct dvb_frontend *fe)
 {
 	struct av201x_priv *priv = fe->tuner_priv;
 	dev_dbg(&priv->i2c->dev, "%s()\n", __func__);
 
 	kfree(fe->tuner_priv);
 	fe->tuner_priv = NULL;
-
-	return 0;
+	return;
 }
 
 static int av201x_init(struct dvb_frontend *fe)
@@ -235,6 +235,7 @@ static const struct dvb_tuner_ops av201x_tuner_ops = {
 	},
 
 	.release = av201x_release,
+
 	.init = av201x_init,
 	.sleep = av201x_sleep,
 	.set_params = av201x_set_params,

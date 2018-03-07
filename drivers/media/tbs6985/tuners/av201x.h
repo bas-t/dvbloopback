@@ -40,7 +40,7 @@ struct av201x_config {
 	u32 xtal_freq;
 };
 
-#if IS_REACHABLE(CONFIG_MEDIA_TUNER_AV201X)
+#if IS_ENABLED(CONFIG_MEDIA_TUNER_AV201X)
 extern struct dvb_frontend *av201x_attach(struct dvb_frontend *fe,
 		struct av201x_config *cfg, struct i2c_adapter *i2c);
 #else
