@@ -1061,6 +1061,8 @@ TBS6985 tuner and demod drivers are added/updated.
     if [ "$VERSION" -gt 415 ]; then
       sed -i "s/include \"dvb_frontend.h\"/include \<media\/dvb_frontend.h\>/" drivers/media/tuners/av201x.h
       sed -i "s/include \"dvb_frontend.h\"/include \<media\/dvb_frontend.h\>/" drivers/media/dvb-frontends/tas2101.c
+      sed -i "s/include \"dvbdev.h\"/include \<media\/dvbdev.h\>/" drivers/media/pci/dvblb_internal.h
+      sed -i "s/include \"dvbdev.h\"/include \<media\/dvbdev.h\>/" drivers/media/pci/dvb_loopback.c
     fi
   fi
 fi
