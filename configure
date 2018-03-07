@@ -867,6 +867,10 @@ dvb-core is patched, dvbloopback added.
       exit 0
     fi
   fi
+  if [ "$VERSION" -gt 415 ]; then
+    sed -i "s/include \"dvbdev.h\"/include \<media\/dvbdev.h\>/" drivers/media/pci/dvbloopback/dvblb_internal.h
+    sed -i "s/include \"dvbdev.h\"/include \<media\/dvbdev.h\>/" drivers/media/pci/dvbloopback/dvb_loopback.c
+  fi
 
 
   # 4.5-linux patch
