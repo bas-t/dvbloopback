@@ -624,8 +624,6 @@ static struct av201x_config tbs6985_av201x_cfg = {
 static int saa716x_tbs6985_frontend_attach(struct saa716x_adapter *adapter, int count)
 {
 	struct saa716x_dev *dev = adapter->saa716x;
-	u8 mac[6];
-
 	if (count > 3)
 		goto err;
 
