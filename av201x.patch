@@ -1,6 +1,6 @@
---- drivers/media/tuners/av201x.c	2018-03-07 17:55:43.704261000 +0100
-+++ drivers/media/tuners/av201x.c	2018-03-07 21:47:30.043635031 +0100
-@@ -110,7 +110,7 @@
+--- drivers/media/tuners/av201x.c	2018-03-07 23:22:09.734009000 +0100
++++ drivers/media/tuners/av201x.c	2018-03-07 23:27:28.544414077 +0100
+@@ -110,14 +110,14 @@
  	return 0;
  }
  
@@ -9,3 +9,11 @@
  {
  	struct av201x_priv *priv = fe->tuner_priv;
  	dev_dbg(&priv->i2c->dev, "%s()\n", __func__);
+ 
+ 	kfree(fe->tuner_priv);
+ 	fe->tuner_priv = NULL;
+-	return;
++	return 0;
+ }
+ 
+ static int av201x_init(struct dvb_frontend *fe)
