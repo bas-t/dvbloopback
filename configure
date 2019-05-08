@@ -635,6 +635,13 @@ Missing dependency g++, marking for installation.
 "
     apt-get install g++ --no-install-recommends -y || die "Error installing dependency g++"
   fi
+  if ! dpkg-query -l gawk | grep "ii" > /dev/null 2>&1; then
+    echo "
+Missing dependency gawk, marking for installation.
+
+"
+    apt-get install gawk --no-install-recommends -y || die "Error installing dependency gawk"
+  fi
   apt-get build-dep --no-install-recommends linux -y
   if ! [ "$?" -eq 0 ]; then
     echo "
