@@ -1,0 +1,38 @@
+--- drivers/media/pci/dvbloopback/dvblb_proc.c	2015-10-10 15:54:58.061168093 +0200
++++ drivers/media/pci/dvbloopback/dvblb_proc.c	2020-04-04 20:02:21.653061296 +0200
+@@ -173,12 +173,11 @@
+     return single_open(filep, dvblb_procfs_read, PDE_DATA(inode));
+ }
+ 
+-static const struct file_operations dvblb_procfs_fops = {
+-    .owner      = THIS_MODULE,
+-    .open       = dvblb_procfs_open,
+-    .read       = seq_read,
+-    .write      = dvblb_procfs_write,
+-    .release    = single_release,
++static const struct proc_ops dvblb_procfs_fops = {
++    .proc_open       = dvblb_procfs_open,
++    .proc_read       = seq_read,
++    .proc_write      = dvblb_procfs_write,
++    .proc_release    = single_release,
+ };
+ 
+ int dvblb_init_procfs_device(struct dvblb *dvblb, struct dvblb_devinfo *lbdev)
+@@ -197,12 +196,11 @@
+     return single_open(filep, dvblb_procfs_adapter_read, PDE_DATA(inode));
+ }
+ 
+-static const struct file_operations dvblb_procfs_adapter_fops = {
+-    .owner      = THIS_MODULE,
+-    .open       = dvblb_procfs_adapter_open,
+-    .read       = seq_read,
+-    .write      = dvblb_procfs_adapter_write,
+-    .release    = single_release,
++static const struct proc_ops dvblb_procfs_adapter_fops = {
++    .proc_open       = dvblb_procfs_adapter_open,
++    .proc_read       = seq_read,
++    .proc_write      = dvblb_procfs_adapter_write,
++    .proc_release    = single_release,
+ };
+ 
+ int dvblb_init_procfs_adapter(struct dvblb *dvblb)

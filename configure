@@ -895,6 +895,22 @@ dvbloopback module is patched for kernel series 4.5.x and up.
       fi
     fi
   fi
+
+  # 5.6-linux patch
+  if [ "$VERSION" -gt 505 ]; then
+    patch -p0 < ../5.6-linux.patch
+    _patch
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
+dvbloopback module is patched for kernel series 5.6.x and up.
+"
+      confirmyes
+      if ! [ "$?" -eq 0 ]; then
+        env_clean
+        exit 0
+      fi
+    fi
+  fi
 fi
 
 # Common (stock and vanilla kernels)
