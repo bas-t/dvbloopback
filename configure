@@ -1101,31 +1101,6 @@ Your $vanilla_opt kernel is patched for newer gcc versions.
   fi
 fi
 
-# Common (stock and vanilla kernels)
-# mediacontroller patch
-if [ "$VERSION" -gt 404 -a "$VERSION" -lt 410 ]; then
-  patch -p0 < ../mediacontroller.patch
-  _patch
-elif [ "$VERSION" -gt 409 -a "$VERSION" -lt 503 ]; then
-  patch -p0 < ../mediacontroller4.10.patch
-  _patch
-else
-  patch -p0 < ../mediacontroller5.3.patch
-  _patch
-fi
-if [ "$VERSION" -gt 404 ]; then
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
-MEDIA_CONTROLLER_DVB is deactivated.
-"
-    confirmyes
-    if ! [ "$?" -eq 0 ]; then
-      env_clean
-      exit 0
-    fi
-  fi
-fi
-
 #
 # Configure the source
 #
