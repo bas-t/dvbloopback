@@ -729,33 +729,26 @@ Going to download the kernel source.
   cd linux-*
   FIRST_DIGIT=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
   SECOND_DIGIT=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
-  if [ "$FIRST_DIGIT" -eq 3 -a "$SECOND_DIGIT" -eq 13 ]; then
-    drivers_opt="no"
-  fi
   if [ "$FIRST_DIGIT" -lt 4 ]; then
-    if ! [ "$SECOND_DIGIT" -eq 16 ]; then
-      if [ "x$drivers_opt" = "xyes" ]; then
-        echo "
-You requested a (re)build of a Debian/Ubuntu $FIRST_DIGIT.$SECOND_DIGIT kernel with extra drivers.
+    echo "
+You requested a (re)build of a Debian/Ubuntu $FIRST_DIGIT.$SECOND_DIGIT kernel.
 
-Building Debian/Ubuntu stock kernels with  TBS 6281/6285 and DVBSky T982 support in-tree in the
-
-3.x kernel series is only supported for 3.16.x kernels. If you don't need those extra drivers, do:
-
-./configure --drivers=no
-
-If you are running Ubuntu 14.04 LTS, and need the extra drivers, you could 'sudo apt-get install linux-image-generic-lts-utopic', reboot with it and run ./configure again.
-
-linux-image-generic-lts-utopic is a 3.16.x kernel and qualifies for the extra drivers.
-
-If you are (still) running Debian Wheezy, with a >=3.10.x kernel, either upgrade to Jessie, or get your 3.16 kernel from backports (not recommended).
+Minimum supported kerneseries is 4.4.x
 
 Aborting...
 "
-        env_clean
-        exit 1
-      fi
-    fi
+    env_clean
+    exit 1
+  elif [ "$FIRST_DIGIT" -eq 4 -a "$SECOND_DIGIT" -lt 4 ]; then
+    echo "
+You requested a (re)build of a Debian/Ubuntu $FIRST_DIGIT.$SECOND_DIGIT kernel.
+
+Minimum supported kerneseries is 4.4.x
+
+Aborting...
+"
+    env_clean
+    exit 1
   fi
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
@@ -787,6 +780,39 @@ Going to download the kernel source.
       tar -xJf linux-$vanilla_opt.tar.xz
     fi
     cd linux-$vanilla_opt
+    FIRST_DIGIT=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+' | head -n1 | awk 'NR==1')
+    SECOND_DIGIT=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+' | head -n2 | awk 'NR==2')
+    if [ "$FIRST_DIGIT" -lt 4 ]; then
+      echo "
+You requested a (re)build of a Debian/Ubuntu $FIRST_DIGIT.$SECOND_DIGIT kernel.
+
+Minimum supported kerneseries is 4.4.x
+
+Aborting...
+"
+      env_clean
+      exit 1
+    elif [ "$FIRST_DIGIT" -eq 4 -a "$SECOND_DIGIT" -lt 4 ]; then
+      echo "
+You requested a (re)build of a Debian/Ubuntu $FIRST_DIGIT.$SECOND_DIGIT kernel.
+
+Minimum supported kerneseries is 4.4.x
+
+Aborting...
+"
+      env_clean
+      exit 1
+    fi
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
+Source is downloaded.
+"
+      confirmyes
+      if ! [ "$?" -eq 0 ]; then
+        env_clean
+        exit 0
+      fi
+    fi
     make clean && make mrproper
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
@@ -832,39 +858,12 @@ if ! [ "$chars" -eq 2 ]; then
 VERSION="$FIRST_DIGIT$EXTRA_DIGIT$SECOND_DIGIT"
 fi
 
-if [ "x$stock_opt" = "xno" -a "x$drivers_opt" = "xyes" -a "$VERSION" -lt 400 ]; then
-  echo "
-You are about to compile a 3.$SECOND_DIGIT.x kernel with TBS 6281/6285
-
-and DVBSKY T982 support. I backported those drivers only for
-
-3.10.x and 3.16.x kernels. All others will likely fail.
-
-If you don't need those drivers, use the --drivers=no flag.
-
-"
-  confirmyes
-  if ! [ "$?" -eq 0 ]; then
-    env_clean
-    exit 0
-  fi
-fi
-
 # Common (stock and vanilla kernels)
 # add saa716x driver
 if [ "x$drivers_opt" = "xyes" ];then
   mkdir drivers/media/pci/saa716x
   cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
-  if [ "$VERSION" -eq 310 ];then
-    patch -p0 < ../Kconfig-3.10.patch
-    _patch
-  elif [ "$VERSION" -lt 400 ];then
-    patch -p0 < ../Kconfig.patch
-    _patch
-  elif [ "$VERSION" -lt 402 ]; then
-    patch -p0 < ../Kconfig.patch
-    _patch
-  elif [ "$VERSION" -lt 405 ]; then
+  if [ "$VERSION" -lt 405 ]; then
     patch -p0 < ../Kconfig-4.2.patch
     _patch
   elif [ "$VERSION" -lt 410 ]; then
@@ -884,22 +883,8 @@ saa716x added, Kconfig patched for saa716x.
       exit 0
     fi
   fi
-  if [ "$VERSION" -eq 316 ]; then
-    patch -p0 < ../Makefile-3.16.patch
-    _patch
-  elif [ "$VERSION" -eq 310 ]; then
-    patch -p0 < ../Makefile-3.10.patch
-    _patch
-  elif [ "$VERSION" -lt 400 ]; then
-    patch -p0 < ../Makefile.patch
-    _patch
-  elif [ "$VERSION" -lt 402 ]; then
-    patch -p0 < ../Makefile.patch
-    _patch
-  else
-    patch -p0 < ../Makefile-4.2.patch
-    _patch
-  fi
+  patch -p0 < ../Makefile-4.2.patch
+  _patch
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Makefile is patched for saa716x.
@@ -919,13 +904,8 @@ if [ "x$dvbloopback_opt" = "xyes" ]; then
   cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
   patch -p1 < ../dvbloopback.patch
   _patch
-  if [ "$VERSION" -lt 313 ]; then
-    patch -p0 < ../3.7-dvb-core.patch
-    _patch
-  else
-    patch -p0 < ../3.13-dvb-core.patch
-    _patch
-  fi
+  patch -p0 < ../3.13-dvb-core.patch
+  _patch
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 dvb-core is patched, dvbloopback added.
@@ -992,33 +972,6 @@ fi
 
 
 # Common (stock and vanilla kernels)
-# cx23885 patch
-if [ "x$drivers_opt" = "xyes" ];then
-  if [ "$VERSION" -eq 316 ]; then
-    patch -p0 < ../cx23885-3.16.patch
-    _patch
-  elif [ "$VERSION" -eq 310 ]; then
-    patch -p0 < ../cx23885-3.10.patch
-    _patch
-  elif [ "$VERSION" -eq 400 -o "$VERSION" -eq 401 ]; then
-    patch -p0 < ../cx23885-4.0.patch
-    _patch
-  fi
-  if [ "x$debug_opt" = "xyes" ]; then
-    if [ "$VERSION" -eq 310 -o "$VERSION" -eq 316 -o "$VERSION" -eq 400 -o "$VERSION" -eq 401 ]; then
-      echo "
-cx23885 patch applied.
-"
-      confirmyes
-      if ! [ "$?" -eq 0 ]; then
-        env_clean
-        exit 0
-      fi
-    fi
-  fi
-fi
-
-# Common (stock and vanilla kernels)
 # silabs si2157 and si2168 patch
 if [ "x$drivers_opt" = "xyes" ];then
   if [ "$VERSION" -lt 404 ]; then
@@ -1070,28 +1023,6 @@ if [ "x$genpix_opt" = "xyes" ]; then
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
 Genpix Skywalker driver is patched.
-"
-    confirmyes
-    if ! [ "$?" -eq 0 ]; then
-      env_clean
-      exit 0
-    fi
-  fi
-fi
-
-# Common (stock and vanilla kernels)
-# gcc patch
-if [ "$VERSION" -eq 316 ]; then
-  patch -p0 < ../mod_devicetable.patch
-  _patch
-elif [ "$VERSION" -eq 310 ]; then
-  patch -p0 < ../gcc310.patch
-  _patch
-fi
-if [ "$VERSION" -eq 310 -o "$VERSION" -eq 316 ]; then
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
-Your $vanilla_opt kernel is patched for newer gcc versions.
 "
     confirmyes
     if ! [ "$?" -eq 0 ]; then
@@ -1344,9 +1275,6 @@ Going to configure your $vanilla_opt vanilla kernel.
   if ! [ "$ADAPTERS" = "$adapters_opt" ]; then
     sed -i "s/CONFIG_DVB_MAX_ADAPTERS=$ADAPTERS/CONFIG_DVB_MAX_ADAPTERS=$adapters_opt/" .config
   fi
-  #if cat .config | grep "CONFIG_MEDIA_CONTROLLER_DVB=y" > /dev/null 2>&1; then
-    #sed -i "s/CONFIG_MEDIA_CONTROLLER_DVB=y/# CONFIG_MEDIA_CONTROLLER_DVB is not set/" .config
-  #fi
   if cat .config | grep "debian/certs/benh@debian.org.cert.pem" > /dev/null 2>&1; then
     sed -i "s/debian\/certs\/benh@debian.org.cert.pem/certs\/signing_key.pem/" .config
     sed -i "s/CONFIG_MODULE_SIG_KEY=\"\"/CONFIG_MODULE_SIG_KEY=\"certs\/signing_key.pem\"/" .config
