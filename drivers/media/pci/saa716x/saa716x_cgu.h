@@ -1,13 +1,15 @@
+/* SPDX-License-Identifier: GPL-2.0+ */
+
 #ifndef __SAA716x_CGU_H
 #define __SAA716x_CGU_H
 
 #define PLL_FREQ	2500
 
-#define SAA716x_CGU_CLKRUN(__reg)  do {						\
-	SAA716x_EPWR(CGU, CGU_PCR_##__reg, CGU_PCR_RUN); /* Run */		\
-	SAA716x_EPWR(CGU, CGU_SCR_##__reg, CGU_SCR_ENF1); /* Switch */		\
-	SAA716x_EPWR(CGU, CGU_FS1_##__reg, 0x00000000); /* PLL Clk */		\
-	SAA716x_EPWR(CGU, CGU_ESR_##__reg, CGU_ESR_FD_EN); /* Frac div */	\
+#define SAA716x_CGU_CLKRUN(__reg)  do {					   \
+	SAA716x_EPWR(CGU, CGU_PCR_##__reg, CGU_PCR_RUN); /* Run */	   \
+	SAA716x_EPWR(CGU, CGU_SCR_##__reg, CGU_SCR_ENF1); /* Switch */	   \
+	SAA716x_EPWR(CGU, CGU_FS1_##__reg, 0x00000000); /* PLL Clk */	   \
+	SAA716x_EPWR(CGU, CGU_ESR_##__reg, CGU_ESR_FD_EN); /* Frac div */  \
 } while (0)
 
 enum saa716x_clk_domain {
@@ -57,5 +59,7 @@ struct saa716x_cgu {
 extern int saa716x_cgu_init(struct saa716x_dev *saa716x);
 extern int saa716x_set_clk_internal(struct saa716x_dev *saa716x, u32 port);
 extern int saa716x_set_clk_external(struct saa716x_dev *saa716x, u32 port);
+extern int saa716x_set_clk(struct saa716x_dev *saa716x,
+			   enum saa716x_clk_domain domain, u32 frequency);
 
 #endif /* __SAA716x_CGU_H */

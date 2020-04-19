@@ -1,0 +1,11 @@
+--- drivers/media/pci/saa716x/saa716x_pci.c	2020-04-07 19:16:16.781546000 +0200
++++ drivers/media/pci/saa716x/saa716x_pci.c	2020-04-08 01:17:04.047756960 +0200
+@@ -97,7 +97,7 @@
+ 		goto fail2;
+ 	}
+ 
+-	saa716x->mmio = ioremap_nocache(pci_resource_start(pdev, 0), 0x30000);
++	saa716x->mmio = ioremap(pci_resource_start(pdev, 0), 0x30000);
+ 	if (!saa716x->mmio) {
+ 		pci_err(saa716x->pdev, "Mem 0 remap failed");
+ 		ret = -ENODEV;

@@ -1,20 +1,24 @@
+/* SPDX-License-Identifier: GPL-2.0+ */
+
 #ifndef __SAA716x_DMA_H
 #define __SAA716x_DMA_H
 
 #define SAA716x_PAGE_SIZE	4096
 
-#define PTA_LSB(__mem)		((u32 ) (__mem))
-#define PTA_MSB(__mem)		((u32 ) ((u64)(__mem) >> 32))
+#define PTA_LSB(__mem)		((u32) (__mem))
+#define PTA_MSB(__mem)		((u32) ((u64)(__mem) >> 32))
 
 #define BAM_DMA_BUF_MODE_BASE		0x00
 #define BAM_DMA_BUF_MODE_OFFSET		0x24
 
-#define BAM_DMA_BUF_MODE(__ch)		(BAM_DMA_BUF_MODE_BASE + (BAM_DMA_BUF_MODE_OFFSET * __ch))
+#define BAM_DMA_BUF_MODE(__ch)		(BAM_DMA_BUF_MODE_BASE + \
+					 (BAM_DMA_BUF_MODE_OFFSET * __ch))
 
 #define BAM_ADDR_OFFSET_BASE		0x04
 #define BAM_ADDR_OFFSET_OFFSET		0x24
 
-#define BAM_ADDR_OFFSET(__ch)		(BAM_ADDR_OFFSET_BASE + (BAM_ADDR_OFFSET_OFFSET * __ch))
+#define BAM_ADDR_OFFSET(__ch)		(BAM_ADDR_OFFSET_BASE + \
+					 (BAM_ADDR_OFFSET_OFFSET * __ch))
 
 #define BAM_ADDR_OFFSET_0(__ch)		(BAM_ADDR_OFFSET(__ch) + 0x00)
 #define BAM_ADDR_OFFSET_1(__ch)		(BAM_ADDR_OFFSET(__ch) + 0x04)

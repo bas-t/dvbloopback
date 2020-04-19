@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0+
+
 #include <linux/kernel.h>
 
 #include "saa716x_mod.h"
@@ -8,7 +10,6 @@
 
 #include "saa716x_dma.h"
 #include "saa716x_fgpi.h"
-#include "saa716x_spi.h"
 #include "saa716x_priv.h"
 
 static const u32 fgpi_ch[] = {
@@ -65,7 +66,7 @@ int saa716x_fgpi_get_write_index(struct saa716x_dev *saa716x, u32 fgpi_index)
 	u32 buf_mode_reg;
 	u32 buf_mode;
 
- 	switch (fgpi_index) {
+	switch (fgpi_index) {
 	case 0: /* FGPI_0 */
 		fgpi_base = FGPI0;
 		buf_mode_reg = BAM_FGPI0_DMA_BUF_MODE;
@@ -87,7 +88,7 @@ int saa716x_fgpi_get_write_index(struct saa716x_dev *saa716x, u32 fgpi_index)
 		break;
 
 	default:
-		printk(KERN_ERR "%s: unexpected fgpi %u\n",
+		pci_err(saa716x->pdev, "%s: unexpected fgpi %u",
 		       __func__, fgpi_index);
 		return -1;
 	}
@@ -119,41 +120,43 @@ static u32 saa716x_init_ptables(struct saa716x_dmabuf *dmabuf, int channel,
 	if ((stream_params->stream_flags & FGPI_INTERLACED) &&
 	    (stream_params->stream_flags & FGPI_ODD_FIELD) &&
 	    (stream_params->stream_flags & FGPI_EVEN_FIELD)) {
-		/* In interlaced mode the same buffer is written twice, once
-		   the odd field and once the even field */
-		SAA716x_EPWR(MMU, MMU_PTA0_LSB(channel), PTA_LSB(dmabuf[0].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA0_MSB(channel), PTA_MSB(dmabuf[0].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA1_LSB(channel), PTA_LSB(dmabuf[0].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA1_MSB(channel), PTA_MSB(dmabuf[0].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA2_LSB(channel), PTA_LSB(dmabuf[1].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA2_MSB(channel), PTA_MSB(dmabuf[1].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA3_LSB(channel), PTA_LSB(dmabuf[1].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA3_MSB(channel), PTA_MSB(dmabuf[1].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA4_LSB(channel), PTA_LSB(dmabuf[2].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA4_MSB(channel), PTA_MSB(dmabuf[2].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA5_LSB(channel), PTA_LSB(dmabuf[2].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA5_MSB(channel), PTA_MSB(dmabuf[2].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA6_LSB(channel), PTA_LSB(dmabuf[3].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA6_MSB(channel), PTA_MSB(dmabuf[3].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA7_LSB(channel), PTA_LSB(dmabuf[3].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA7_MSB(channel), PTA_MSB(dmabuf[3].mem_ptab_phys)); /* High */
+		/*
+		 * In interlaced mode the same buffer is written twice,
+		 * once the odd field and once the even field
+		 */
+		SAA716x_EPWR(MMU, MMU_PTA0_LSB(channel), PTA_LSB(dmabuf[0].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA0_MSB(channel), PTA_MSB(dmabuf[0].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA1_LSB(channel), PTA_LSB(dmabuf[0].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA1_MSB(channel), PTA_MSB(dmabuf[0].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA2_LSB(channel), PTA_LSB(dmabuf[1].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA2_MSB(channel), PTA_MSB(dmabuf[1].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA3_LSB(channel), PTA_LSB(dmabuf[1].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA3_MSB(channel), PTA_MSB(dmabuf[1].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA4_LSB(channel), PTA_LSB(dmabuf[2].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA4_MSB(channel), PTA_MSB(dmabuf[2].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA5_LSB(channel), PTA_LSB(dmabuf[2].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA5_MSB(channel), PTA_MSB(dmabuf[2].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA6_LSB(channel), PTA_LSB(dmabuf[3].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA6_MSB(channel), PTA_MSB(dmabuf[3].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA7_LSB(channel), PTA_LSB(dmabuf[3].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA7_MSB(channel), PTA_MSB(dmabuf[3].mem_ptab_phys));
 	} else {
-		SAA716x_EPWR(MMU, MMU_PTA0_LSB(channel), PTA_LSB(dmabuf[0].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA0_MSB(channel), PTA_MSB(dmabuf[0].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA1_LSB(channel), PTA_LSB(dmabuf[1].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA1_MSB(channel), PTA_MSB(dmabuf[1].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA2_LSB(channel), PTA_LSB(dmabuf[2].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA2_MSB(channel), PTA_MSB(dmabuf[2].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA3_LSB(channel), PTA_LSB(dmabuf[3].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA3_MSB(channel), PTA_MSB(dmabuf[3].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA4_LSB(channel), PTA_LSB(dmabuf[4].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA4_MSB(channel), PTA_MSB(dmabuf[4].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA5_LSB(channel), PTA_LSB(dmabuf[5].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA5_MSB(channel), PTA_MSB(dmabuf[5].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA6_LSB(channel), PTA_LSB(dmabuf[6].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA6_MSB(channel), PTA_MSB(dmabuf[6].mem_ptab_phys)); /* High */
-		SAA716x_EPWR(MMU, MMU_PTA7_LSB(channel), PTA_LSB(dmabuf[7].mem_ptab_phys)); /* Low */
-		SAA716x_EPWR(MMU, MMU_PTA7_MSB(channel), PTA_MSB(dmabuf[7].mem_ptab_phys)); /* High */
+		SAA716x_EPWR(MMU, MMU_PTA0_LSB(channel), PTA_LSB(dmabuf[0].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA0_MSB(channel), PTA_MSB(dmabuf[0].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA1_LSB(channel), PTA_LSB(dmabuf[1].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA1_MSB(channel), PTA_MSB(dmabuf[1].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA2_LSB(channel), PTA_LSB(dmabuf[2].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA2_MSB(channel), PTA_MSB(dmabuf[2].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA3_LSB(channel), PTA_LSB(dmabuf[3].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA3_MSB(channel), PTA_MSB(dmabuf[3].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA4_LSB(channel), PTA_LSB(dmabuf[4].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA4_MSB(channel), PTA_MSB(dmabuf[4].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA5_LSB(channel), PTA_LSB(dmabuf[5].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA5_MSB(channel), PTA_MSB(dmabuf[5].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA6_LSB(channel), PTA_LSB(dmabuf[6].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA6_MSB(channel), PTA_MSB(dmabuf[6].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA7_LSB(channel), PTA_LSB(dmabuf[7].mem_ptab_phys));
+		SAA716x_EPWR(MMU, MMU_PTA7_MSB(channel), PTA_MSB(dmabuf[7].mem_ptab_phys));
 	}
 
 	return 0;
@@ -191,7 +194,7 @@ int saa716x_fgpi_setparams(struct saa716x_dmabuf *dmabuf,
 	}
 
 	if (val) {
-		dprintk(SAA716x_ERROR, 1, "Error: BAM FGPI Reset failed!");
+		pci_err(saa716x->pdev, "Error: BAM FGPI Reset failed!");
 		return -EIO;
 	}
 
@@ -211,10 +214,11 @@ int saa716x_fgpi_setparams(struct saa716x_dmabuf *dmabuf,
 	/* get module ID */
 	mid = SAA716x_EPRD(fgpi_port, FGPI_MODULE_ID);
 	if (mid != 0x14b0100)
-		dprintk(SAA716x_ERROR, 1, "FGPI Id<%04x> is not supported", mid);
+		pci_err(saa716x->pdev, "FGPI Id<%04x> is not supported", mid);
 
 	/* Initialize FGPI block */
-	SAA716x_EPWR(fgpi_port, FGPI_REC_SIZE, stream_params->samples * (stream_params->bits / 8));
+	SAA716x_EPWR(fgpi_port, FGPI_REC_SIZE, stream_params->samples *
+					       (stream_params->bits / 8));
 	SAA716x_EPWR(fgpi_port, FGPI_STRIDE, stream_params->pitch);
 
 	offst_1 = 0;
@@ -233,17 +237,22 @@ int saa716x_fgpi_setparams(struct saa716x_dmabuf *dmabuf,
 
 	case FGPI_VIDEO_STREAM:
 		SAA716x_EPWR(fgpi_port, FGPI_CONTROL, 0x00000040);
-		SAA716x_EPWR(fgpi_port, FGPI_D1_XY_START, stream_params->offset);
+		SAA716x_EPWR(fgpi_port, FGPI_D1_XY_START,
+			     stream_params->offset);
 
 		if ((stream_params->stream_flags & FGPI_INTERLACED) &&
 		    (stream_params->stream_flags & FGPI_ODD_FIELD) &&
 		    (stream_params->stream_flags & FGPI_EVEN_FIELD)) {
 
-			SAA716x_EPWR(fgpi_port, FGPI_SIZE, stream_params->lines / 2);
-			SAA716x_EPWR(fgpi_port, FGPI_STRIDE, stream_params->pitch * 2); /* interlaced stride of 2 lines */
+			SAA716x_EPWR(fgpi_port, FGPI_SIZE,
+				     stream_params->lines / 2);
+			/* interlaced stride of 2 lines */
+			SAA716x_EPWR(fgpi_port, FGPI_STRIDE,
+				     stream_params->pitch * 2);
 
 			D1_XY_END  = (stream_params->samples << 16);
-			D1_XY_END |= (stream_params->lines / 2) + stream_params->offset;
+			D1_XY_END |= (stream_params->lines / 2) +
+				     stream_params->offset;
 
 			if (stream_params->stream_flags & FGPI_PAL)
 				offst_2 = stream_params->pitch;
@@ -251,11 +260,15 @@ int saa716x_fgpi_setparams(struct saa716x_dmabuf *dmabuf,
 				offst_1 = stream_params->pitch;
 
 		} else {
-			SAA716x_EPWR(fgpi_port, FGPI_SIZE, stream_params->lines);
-			SAA716x_EPWR(fgpi_port, FGPI_STRIDE, stream_params->pitch); /* stride of 1 line */
+			SAA716x_EPWR(fgpi_port, FGPI_SIZE,
+				     stream_params->lines);
+			/* stride of 1 line */
+			SAA716x_EPWR(fgpi_port, FGPI_STRIDE,
+				     stream_params->pitch);
 
 			D1_XY_END  = stream_params->samples << 16;
-			D1_XY_END |= stream_params->lines + stream_params->offset;
+			D1_XY_END |= stream_params->lines +
+				     stream_params->offset;
 		}
 
 		SAA716x_EPWR(fgpi_port, FGPI_D1_XY_END, D1_XY_END);
@@ -279,19 +292,21 @@ int saa716x_fgpi_start(struct saa716x_dev *saa716x, int port,
 	u32 config;
 	u32 val;
 	u32 i;
+	int ret;
 
 	fgpi_port = fgpi_ch[port];
 
 	SAA716x_EPWR(fgpi_port, FGPI_INTERFACE, 0);
 	msleep(10);
 
-	if (saa716x_fgpi_setparams(saa716x->fgpi[port].dma_buf, stream_params, port) != 0) {
+	ret = saa716x_fgpi_setparams(saa716x->fgpi[port].dma_buf,
+				     stream_params, port);
+	if (ret)
 		return -EIO;
-	}
 
 	saa716x->fgpi[port].read_index = 0;
 
-	config = MMU_DMA_CONFIG(saa716x->fgpi[port].dma_channel); /* DMACONFIGx */
+	config = MMU_DMA_CONFIG(saa716x->fgpi[port].dma_channel);
 
 	val = SAA716x_EPRD(MMU, config);
 	SAA716x_EPWR(MMU, config, val & ~0x40);
@@ -310,7 +325,7 @@ int saa716x_fgpi_start(struct saa716x_dev *saa716x, int port,
 	}
 
 	if (!(val & 0x80)) {
-		dprintk(SAA716x_ERROR, 1, "Error: PTE pre-fetch failed!");
+		pci_err(saa716x->pdev, "Error: PTE pre-fetch failed!");
 		return -EIO;
 	}
 
@@ -353,14 +368,12 @@ int saa716x_fgpi_init(struct saa716x_dev *saa716x, int port, int dma_buf_size,
 	int ret;
 
 	saa716x->fgpi[port].dma_channel = port + 6;
-	for (i = 0; i < FGPI_BUFFERS; i++)
-	{
+	for (i = 0; i < FGPI_BUFFERS; i++) {
 		ret = saa716x_dmabuf_alloc(saa716x,
 					   &saa716x->fgpi[port].dma_buf[i],
 					   dma_buf_size);
-		if (ret < 0) {
+		if (ret < 0)
 			return ret;
-		}
 	}
 	saa716x->fgpi[port].saa716x = saa716x;
 	tasklet_init(&saa716x->fgpi[port].tasklet, worker,
@@ -377,9 +390,7 @@ int saa716x_fgpi_exit(struct saa716x_dev *saa716x, int port)
 
 	tasklet_kill(&saa716x->fgpi[port].tasklet);
 	for (i = 0; i < FGPI_BUFFERS; i++)
-	{
 		saa716x_dmabuf_free(saa716x, &saa716x->fgpi[port].dma_buf[i]);
-	}
 
 	return 0;
 }

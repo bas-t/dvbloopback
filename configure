@@ -851,70 +851,7 @@ If you don't need those drivers, use the --drivers=no flag.
 fi
 
 # Common (stock and vanilla kernels)
-# dvbloopback patch
-if [ "x$dvbloopback_opt" = "xyes" ]; then
-  mkdir drivers/media/pci/dvbloopback
-  cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
-  patch -p1 < ../dvbloopback.patch
-  _patch
-  if [ "$VERSION" -lt 313 ]; then
-    patch -p0 < ../3.7-dvb-core.patch
-    _patch
-  else
-    patch -p0 < ../3.13-dvb-core.patch
-    _patch
-  fi
-  if [ "x$debug_opt" = "xyes" ]; then
-    echo "
-dvb-core is patched, dvbloopback added.
-"
-    confirmyes
-    if ! [ "$?" -eq 0 ]; then
-      env_clean
-      exit 0
-    fi
-  fi
-  if [ "$VERSION" -gt 415 ]; then
-    sed -i "s/include \"dvbdev.h\"/include \<media\/dvbdev.h\>/" drivers/media/pci/dvbloopback/dvblb_internal.h
-    sed -i "s/include \"dvbdev.h\"/include \<media\/dvbdev.h\>/" drivers/media/pci/dvbloopback/dvb_loopback.c
-  fi
-
-
-  # 4.5-linux patch
-  if [ "$VERSION" -gt 404 ]; then
-    patch -p0 < ../4.5-linux.patch
-    _patch
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
-dvbloopback module is patched for kernel series 4.5.x and up.
-"
-      confirmyes
-      if ! [ "$?" -eq 0 ]; then
-        env_clean
-        exit 0
-      fi
-    fi
-  fi
-
-  # 5.6-linux patch
-  if [ "$VERSION" -gt 505 ]; then
-    patch -p0 < ../5.6-linux.patch
-    _patch
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
-dvbloopback module is patched for kernel series 5.6.x and up.
-"
-      confirmyes
-      if ! [ "$?" -eq 0 ]; then
-        env_clean
-        exit 0
-      fi
-    fi
-  fi
-fi
-
-# Common (stock and vanilla kernels)
-# saa716x patch
+# add saa716x driver
 if [ "x$drivers_opt" = "xyes" ];then
   mkdir drivers/media/pci/saa716x
   cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
@@ -974,6 +911,85 @@ Makefile is patched for saa716x.
     fi
   fi
 fi
+
+# Common (stock and vanilla kernels)
+# insert dvbloopback driver
+if [ "x$dvbloopback_opt" = "xyes" ]; then
+  mkdir drivers/media/pci/dvbloopback
+  cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
+  patch -p1 < ../dvbloopback.patch
+  _patch
+  if [ "$VERSION" -lt 313 ]; then
+    patch -p0 < ../3.7-dvb-core.patch
+    _patch
+  else
+    patch -p0 < ../3.13-dvb-core.patch
+    _patch
+  fi
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+dvb-core is patched, dvbloopback added.
+"
+    confirmyes
+    if ! [ "$?" -eq 0 ]; then
+      env_clean
+      exit 0
+    fi
+  fi
+  if [ "$VERSION" -gt 415 ]; then
+    sed -i "s/include \"dvbdev.h\"/include \<media\/dvbdev.h\>/" drivers/media/pci/dvbloopback/dvblb_internal.h
+    sed -i "s/include \"dvbdev.h\"/include \<media\/dvbdev.h\>/" drivers/media/pci/dvbloopback/dvb_loopback.c
+  fi
+
+
+  # 4.5-linux patch
+  if [ "$VERSION" -gt 404 ]; then
+    patch -p0 < ../4.5-linux.patch
+    _patch
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
+dvbloopback module is patched for kernel series 4.5.x and up.
+"
+      confirmyes
+      if ! [ "$?" -eq 0 ]; then
+        env_clean
+        exit 0
+      fi
+    fi
+  fi
+fi
+
+# Common (stock and vanilla)
+# Kernel series 5.6.x and up patches
+if [ "$VERSION" -gt 505 ]; then
+  patch -p0 < ../5.6-linux.patch
+  _patch
+  if [ "x$debug_opt" = "xyes" ]; then
+    echo "
+dvbloopback module is patched for kernel series 5.6.x and up.
+"
+    confirmyes
+    if ! [ "$?" -eq 0 ]; then
+      env_clean
+      exit 0
+    fi
+  fi
+  if [ "x$drivers_opt" = "xyes" ];then
+    patch -p0 < ../saa716x-linux-5.6.x.patch
+    _patch
+    if [ "x$debug_opt" = "xyes" ]; then
+      echo "
+saa716x driver is patched for kernel series 5.6.x and up.
+"
+      confirmyes
+      if ! [ "$?" -eq 0 ]; then
+        env_clean
+        exit 0
+      fi
+    fi
+  fi
+fi
+
 
 # Common (stock and vanilla kernels)
 # cx23885 patch
@@ -1677,22 +1693,6 @@ Do you want to install included firmware into /lib/firmware?
         mkdir /lib/firmware
       fi
       cp -f firmware/* /lib/firmware/
-    fi
-  fi
-  # Set msi mode for saa716x budget driver
-  if ! cat /etc/modprobe.d/tbs_opensource.conf | grep "int_type=1" > /dev/null 2>&1; then
-    echo "
-Do you want to set \"options saa716x_budget int_type=1\"
-
-and \"options dvb_core dvb_powerdown_on_sleep=0\"
-
-in /etc/modprobe.d/tbs_opensource.conf?
-
-"
-    confirmyes "Yes, please do. [Y/n]"
-    if [ "$?" -eq 0 ]; then
-      echo "options saa716x_budget int_type=1
-options dvb_core dvb_powerdown_on_sleep=0" > /etc/modprobe.d/tbs_opensource.conf
     fi
   fi
 fi
