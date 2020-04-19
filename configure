@@ -814,16 +814,6 @@ Source is downloaded.
       fi
     fi
     make clean && make mrproper
-    if [ "x$debug_opt" = "xyes" ]; then
-      echo "
-Source is downloaded.
-"
-      confirmyes
-      if ! [ "$?" -eq 0 ]; then
-        env_clean
-        exit 0
-      fi
-    fi
   fi
 fi
 
