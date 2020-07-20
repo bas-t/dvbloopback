@@ -158,6 +158,7 @@ static int call_func(struct file *file,
 				 tvps->num * sizeof(struct dtv_property)))
 			err = -EFAULT;
 	}
+    tvps->props = oldprops;
 	return err;
 }
 
