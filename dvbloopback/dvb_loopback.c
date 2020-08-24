@@ -288,8 +288,8 @@ static int dvblb_fake_ioctl(struct dvblb_devinfo *lbdev, struct dvb_device **f,
 	while(1) {
 	        ret = wait_event_interruptible_timeout(lbdev->wait_ioctl,
 			 lbdev->ioctlcmd == ULONG_MAX, HZ);
-		dprintk2("fake-ioctl wait (%lu) returned: %d/%lu\n", cmd,
-		         ret, lbdev->ioctlcmd);
+		dprintk2("fake-ioctl wait (%lu) returned: %d/%lu\n", 0xFF & cmd,
+		         ret, 0xFF & lbdev->ioctlcmd);
 		if(ret >= 0 && lbdev->ioctlcmd == ULONG_MAX)
 			break;
 		if(cmd == DVBLB_CMD_CLOSE) {
@@ -356,7 +356,7 @@ static int dvblb_open(struct inode *inode, struct file *f)
 		printk("Failed to find private data during open\n");
 		return -EFAULT;
 	}
-	dprintk("dvblb_open %d%s%d\n", lbdev->parent->adapter.num,
+	dprintk("dvblb_open adapter%d/%s%d\n", lbdev->parent->adapter.num,
 	        dnames[dvbdev->type], dvbdev->id);
 
 	if(dvbdev->id == 0) {
@@ -527,7 +527,7 @@ static ssize_t dvblb_write(struct file *f, const char *buf,
 		printk("Failed to find private data during close\n");
 		return -EFAULT;
 	}
-	dprintk3("dvblb_write %d%s%d fd:%d\n", lbdev->parent->adapter.num,
+	dprintk3("dvblb_write adapter%d/%s%d fd:%d\n", lbdev->parent->adapter.num,
 	        dnames[dvbdev->type],
 	        dvbdev->id, find_filemap(lbdev, filemap));
 
@@ -560,7 +560,7 @@ static ssize_t dvblb_read (struct file *f, char * buf, size_t count, loff_t *off
 		printk("Failed to find private data during read\n");
 		return -EFAULT;
 	}
-	dprintk3("dvblb_read %d%s%d fd:%d\n", lbdev->parent->adapter.num,
+	dprintk3("dvblb_read adapter%d/%s%d fd:%d\n", lbdev->parent->adapter.num,
 	        dnames[dvbdev->type],
 	        dvbdev->id, find_filemap(lbdev, filemap));
 	if(dvbdev->id == 0) {
@@ -723,9 +723,9 @@ static long dvblb_ioctl(struct file *f,
  		                       dvbdev->kernel_ioctl);
 	}
 	/* This is the userspace control device */
-	dprintk2("dvblb_ioctl %d%s%d fd:%d cmd:%x\n",lbdev->parent->adapter.num,
+	dprintk2("dvblb_ioctl adapter%d/%s%d fd:%d cmd:%x\n",lbdev->parent->adapter.num,
 	        dnames[dvbdev->type],
-	        dvbdev->id, find_filemap(lbdev, filemap), cmd);
+	        dvbdev->id, find_filemap(lbdev, filemap), 0xFF & cmd);
 	if (cmd == DVBLB_CMD_ASYNC) {
 		/* async command return */
 		int pos, i;
@@ -784,6 +784,7 @@ static long dvblb_ioctl(struct file *f,
 	}
 	if (cmd == FE_GET_PROPERTY)
 	{    
+	    int i;
 	    tvps = (struct dtv_properties __user *)(lbdev->ioctlretdata + sizeof(int));    
 	    if (copy_from_user(lbdev->ioctlretdata + size, tvps->props,
 	                 tvps->num * sizeof(struct dtv_property))) 
@@ -793,7 +794,9 @@ static long dvblb_ioctl(struct file *f,
 	    }
 	    tvps = (struct dtv_properties __user *)(lbdev->ioctlretdata + sizeof(int));
 	    tvps->props = (struct dtv_property __user *)(lbdev->ioctlretdata + size);
-	    dprintk("%s() copy_from_user: cmd %u\n", __func__, tvps->props[0].cmd);
+	    for (i = 0; i < tvps->num ; i++) {
+		    dprintk("%s() copy_from_user: FE_GET_PROPERTY %d/%d cmd %u\n", __func__, i+1, tvps->num, tvps->props[i].cmd);
+	    }
  	}
 
 	lbdev->ioctlretval = *(int *)lbdev->ioctlretdata;
@@ -826,7 +829,7 @@ static int dvblb_mmap(struct file *f, struct vm_area_struct *vma)
 		printk("Failed to find private data during mmap\n");
 		return -EFAULT;
 	}
-	dprintk("dvblb_mmap %d%s%d fd:%d\n", lbdev->parent->adapter.num,
+	dprintk("dvblb_mmap adapter%d/%s%d fd:%d\n", lbdev->parent->adapter.num,
 	        dnames[dvbdev->type],
 	        dvbdev->id, find_filemap(lbdev, filemap));
 	if(dvbdev->id == 0) {
@@ -893,7 +896,7 @@ static unsigned int dvblb_poll(struct file *f, struct poll_table_struct *wait)
 		printk("Failed to find private data during poll\n");
 		return -EFAULT;
 	}
-	dprintk3("dvblb_poll %d%s%d: fd:%d\n", lbdev->parent->adapter.num,
+	dprintk3("dvblb_poll adapter%d/%s%d: fd:%d\n", lbdev->parent->adapter.num,
 	         dnames[dvbdev->type],
 	         dvbdev->id, find_filemap(lbdev, filemap));
 	if(dvbdev->id == 0) {
@@ -947,7 +950,7 @@ static unsigned int dvblb_poll(struct file *f, struct poll_table_struct *wait)
 			printk("skipping poll on %p (%d)\n", f, pos);
 			*/
 		}
-	dprintk3("dvblb_poll %d%s%d: fd:%d returned: %d\n",
+	dprintk3("dvblb_poll adapter%d/%s%d: fd:%d returned: %d\n",
 	         lbdev->parent->adapter.num,
 	         dnames[dvbdev->type], dvbdev->id, pos, ci.u.mode);
 		return(ci.u.mode);
