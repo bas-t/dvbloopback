@@ -6,8 +6,7 @@
 #define DVBLB_MAXFD 96
 
 static const char * const dnames[] = {
-        "video", "audio", "sec", "frontend", "demux", "dvr", "ca",
-         "sec", "frontend", "demux", "dvr", "ca", "net", "video", "audio", "osd" "sec", "frontend", "demux", "dvr", "ca", "net", "video", "audio", "osd"
+		 "sec", "frontend", "demux", "dvr", "ca", "net", "video", "audio", "osd"
 };
 
 typedef enum dvblb_type {
